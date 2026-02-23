@@ -1,6 +1,5 @@
 import React, { useMemo, useCallback } from 'react';
 import WindowTemplate from '../WindowTemplate';
-import StepIndicator from './StepIndicator';
 import WizardProgressBar from './WizardProgressBar';
 import { useWizardState } from './useWizardState';
 import WelcomeAuthStep from './steps/WelcomeAuthStep';
@@ -106,7 +105,7 @@ const SetupWizard = ({ isInitialSetup = true, onComplete }) => {
     >
       {/* Step progress indicator */}
       <div className="setup-wizard-progress">
-        <StepIndicator
+        <WizardProgressBar
           steps={steps}
           currentIndex={currentStepIndex}
           completedSteps={completedSteps}
