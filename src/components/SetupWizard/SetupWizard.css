@@ -4,6 +4,28 @@
  * All styles use design tokens from --spacing-*, --color-*, --radius-*, etc.
  */
 
+/* Full-screen shell for initial setup */
+.setup-wizard-fullscreen {
+  position: fixed;
+  inset: 0;
+  background: var(--color-bg-primary);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 9999;
+  overflow-y: auto;
+}
+
+.setup-wizard-fullscreen-inner {
+  width: 100%;
+  max-width: 860px;
+  min-height: 100vh;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
 /* Main wizard container */
 .setup-wizard {
   display: flex;

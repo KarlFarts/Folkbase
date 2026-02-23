@@ -1,6 +1,7 @@
 import React, { useMemo, useCallback } from 'react';
 import WindowTemplate from '../WindowTemplate';
 import StepIndicator from './StepIndicator';
+import WizardProgressBar from './WizardProgressBar';
 import { useWizardState } from './useWizardState';
 import WelcomeAuthStep from './steps/WelcomeAuthStep';
 import ProfileStep from './steps/ProfileStep';
@@ -68,10 +69,37 @@ const SetupWizard = ({ isInitialSetup = true, onComplete }) => {
     }
   }, [onComplete]);
 
+  if (isInitialSetup) {
+    return (
+      <div className="setup-wizard-fullscreen">
+        <div className="setup-wizard-fullscreen-inner">
+          <div className="setup-wizard-progress">
+            <WizardProgressBar
+              steps={steps}
+              currentIndex={currentStepIndex}
+              completedSteps={completedSteps}
+            />
+          </div>
+          <div className="setup-wizard-content">
+            <CurrentStepComponent
+              wizardData={wizardData}
+              onUpdate={updateData}
+              onNext={handleNext}
+              onBack={handleBack}
+              onComplete={handleComplete}
+              isFirstStep={isFirstStep}
+              isLastStep={isLastStep}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <WindowTemplate
       isOpen={true}
-      onClose={isInitialSetup ? null : onComplete}
+      onClose={onComplete}
       title="Welcome to Folkbase"
       size="md"
       className="setup-wizard"
