@@ -645,6 +645,7 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-lg);
   margin-top: var(--spacing-lg);
+  animation: fade-slide-in var(--transition-slow);
 }
 
 .wizard-choice-card {
@@ -714,6 +715,13 @@
   border-color: var(--color-accent-primary);
   background: var(--color-accent-primary);
   color: var(--color-text-inverse);
+}
+
+/* Center step headers on full-screen layout */
+.setup-wizard-fullscreen-inner .wizard-step-header {
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto;
 }
 
 @media (max-width: 600px) {
