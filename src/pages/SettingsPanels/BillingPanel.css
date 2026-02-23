@@ -1,0 +1,169 @@
+.billing-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.billing-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.billing-plan-card {
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.billing-plan-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.billing-plan-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.billing-plan-status {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.status-badge.status-free {
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+}
+
+.status-badge.status-active {
+  background: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.status-badge.status-past_due {
+  background: var(--color-warning);
+  color: var(--color-text-inverse);
+}
+
+.status-badge.status-canceled {
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+
+.billing-features {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.billing-features-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.billing-features-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.5rem;
+}
+
+.billing-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.billing-feature-icon {
+  color: var(--color-success);
+  flex-shrink: 0;
+}
+
+.billing-usage {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1rem;
+}
+
+.billing-usage-title {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.billing-usage-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+}
+
+.billing-usage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.billing-renewal {
+  margin: 1rem 0 0 0;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.billing-free-info {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+}
+
+.billing-free-info h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+}
+
+.billing-free-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.billing-free-info li {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 768px) {
+  .billing-plan-header {
+    flex-direction: column;
+  }
+
+  .billing-features-list {
+    grid-template-columns: 1fr;
+  }
+}

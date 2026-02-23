@@ -1,0 +1,56 @@
+.batch-actions-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--border-color-default);
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.selection-info {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.batch-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.batch-action-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid var(--color-accent-primary);
+  background: var(--color-accent-primary);
+  color: var(--color-text-inverse);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.batch-action-button:hover:not(:disabled) {
+  background: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.batch-action-button:disabled {
+  background: var(--border-color-default);
+  border-color: var(--border-color-default);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.batch-action-button.exclude-button {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.batch-action-button.exclude-button:hover:not(:disabled) {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  filter: brightness(0.9);
+}

@@ -1,0 +1,174 @@
+/* LinkedEntitiesDisplay Component Styles */
+
+.linked-entities-display {
+  width: 100%;
+  padding: 16px 0;
+}
+
+/* Entity Section */
+.entity-section {
+  margin-bottom: 24px;
+}
+
+.entity-section:last-child {
+  margin-bottom: 0;
+}
+
+.entity-section-header {
+  margin-bottom: 12px;
+}
+
+.entity-section-header h4 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Entity Chips Container */
+.entity-chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Entity Chip */
+.entity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  user-select: none;
+  background-color: var(--color-bg-tertiary);
+}
+
+.entity-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  filter: brightness(0.98);
+}
+
+.entity-chip:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Entity Icon */
+.entity-icon {
+  font-size: 16px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Entity Name */
+.entity-name {
+  font-weight: 500;
+  color: var(--color-text-primary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Unlink Button */
+.unlink-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-danger);
+  padding: 0;
+  margin-left: 2px;
+  transition: all 0.2s ease;
+}
+
+.unlink-button:hover {
+  background: rgba(239, 68, 68, 0.2);
+  transform: scale(1.1);
+}
+
+.unlink-button:active {
+  transform: scale(0.95);
+}
+
+/* Link More Button */
+.link-more-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1.5px dashed;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  font-weight: 500;
+  user-select: none;
+}
+
+.link-more-button:hover {
+  background: rgba(0, 0, 0, 0.03);
+  transform: translateY(-2px);
+}
+
+.link-more-button:active {
+  transform: translateY(0);
+}
+
+.link-more-button.primary {
+  border-color: var(--color-accent-primary);
+  color: var(--color-accent-primary);
+  padding: 10px 16px;
+  margin-top: 8px;
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--color-text-muted);
+}
+
+.empty-state p {
+  margin: 0 0 16px 0;
+  font-size: 15px;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .entity-chip {
+    padding: 6px 10px;
+    font-size: 13px;
+  }
+
+  .entity-name {
+    max-width: 150px;
+  }
+
+  .entity-section-header h4 {
+    font-size: 13px;
+  }
+
+  .entity-chips-container {
+    gap: 6px;
+  }
+}
+
+/* Dark mode is handled by the theme system via CSS variables */

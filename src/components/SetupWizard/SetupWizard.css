@@ -1,0 +1,615 @@
+/* ============================================================================
+ * SETUP WIZARD STYLES
+ * ============================================================================
+ * All styles use design tokens from --spacing-*, --color-*, --radius-*, etc.
+ */
+
+/* Main wizard container */
+.setup-wizard {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Progress indicator section */
+.setup-wizard-progress {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+/* Step indicator — numbered circles with labels */
+.step-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.step-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  transition: all var(--transition-fast);
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-primary);
+  color: var(--color-text-tertiary);
+}
+
+.step-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  font-weight: var(--font-weight-medium);
+  transition: color var(--transition-fast);
+}
+
+/* Current step */
+.step-item.current .step-dot {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+}
+
+.step-item.current .step-label {
+  color: var(--color-accent);
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Completed step */
+.step-item.completed .step-dot {
+  background: var(--color-success);
+  border-color: var(--color-success);
+  color: var(--color-text-inverse);
+}
+
+.step-item.completed .step-label {
+  color: var(--color-success);
+}
+
+/* Future step */
+.step-item.future .step-dot {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-border-subtle);
+  color: var(--color-text-tertiary);
+}
+
+.step-item.future .step-label {
+  color: var(--color-text-tertiary);
+}
+
+/* Connecting line between steps */
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: var(--color-border);
+  transition: background var(--transition-fast);
+  margin: 0 var(--spacing-sm);
+  margin-bottom: 20px; /* Offset for the label below the dot */
+}
+
+.step-line.completed {
+  background: var(--color-success);
+}
+
+/* Content area */
+.setup-wizard-content {
+  flex: 1;
+  padding: var(--spacing-xl);
+  overflow-y: auto;
+}
+
+/* Footer navigation */
+.setup-wizard-footer {
+  display: flex;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-bg-elevated);
+}
+
+/* ============================================================================
+ * STEP CONTENT STYLES
+ * ============================================================================ */
+
+/* Step container */
+.wizard-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  animation: fade-slide-in var(--transition-normal);
+}
+
+/* Step fade-in animation */
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step header */
+.wizard-step-header {
+  text-align: center;
+}
+
+.wizard-step-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-accent);
+}
+
+.wizard-step-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.wizard-step-description {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+  margin: 0;
+}
+
+/* Step body content */
+.wizard-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Step actions (buttons within step content) */
+.wizard-step-actions {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+}
+
+/* ============================================================================
+ * PATH SELECTION CARDS (Sheet Setup Step)
+ * ============================================================================ */
+
+.path-selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.path-card {
+  padding: var(--spacing-lg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  position: relative;
+}
+
+.path-card:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-elevated);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.path-card.selected {
+  border-color: var(--color-accent);
+  background: var(--color-accent-bg);
+}
+
+.path-card.recommended::after {
+  content: 'Recommended';
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+.path-card-icon {
+  font-size: 32px;
+  color: var(--color-accent);
+}
+
+.path-card-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.path-card-description {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ============================================================================
+ * THEME PREVIEW CARDS (Theme Step)
+ * ============================================================================ */
+
+.theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-lg);
+}
+
+.theme-card {
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--color-bg-primary);
+}
+
+.theme-card:hover {
+  border-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+.theme-card.selected {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 2px var(--color-accent-bg);
+}
+
+.theme-preview {
+  height: 60px;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--spacing-sm);
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+}
+
+.theme-preview-swatch {
+  flex: 1;
+  border-radius: 4px;
+}
+
+.theme-name {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  text-align: center;
+}
+
+/* ============================================================================
+ * CHECKLIST (Welcome Step)
+ * ============================================================================ */
+
+.wizard-checklist {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-lg) 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.wizard-checklist li {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-md);
+}
+
+.wizard-checklist li svg {
+  flex-shrink: 0;
+  color: var(--color-accent);
+}
+
+/* ============================================================================
+ * PRIVACY NOTE / INFO BOXES
+ * ============================================================================ */
+
+.wizard-info-box {
+  padding: var(--spacing-md);
+  background: var(--color-bg-elevated);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed);
+}
+
+.wizard-info-box.success {
+  background: var(--color-success-bg);
+  border-left-color: var(--color-success);
+  color: var(--color-success-text);
+}
+
+.wizard-info-box.warning {
+  background: var(--color-warning-bg);
+  border-left-color: var(--color-warning);
+  color: var(--color-warning-text);
+}
+
+/* ============================================================================
+ * FORM INPUTS
+ * ============================================================================ */
+
+.wizard-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.wizard-form-group-spaced {
+  margin-top: var(--spacing-lg);
+}
+
+.wizard-form-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.wizard-form-input {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.wizard-form-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-bg);
+}
+
+.wizard-form-input.error {
+  border-color: var(--color-error);
+}
+
+.wizard-form-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+}
+
+.wizard-form-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error);
+}
+
+/* ============================================================================
+ * SUMMARY CARD (Completion Step)
+ * ============================================================================ */
+
+.wizard-summary-card {
+  padding: var(--spacing-lg);
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.wizard-summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.wizard-summary-item:last-child {
+  border-bottom: none;
+}
+
+.wizard-summary-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.wizard-summary-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
+.wizard-summary-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+
+.wizard-summary-link:hover {
+  text-decoration: underline;
+}
+
+.wizard-next-steps {
+  margin: var(--spacing-sm) 0 0 0;
+  padding-left: 20px;
+}
+
+.wizard-info-box-spaced {
+  margin-top: var(--spacing-md);
+}
+
+/* ============================================================================
+ * DISCOVERED SHEETS LIST
+ * ============================================================================ */
+
+.wizard-step-section {
+  margin-bottom: var(--spacing-lg);
+}
+
+.discovered-sheets-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.discovered-sheet-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  transition: all var(--transition-fast);
+}
+
+.discovered-sheet-card:hover {
+  border-color: var(--color-accent);
+  background: var(--color-bg-elevated);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.discovered-sheet-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.discovered-sheet-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.discovered-sheet-name {
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--spacing-xs) 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.discovered-sheet-meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+}
+
+.folder-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 6px;
+  background: var(--color-success-bg);
+  color: var(--color-success);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ============================================================================
+ * DISCOVERY / SEARCHING STATE
+ * ============================================================================ */
+
+.wizard-searching {
+  text-align: center;
+  padding: var(--spacing-lg);
+}
+
+.wizard-searching-icon {
+  color: var(--color-accent);
+  margin-bottom: var(--spacing-sm);
+}
+
+.wizard-searching-text {
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.wizard-section-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-md);
+}
+
+.wizard-section-note {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+  margin-top: var(--spacing-md);
+  text-align: center;
+}
+
+/* ============================================================================
+ * SUCCESS ICON COLOR OVERRIDE
+ * ============================================================================ */
+
+.wizard-step-icon.success {
+  color: var(--color-success);
+}
+
+.wizard-step-icon.error {
+  color: var(--color-error);
+}
+
+/* ============================================================================
+ * SPINNER ANIMATION
+ * ============================================================================ */
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* ============================================================================
+ * RESPONSIVE ADJUSTMENTS
+ * ============================================================================ */
+
+@media (max-width: 768px) {
+  .path-selection {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .setup-wizard-content {
+    padding: var(--spacing-md);
+  }
+
+  .setup-wizard-footer {
+    padding: var(--spacing-md);
+  }
+}

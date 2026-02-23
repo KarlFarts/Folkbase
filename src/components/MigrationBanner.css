@@ -1,0 +1,59 @@
+.migration-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.migration-banner.running {
+  background: var(--color-info-bg);
+  border-bottom: 1px solid var(--color-info);
+  color: var(--color-info);
+}
+
+.migration-banner.success {
+  background: var(--color-success-bg);
+  border-bottom: 1px solid var(--color-success);
+  color: var(--color-success);
+}
+
+.migration-banner.error {
+  background: var(--color-error-bg, var(--color-danger-bg));
+  border-bottom: 1px solid var(--color-error, var(--color-danger));
+  color: var(--color-error, var(--color-danger));
+}
+
+.migration-banner .spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.migration-banner .progress-bar {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-top: var(--spacing-xs);
+}
+
+.migration-banner .progress-fill {
+  height: 100%;
+  background: currentColor;
+  transition: width 0.3s ease;
+}

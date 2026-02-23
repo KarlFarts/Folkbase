@@ -1,0 +1,65 @@
+.data-correction-table-container {
+  width: 100%;
+  overflow-x: auto;
+  margin: 20px 0;
+}
+
+.data-correction-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--border-color-default);
+  border-radius: 4px;
+}
+
+.data-correction-table thead {
+  background: var(--color-bg-secondary);
+  border-bottom: 2px solid var(--border-color-default);
+}
+
+.data-correction-table th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.data-correction-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color-default);
+}
+
+.data-correction-table tr:hover {
+  background: var(--color-bg-secondary);
+}
+
+.data-correction-table tr.selected {
+  background: rgba(var(--color-accent-primary-rgb), 0.1);
+}
+
+.editable-cell {
+  width: 100%;
+  padding: 4px 8px;
+  border: 1px solid var(--border-color-default);
+  border-radius: 3px;
+  font-size: 14px;
+}
+
+.editable-cell:focus {
+  outline: none;
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-primary-rgb), 0.1);
+}
+
+.issue-cell {
+  color: var(--color-danger);
+  font-size: 13px;
+  max-width: 300px;
+}
+
+.data-correction-table-empty {
+  text-align: center;
+  padding: 40px;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}

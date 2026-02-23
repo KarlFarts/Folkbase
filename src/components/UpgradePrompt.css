@@ -1,0 +1,101 @@
+/* Upgrade Prompt - Full card variant */
+.upgrade-prompt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  gap: 1.5rem;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+}
+
+.upgrade-prompt-icon {
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
+.upgrade-prompt-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 400px;
+}
+
+.upgrade-prompt-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.upgrade-prompt-description {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.upgrade-prompt-button {
+  margin-top: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Upgrade Prompt - Compact variant */
+.upgrade-prompt-compact {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+
+.upgrade-prompt-compact-icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.upgrade-prompt-compact-text {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.upgrade-prompt-compact-button {
+  background: var(--color-primary);
+  color: var(--color-text-inverse);
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.upgrade-prompt-compact-button:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .upgrade-prompt {
+    padding: 2rem 1rem;
+  }
+
+  .upgrade-prompt-title {
+    font-size: 1.25rem;
+  }
+
+  .upgrade-prompt-description {
+    font-size: 0.9375rem;
+  }
+}

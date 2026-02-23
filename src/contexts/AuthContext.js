@@ -1,0 +1,476 @@
+import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
+import { useGoogleLogin } from '@react-oauth/google';
+import { GOOGLE_SCOPES, CALENDAR_SCOPE } from '../googleAuth';
+import {
+  isDevMode,
+  getCurrentMockUser,
+  setMockUserRole,
+  mockSignIn,
+  mockSignOut,
+  MOCK_ACCESS_TOKEN,
+} from '../__tests__/mocks/mockAuth';
+import { log, warn } from '../utils/logger';
+import { logApiCall } from '../utils/apiUsageLogger.js';
+
+const AuthContext = createContext();
+
+export function useAuth() {
+  return useContext(AuthContext);
+}
+
+function generateOAuthState() {
+  const array = new Uint8Array(32);
+  crypto.getRandomValues(array);
+  const state = Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  sessionStorage.setItem('oauth_state', state);
+  return state;
+}
+
+function validateOAuthState(receivedState) {
+  const storedState = sessionStorage.getItem('oauth_state');
+  sessionStorage.removeItem('oauth_state');
+  return storedState && storedState === receivedState;
+}
+
+
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Ref to prevent StrictMode double-mount from initializing auth twice
+  const authInitializedRef = useRef(false);
+  // Ref to track pending login callback
+  const loginCallbackRef = useRef(null);
+
+  // Google OAuth login hook - only used in production mode
+  // In dev mode, we skip this hook entirely since GoogleOAuthProvider is not mounted
+  const googleLogin = isDevMode()
+    ? () => {} // No-op in dev mode
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useGoogleLogin({
+        onSuccess: async (tokenResponse) => {
+          if (tokenResponse.state && !validateOAuthState(tokenResponse.state)) {
+            warn('OAuth state mismatch - possible CSRF attack');
+            if (loginCallbackRef.current) {
+              loginCallbackRef.current.reject(new Error('OAuth state validation failed'));
+              loginCallbackRef.current = null;
+            }
+            return;
+          }
+
+          const startTime = Date.now();
+          try {
+            const token = tokenResponse.access_token;
+            setAccessToken(token);
+
+            // Fetch user info from Google
+            const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!userInfoResponse.ok) {
+              throw new Error('Failed to fetch user info');
+            }
+
+            const userInfo = await userInfoResponse.json();
+
+            const newUser = {
+              uid: userInfo.sub,
+              email: userInfo.email,
+              displayName: userInfo.name,
+              photoURL: userInfo.picture,
+            };
+
+            setUser(newUser);
+
+            // Store token with expiration metadata
+            // Google OAuth tokens typically expire in 1 hour (3600 seconds)
+            const expiresAt = Date.now() + tokenResponse.expires_in * 1000;
+            localStorage.setItem('googleAccessToken', token);
+            localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+            // Store user info for session restoration
+            localStorage.setItem('googleUserInfo', JSON.stringify(newUser));
+
+            // Log successful auth
+            logApiCall('google-oauth', 'signInWithGoogle', {
+              success: true,
+              statusCode: 200,
+              duration: Date.now() - startTime,
+            });
+
+            // Resolve the promise if there's a pending callback
+            if (loginCallbackRef.current) {
+              loginCallbackRef.current.resolve(newUser);
+              loginCallbackRef.current = null;
+            }
+          } catch (error) {
+            // Log failed auth
+            logApiCall('google-oauth', 'signInWithGoogle', {
+              success: false,
+              statusCode: null,
+              duration: Date.now() - startTime,
+              error: error.message,
+            });
+
+            // Reject the promise if there's a pending callback
+            if (loginCallbackRef.current) {
+              loginCallbackRef.current.reject(error);
+              loginCallbackRef.current = null;
+            }
+          }
+        },
+        onError: (error) => {
+          warn('Google login failed:', error);
+
+          // Log failed auth
+          logApiCall('google-oauth', 'signInWithGoogle', {
+            success: false,
+            statusCode: null,
+            duration: 0,
+            error: error.error_description || error.error || 'Unknown error',
+          });
+
+          // Reject the promise if there's a pending callback
+          if (loginCallbackRef.current) {
+            loginCallbackRef.current.reject(
+              new Error(error.error_description || error.error || 'Login failed')
+            );
+            loginCallbackRef.current = null;
+          }
+        },
+        scope: GOOGLE_SCOPES,
+        flow: 'implicit',
+        // NOTE: Implicit flow is deprecated for apps with backends, but is the correct
+        // choice for client-only apps like Folkbase. Auth code flow requires a
+        // backend to securely exchange the code for tokens using client_secret.
+        // Mitigations: Short-lived tokens (1hr), CSRF protection via state validation,
+        // CSP headers, HTTPS-only, and no XSS vulnerabilities.
+        state: generateOAuthState(),
+      });
+
+  const signInWithGoogle = useCallback(
+    async (forceReauth = false) => {
+      // DEV MODE: Use mock authentication
+      if (isDevMode()) {
+        const mockUser = await mockSignIn();
+        setUser(mockUser);
+        setAccessToken(MOCK_ACCESS_TOKEN);
+        log('[DEV MODE] Signed in as:', mockUser.displayName, `(${mockUser.role})`);
+        return mockUser;
+      }
+
+      // PRODUCTION: Use Google OAuth
+      // Create a promise that will be resolved when the OAuth callback completes
+      return new Promise((resolve, reject) => {
+        loginCallbackRef.current = { resolve, reject };
+
+        // If forcing re-auth, we need to use a different approach
+        // The @react-oauth/google library handles this via the prompt parameter
+        if (forceReauth) {
+          // For forced re-auth, we'll clear the stored token and trigger a new login
+          localStorage.removeItem('googleAccessToken');
+          localStorage.removeItem('googleAccessTokenExpiresAt');
+          localStorage.removeItem('googleUserInfo');
+        }
+
+        // Trigger the Google OAuth popup
+        googleLogin();
+      });
+    },
+    [googleLogin]
+  );
+
+  const refreshAccessToken = useCallback(async () => {
+    // Force re-authentication to get a fresh token
+    return signInWithGoogle(true);
+  }, [signInWithGoogle]);
+
+  async function logout() {
+    const startTime = Date.now();
+    try {
+      // DEV MODE: Use mock sign out
+      if (isDevMode()) {
+        await mockSignOut();
+        setUser(null);
+        setAccessToken(null);
+        log('[DEV MODE] Signed out');
+        return;
+      }
+
+      // Get token before clearing for revocation
+      const token = localStorage.getItem('googleAccessToken');
+
+      // Clear local state
+      setUser(null);
+      setAccessToken(null);
+      localStorage.removeItem('googleAccessToken');
+      localStorage.removeItem('googleAccessTokenExpiresAt');
+      localStorage.removeItem('googleUserInfo');
+
+      // Clear session storage (OAuth state, etc.)
+      sessionStorage.removeItem('oauth_state');
+
+      // Optionally revoke the token (fire and forget)
+      if (token) {
+        fetch('https://oauth2.googleapis.com/revoke', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: `token=${encodeURIComponent(token)}`,
+        }).catch((error) => {
+          // Log for monitoring but don't block logout
+          console.warn('Token revocation failed:', error.message);
+          logApiCall('google-oauth', 'revokeToken', {
+            success: false,
+            error: error.message,
+          });
+        });
+      }
+
+      // Log successful sign out
+      logApiCall('google-oauth', 'signOut', {
+        success: true,
+        statusCode: 200,
+        duration: Date.now() - startTime,
+      });
+    } catch (error) {
+      // Log failed sign out
+      logApiCall('google-oauth', 'signOut', {
+        success: false,
+        statusCode: null,
+        duration: Date.now() - startTime,
+        error: error.message,
+      });
+      throw error;
+    }
+  }
+
+  useEffect(() => {
+    // Prevent StrictMode double-mount from running this twice
+    if (authInitializedRef.current) {
+      return;
+    }
+
+    authInitializedRef.current = true;
+
+    // DEV MODE: Auto-initialize with mock user
+    if (isDevMode()) {
+      const mockUser = getCurrentMockUser();
+      setUser(mockUser);
+      setAccessToken(MOCK_ACCESS_TOKEN);
+      setLoading(false);
+      log(
+        '[DEV MODE] Auto-initialized with mock user:',
+        mockUser.displayName,
+        `(${mockUser.role})`
+      );
+      return () => {
+        authInitializedRef.current = false;
+      };
+    }
+
+    // PRODUCTION: Check for existing session in localStorage
+    const restoreSession = async () => {
+      const storedToken = localStorage.getItem('googleAccessToken');
+      const expiresAt = localStorage.getItem('googleAccessTokenExpiresAt');
+      const storedUserInfo = localStorage.getItem('googleUserInfo');
+
+      if (storedToken && expiresAt && Date.now() < parseInt(expiresAt)) {
+        // Token exists and hasn't expired — restore the session optimistically.
+        // We trust the stored expiry timestamp rather than making a live API call,
+        // which would log the user out on any transient network error.
+        // If the token is actually invalid, the first Sheets/Calendar API call
+        // will return 401 and the app will prompt re-authentication then.
+        setAccessToken(storedToken);
+
+        // Restore user from stored info (no network call needed)
+        if (storedUserInfo) {
+          try {
+            const userInfo = JSON.parse(storedUserInfo);
+            setUser(userInfo);
+            setLoading(false);
+            return;
+          } catch {
+            // Stored user info is malformed — fall through to fetch it
+          }
+        }
+
+        // Stored user info missing or malformed — fetch it once
+        try {
+          const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${storedToken}` },
+          });
+
+          if (response.ok) {
+            const userInfo = await response.json();
+            const restoredUser = {
+              uid: userInfo.sub,
+              email: userInfo.email,
+              displayName: userInfo.name,
+              photoURL: userInfo.picture,
+            };
+            setUser(restoredUser);
+            localStorage.setItem('googleUserInfo', JSON.stringify(restoredUser));
+          }
+          // If the fetch fails, we still have a valid non-expired token.
+          // Don't log the user out — leave user as null and let the app
+          // handle the unauthenticated state gracefully.
+        } catch {
+          // Network error — keep the token, don't clear the session.
+        }
+      } else if (storedToken) {
+        // Token exists but timestamp says it's expired — clear it.
+        localStorage.removeItem('googleAccessToken');
+        localStorage.removeItem('googleAccessTokenExpiresAt');
+        localStorage.removeItem('googleUserInfo');
+      }
+
+      setLoading(false);
+    };
+
+    restoreSession();
+
+    return () => {
+      authInitializedRef.current = false;
+    };
+  }, []);
+
+  // Token refresh removed - will happen on-demand when API calls fail
+  // This prevents surprise popup interruptions during user's work
+
+  // Calendar access - check if token has calendar scope
+  const hasCalendarAccess = useCallback(async () => {
+    if (isDevMode()) {
+      // Dev mode: check localStorage setting
+      const settings = JSON.parse(localStorage.getItem('touchpoint_calendar_settings') || '{}');
+      return settings.enabled === true;
+    }
+
+    if (!accessToken) return false;
+
+    try {
+      // Use Authorization header to prevent token exposure in logs
+      const response = await fetch('https://www.googleapis.com/oauth2/v3/tokeninfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!response.ok) return false;
+
+      const data = await response.json();
+      return data.scope?.includes(CALENDAR_SCOPE) || false;
+    } catch {
+      return false;
+    }
+  }, [accessToken]);
+
+  // Request calendar access via incremental consent
+  const requestCalendarAccess = useCallback(async () => {
+    if (isDevMode()) {
+      // Dev mode: just enable in localStorage
+      const settings = JSON.parse(localStorage.getItem('touchpoint_calendar_settings') || '{}');
+      settings.enabled = true;
+      localStorage.setItem('touchpoint_calendar_settings', JSON.stringify(settings));
+      log('[DEV MODE] Calendar access enabled in localStorage');
+      return true;
+    }
+
+    // Production: trigger OAuth with calendar scope
+    return new Promise((resolve, reject) => {
+      const state = generateOAuthState();
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+
+      // Build OAuth URL with incremental consent
+      const params = new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: window.location.origin,
+        response_type: 'token',
+        scope: CALENDAR_SCOPE,
+        state,
+        prompt: 'consent',
+        include_granted_scopes: 'true', // Keep existing scopes
+      });
+
+      const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+
+      // Open popup
+      const width = 500;
+      const height = 600;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      const popup = window.open(
+        authUrl,
+        'Google Calendar Authorization',
+        `width=${width},height=${height},top=${top},left=${left}`
+      );
+
+      if (!popup) {
+        reject(new Error('Popup blocked'));
+        return;
+      }
+
+      // Listen for OAuth callback
+      const handleMessage = (event) => {
+        if (event.origin !== window.location.origin) return;
+
+        const { type, token, state: receivedState, error } = event.data;
+
+        if (type === 'oauth-callback') {
+          window.removeEventListener('message', handleMessage);
+          popup.close();
+
+          if (error) {
+            reject(new Error(error));
+            return;
+          }
+
+          if (!validateOAuthState(receivedState)) {
+            reject(new Error('OAuth state validation failed'));
+            return;
+          }
+
+          // Update token with new scope
+          setAccessToken(token);
+          localStorage.setItem('googleAccessToken', token);
+          // Update expiration metadata (tokens typically expire in 3600 seconds)
+          const expiresAt = Date.now() + 3600 * 1000;
+          localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+
+          log('Calendar access granted');
+          resolve(true);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+
+      // Timeout after 2 minutes
+      setTimeout(() => {
+        window.removeEventListener('message', handleMessage);
+        if (!popup.closed) popup.close();
+        reject(new Error('Authorization timeout'));
+      }, 120000);
+    });
+  }, []);
+
+  const value = {
+    user,
+    accessToken,
+    signInWithGoogle,
+    refreshAccessToken,
+    logout,
+    loading,
+    hasCalendarAccess,
+    requestCalendarAccess,
+    // Dev mode utilities
+    isDevMode: isDevMode(),
+    setMockUserRole: (role) => {
+      if (isDevMode()) {
+        setMockUserRole(role);
+        // Refresh user state
+        const mockUser = getCurrentMockUser();
+        setUser(mockUser);
+        log('[DEV MODE] Switched to:', mockUser.displayName, `(${mockUser.role})`);
+      }
+    },
+  };
+
+  return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
+}

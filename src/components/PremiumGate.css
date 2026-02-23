@@ -1,0 +1,96 @@
+/* Premium Gate Card - Full card variant */
+.premium-gate-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  text-align: center;
+  gap: 1.5rem;
+  min-height: 300px;
+}
+
+.premium-gate-icon {
+  color: var(--color-text-tertiary);
+  opacity: 0.6;
+}
+
+.premium-gate-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 400px;
+}
+
+.premium-gate-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+
+.premium-gate-description {
+  font-size: 1rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.premium-gate-button {
+  margin-top: 0.5rem;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+}
+
+/* Premium Gate Inline - Small variant for menus, lists, etc */
+.premium-gate-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--color-bg-secondary);
+  border-radius: var(--border-radius);
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+}
+
+.premium-gate-inline-icon {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+
+.premium-gate-inline-text {
+  flex: 1;
+}
+
+.premium-gate-inline-link {
+  background: none;
+  border: none;
+  color: var(--color-primary);
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.premium-gate-inline-link:hover {
+  color: var(--color-primary-hover);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .premium-gate-card {
+    padding: 2rem 1rem;
+    min-height: 250px;
+  }
+
+  .premium-gate-title {
+    font-size: 1.25rem;
+  }
+
+  .premium-gate-description {
+    font-size: 0.9375rem;
+  }
+}

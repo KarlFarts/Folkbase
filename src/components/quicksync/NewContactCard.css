@@ -1,0 +1,216 @@
+.new-contact-card {
+  background: var(--background-primary, var(--color-bg-primary));
+  border: 1px solid var(--border-color, var(--border-color-default));
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-card-resting);
+}
+
+.new-contact-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-4px);
+}
+
+.new-contact-card.adding {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.contact-info {
+  display: flex;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color, var(--color-accent-primary)) 0%, var(--color-accent-secondary) 100%);
+  color: var(--color-text-inverse);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.contact-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.contact-name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary, var(--color-text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-org {
+  margin: 0.25rem 0 0 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary, var(--color-text-secondary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.contact-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, var(--color-text-secondary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meta-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.new-badge {
+  background: var(--success-color, var(--color-success));
+  color: var(--color-text-inverse);
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+
+.expand-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  background: transparent;
+  border: 1px dashed var(--border-color, var(--border-color-default));
+  border-radius: 8px;
+  color: var(--text-secondary, var(--color-text-secondary));
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.expand-toggle:hover {
+  background: var(--background-secondary, var(--color-bg-secondary));
+  border-color: var(--primary-color, var(--color-accent-primary));
+  color: var(--primary-color, var(--color-accent-primary));
+}
+
+.expand-icon {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.2s ease;
+}
+
+.expand-icon.expanded {
+  transform: rotate(180deg);
+}
+
+.enrichment-section {
+  margin-top: 1rem;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color, var(--border-color-default));
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.skip-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, var(--border-color-default));
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.skip-btn:hover:not(:disabled) {
+  background: var(--background-secondary, var(--color-bg-secondary));
+  border-color: var(--text-secondary, var(--color-text-muted));
+}
+
+.add-btn {
+  background: var(--primary-color, var(--color-accent-primary));
+  border: 1px solid var(--primary-color, var(--color-accent-primary));
+  color: var(--color-text-inverse);
+}
+
+.add-btn:hover:not(:disabled) {
+  background: var(--primary-hover, var(--color-accent-hover));
+  border-color: var(--primary-hover, var(--color-accent-hover));
+}
+
+@media (max-width: 600px) {
+  .new-contact-card {
+    padding: 1rem;
+  }
+
+  .contact-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+  }
+
+  .contact-name {
+    font-size: 1rem;
+  }
+
+  .contact-meta {
+    flex-direction: column;
+  }
+
+  .card-actions {
+    flex-direction: column;
+  }
+
+  .action-btn {
+    width: 100%;
+  }
+}

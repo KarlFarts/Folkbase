@@ -1,0 +1,116 @@
+.quick-enrichment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--background-secondary, var(--color-bg-secondary));
+  border-radius: 8px;
+  border: 1px solid var(--border-color, var(--border-color-default));
+}
+
+.enrichment-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.enrichment-field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary, var(--color-text-secondary));
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.enrichment-field input,
+.enrichment-field select {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color, var(--border-color-default));
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background: var(--background-primary, var(--color-bg-primary));
+  color: var(--text-primary, var(--color-text-primary));
+}
+
+.enrichment-field input:focus,
+.enrichment-field select:focus {
+  outline: none;
+  border-color: var(--primary-color, var(--color-accent-primary));
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-primary-rgb), 0.15);
+}
+
+.enrichment-field input::placeholder {
+  color: var(--text-tertiary, var(--color-text-muted));
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+}
+
+.suggestion-chip {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8rem;
+  background: var(--background-primary, var(--color-bg-primary));
+  border: 1px solid var(--border-color, var(--border-color-default));
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.suggestion-chip:hover {
+  background: var(--background-hover, var(--color-bg-tertiary));
+  border-color: var(--primary-color, var(--color-accent-primary));
+  color: var(--primary-color, var(--color-accent-primary));
+}
+
+.suggestion-chip.active {
+  background: var(--primary-color, var(--color-accent-primary));
+  border-color: var(--primary-color, var(--color-accent-primary));
+  color: var(--color-text-inverse);
+}
+
+.tag-hints {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+}
+
+.hint-label {
+  font-size: 0.75rem;
+  color: var(--text-tertiary, var(--color-text-muted));
+}
+
+.tag-hint {
+  padding: 0.2rem 0.5rem;
+  font-size: 0.75rem;
+  background: transparent;
+  border: 1px dashed var(--border-color, var(--border-color-default));
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--text-secondary, var(--color-text-secondary));
+  transition: all 0.15s ease;
+}
+
+.tag-hint:hover {
+  background: var(--background-hover, var(--color-bg-tertiary));
+  border-style: solid;
+  border-color: var(--primary-color, var(--color-accent-primary));
+  color: var(--primary-color, var(--color-accent-primary));
+}
+
+@media (max-width: 600px) {
+  .quick-enrichment-form {
+    padding: 0.75rem;
+  }
+
+  .suggestion-chip,
+  .tag-hint {
+    font-size: 0.75rem;
+  }
+}

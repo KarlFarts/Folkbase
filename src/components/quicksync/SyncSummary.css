@@ -1,0 +1,204 @@
+.sync-summary {
+  background: var(--background-primary, var(--color-bg-primary));
+  border: 1px solid var(--border-color, var(--border-color-default));
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.summary-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--success-color, var(--color-success)) 0%, var(--color-success) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-icon svg {
+  width: 32px;
+  height: 32px;
+  color: var(--color-text-inverse);
+}
+
+.summary-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary, var(--color-text-primary));
+}
+
+.summary-stats {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--border-color, var(--border-color-default));
+  border-bottom: 1px solid var(--border-color, var(--border-color-default));
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.stat-added .stat-number {
+  color: var(--success-color, var(--color-success));
+}
+
+.stat-skipped .stat-number {
+  color: var(--text-tertiary, var(--color-text-muted));
+}
+
+.stat-existing .stat-number {
+  color: var(--primary-color, var(--color-accent-primary));
+}
+
+.recently-added {
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.recently-added h4 {
+  margin: 0 0 0.75rem 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary, var(--color-text-primary));
+}
+
+.added-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.added-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color, var(--border-color-default));
+}
+
+.added-item:last-child {
+  border-bottom: none;
+}
+
+.added-name {
+  font-weight: 500;
+  color: var(--text-primary, var(--color-text-primary));
+}
+
+.added-org {
+  font-size: 0.85rem;
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.added-more {
+  padding: 0.5rem 0;
+  font-size: 0.85rem;
+  color: var(--text-tertiary, var(--color-text-muted));
+  font-style: italic;
+}
+
+.no-new-message {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  background: var(--background-secondary, var(--color-bg-secondary));
+  border-radius: 8px;
+}
+
+.no-new-message p {
+  margin: 0;
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.no-new-message .hint {
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-tertiary, var(--color-text-muted));
+}
+
+.summary-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.75rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.secondary-btn {
+  background: transparent;
+  border: 1px solid var(--border-color, var(--border-color-default));
+  color: var(--text-secondary, var(--color-text-secondary));
+}
+
+.secondary-btn:hover {
+  background: var(--background-secondary, var(--color-bg-secondary));
+  border-color: var(--text-secondary, var(--color-text-muted));
+}
+
+.primary-btn {
+  background: var(--primary-color, var(--color-accent-primary));
+  border: 1px solid var(--primary-color, var(--color-accent-primary));
+  color: var(--color-text-inverse);
+}
+
+.primary-btn:hover {
+  background: var(--primary-hover, var(--color-accent-hover));
+  border-color: var(--primary-hover, var(--color-accent-hover));
+}
+
+@media (max-width: 600px) {
+  .sync-summary {
+    padding: 1.5rem;
+  }
+
+  .summary-stats {
+    gap: 1rem;
+  }
+
+  .stat-number {
+    font-size: 1.5rem;
+  }
+
+  .stat-label {
+    font-size: 0.75rem;
+  }
+
+  .summary-actions {
+    flex-direction: column;
+  }
+}

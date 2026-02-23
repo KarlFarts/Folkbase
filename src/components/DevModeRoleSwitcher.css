@@ -1,0 +1,219 @@
+/**
+ * Dev Mode Role Switcher Styles
+ *
+ * Styling for the development mode user role switcher dropdown.
+ * Only visible in dev mode.
+ */
+
+.dev-mode-role-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.role-switcher-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--border-color-default);
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-switcher-button:hover {
+  background: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border-color: var(--color-accent-secondary);
+}
+
+.current-role {
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-arrow {
+  transition: transform 0.2s ease;
+}
+
+.dropdown-arrow.open {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu */
+.role-switcher-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--border-color-default);
+  border-radius: 6px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 240px;
+  animation: slideDown 0.2s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dropdown-section .dropdown-header {
+  border-bottom: none;
+  padding-bottom: 4px;
+}
+
+.profile-info {
+  padding: 0 16px 12px;
+}
+
+.profile-email {
+  font-size: 13px;
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border-color-default);
+  margin: 0;
+}
+
+.dropdown-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: var(--color-text-primary);
+  transition: background 0.15s ease;
+}
+
+.dropdown-action:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.dropdown-action-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.dropdown-action-danger {
+  color: var(--color-danger);
+}
+
+.dropdown-action-danger:hover {
+  background: var(--color-danger-bg);
+}
+
+.role-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid var(--border-color-default);
+}
+
+.role-option:last-of-type {
+  border-bottom: none;
+}
+
+.role-option:hover {
+  background: var(--color-bg-tertiary);
+}
+
+.role-option.active {
+  background: var(--color-bg-tertiary);
+  border-left: 3px solid var(--color-accent-primary);
+  padding-left: 13px;
+}
+
+.role-name {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 2px;
+}
+
+.role-email {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+.role-type {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 6px;
+  background: var(--color-bg-tertiary);
+  border-radius: 3px;
+  color: var(--color-text-secondary);
+  text-transform: capitalize;
+}
+
+.checkmark {
+  margin-left: auto;
+  color: var(--color-accent-primary);
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.dropdown-footer {
+  padding: 8px 16px;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--border-color-default);
+  font-style: italic;
+}
+
+.dropdown-footer p {
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .role-switcher-dropdown {
+    min-width: 200px;
+    right: -50px;
+  }
+
+  .current-role {
+    max-width: 80px;
+  }
+}
