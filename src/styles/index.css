@@ -116,11 +116,82 @@
   --border-color-focus: #5a7a5e;
   --border-color-error: #c67b6b;
 
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
+
+  /* ========================================
+     SEMANTIC CARD PALETTE
+     One variable set per domain — change here
+     to update all cards of that type globally
+     ======================================== */
+
+  /* Contacts - soft blue-gray */
+  --card-bg-contacts: #e8eef4;
+  --card-text-contacts: #2c3e50;
+  --card-border-contacts: #c8d6e2;
+
+  /* Events - soft amber */
+  --card-bg-events: #f5eee0;
+  --card-text-events: #5a4830;
+  --card-border-events: #e2d4be;
+
+  /* Tasks - soft rose */
+  --card-bg-tasks: #f4e8e6;
+  --card-text-tasks: #5c3a36;
+  --card-border-tasks: #e2ccc8;
+
+  /* Organizations - soft sage */
+  --card-bg-organizations: #e6ede8;
+  --card-text-organizations: #2e4436;
+  --card-border-organizations: #c6d6ca;
+
+  /* Locations - soft teal */
+  --card-bg-locations: #e2edec;
+  --card-text-locations: #2a4240;
+  --card-border-locations: #c0d6d2;
+
+  /* Notes/Activity - soft lavender */
+  --card-bg-notes: #eae6f0;
+  --card-text-notes: #3c3450;
+  --card-border-notes: #cec6da;
+
+  /* Celebrations - soft warm gold */
+  --card-bg-celebrations: #f2eddf;
+  --card-text-celebrations: #4a4230;
+  --card-border-celebrations: #ddd4be;
+
+  /* Settings/System - neutral warm gray */
+  --card-bg-settings: #edeae6;
+  --card-text-settings: #4a4238;
+  --card-border-settings: #d6d0c6;
+
+  /* Workspaces - soft indigo */
+  --card-bg-workspaces: #e6e8f0;
+  --card-text-workspaces: #343650;
+  --card-border-workspaces: #c6c8da;
+
+  /* ========================================
+     CARD HERO TYPOGRAPHY
+     Steep hierarchy: 40px hero vs 13px label
+     ======================================== */
+
+  --font-size-card-hero: 2.5rem;
+  --font-size-card-hero-sm: 1.75rem;
+  --font-weight-card-hero: 700;
+  --line-height-card-hero: 1.1;
+  --font-size-card-label: 0.8125rem;
+  --font-size-card-sub: 0.75rem;
+
+  /* ========================================
+     CARD PADDING
+     Generous internal breathing room
+     ======================================== */
+
+  --spacing-card-padding: 28px;
+  --spacing-card-padding-lg: 36px;
 
   /* ========================================
      SHADOW SYSTEM - Warm brown shadows
@@ -664,6 +735,178 @@ a:hover {
   padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--color-bg-tertiary);
   background: var(--color-bg-secondary);
+}
+
+/* ========================================
+   SEMANTIC CARD SYSTEM (.scard)
+   Domain-colored cards with dominant hierarchy.
+   Use alongside .card — does not replace it.
+   ======================================== */
+
+.scard {
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-card-padding);
+  transition: transform var(--transition-fast), box-shadow var(--transition-base);
+  box-shadow: var(--shadow-card-resting);
+  position: relative;
+  overflow: hidden;
+}
+
+.scard[role='button'],
+.scard-clickable {
+  cursor: pointer;
+}
+
+.scard[role='button']:hover,
+.scard-clickable:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* Domain backgrounds */
+.scard-contacts {
+  background: var(--card-bg-contacts);
+  color: var(--card-text-contacts);
+  border: 1px solid var(--card-border-contacts);
+}
+
+.scard-events {
+  background: var(--card-bg-events);
+  color: var(--card-text-events);
+  border: 1px solid var(--card-border-events);
+}
+
+.scard-tasks {
+  background: var(--card-bg-tasks);
+  color: var(--card-text-tasks);
+  border: 1px solid var(--card-border-tasks);
+}
+
+.scard-organizations {
+  background: var(--card-bg-organizations);
+  color: var(--card-text-organizations);
+  border: 1px solid var(--card-border-organizations);
+}
+
+.scard-locations {
+  background: var(--card-bg-locations);
+  color: var(--card-text-locations);
+  border: 1px solid var(--card-border-locations);
+}
+
+.scard-notes {
+  background: var(--card-bg-notes);
+  color: var(--card-text-notes);
+  border: 1px solid var(--card-border-notes);
+}
+
+.scard-celebrations {
+  background: var(--card-bg-celebrations);
+  color: var(--card-text-celebrations);
+  border: 1px solid var(--card-border-celebrations);
+}
+
+.scard-settings {
+  background: var(--card-bg-settings);
+  color: var(--card-text-settings);
+  border: 1px solid var(--card-border-settings);
+}
+
+.scard-workspaces {
+  background: var(--card-bg-workspaces);
+  color: var(--card-text-workspaces);
+  border: 1px solid var(--card-border-workspaces);
+}
+
+/* Dominant hero element — one per card */
+.scard-hero {
+  font-size: var(--font-size-card-hero);
+  font-weight: var(--font-weight-card-hero);
+  line-height: var(--line-height-card-hero);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.scard-hero-sm {
+  font-size: var(--font-size-card-hero-sm);
+  font-weight: var(--font-weight-card-hero);
+  line-height: var(--line-height-card-hero);
+  letter-spacing: -0.015em;
+  margin-bottom: var(--spacing-sm);
+  display: block;
+}
+
+.scard-hero-icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: var(--spacing-md);
+  opacity: 0.8;
+  display: block;
+}
+
+/* Supporting label — visually subordinate to hero */
+.scard-label {
+  font-size: var(--font-size-card-label);
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+}
+
+/* Tertiary info */
+.scard-sub {
+  font-size: var(--font-size-card-sub);
+  font-weight: 400;
+  opacity: 0.55;
+  margin-top: var(--spacing-xs);
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bottom action link */
+.scard-action {
+  font-size: var(--font-size-card-sub);
+  font-weight: 600;
+  opacity: 0;
+  text-align: right;
+  margin-top: var(--spacing-md);
+  display: block;
+  transition: opacity var(--transition-fast);
+  letter-spacing: 0.02em;
+}
+
+.scard:hover .scard-action {
+  opacity: 0.6;
+}
+
+/* Compact list inside a card */
+.scard-list {
+  list-style: none;
+  padding: 0;
+  margin: var(--spacing-md) 0 0 0;
+}
+
+.scard-list-item {
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-card-label);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scard-list-item:last-child {
+  border-bottom: none;
+}
+
+.scard-list-item:hover {
+  opacity: 0.7;
 }
 
 /* ========================================

@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { User, Building2, MapPin, Folder, Plus } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 import HeroWelcome from '../components/dashboard/HeroWelcome';
+import CelebrationsWidget from '../components/dashboard/CelebrationsWidget';
 import { DashboardSkeleton } from '../components/SkeletonLoader';
 import LogTouchpointQuickModal from '../components/LogTouchpointQuickModal';
 
@@ -13,7 +14,7 @@ function Dashboard({ onNavigate }) {
   const { accessToken, refreshAccessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
-  const { userWorkspaces, switchToWorkspace } = useWorkspace();
+  const { userWorkspaces, switchToWorkspace: _switchToWorkspace } = useWorkspace();
   const [contacts, setContacts] = useState([]);
   const [touchpoints, setTouchpoints] = useState([]);
   const [events, setEvents] = useState([]);
@@ -27,7 +28,7 @@ function Dashboard({ onNavigate }) {
   const [_markingDone, setMarkingDone] = useState(null);
   const [showLogTouchpoint, setShowLogTouchpoint] = useState(false);
   const [savingTouchpoint, setSavingTouchpoint] = useState(false);
-  const [expandedSection, setExpandedSection] = useState(null);
+  const [_expandedSection, _setExpandedSection] = useState(null);
 
   const isMountedRef = useRef(false);
   const isLoadingRef = useRef(false);
@@ -215,7 +216,7 @@ function Dashboard({ onNavigate }) {
     .filter((item) => item !== null);
 
   // Filter high priority contacts
-  const highPriorityContacts = contacts
+  const _highPriorityContacts = contacts
     .filter((contact) => {
       const priority = contact['Priority'];
       const status = contact['Status'];
@@ -396,10 +397,10 @@ function Dashboard({ onNavigate }) {
   const _allEmpty =
     overdueFollowups.length === 0 &&
     dueTodayFollowups.length === 0 &&
-    highPriorityContacts.length === 0;
+    _highPriorityContacts.length === 0;
 
   // Profile Completion Tracking - identify contacts with missing key fields
-  const incompleteProfiles = contacts
+  const _incompleteProfiles = contacts
     .filter((contact) => {
       const hasPhone = contact['Phone'];
       const hasEmail = contact['Email'];
@@ -468,7 +469,7 @@ function Dashboard({ onNavigate }) {
   }
 
   // Quick Actions Data
-  const quickActions = [
+  const _quickActions = [
     { id: 'add-contact', label: 'Add Contact', action: () => onNavigate('contacts') },
     { id: 'log-touchpoint', label: 'Log Touchpoint', action: () => setShowLogTouchpoint(true) },
     { id: 'import', label: 'Import', action: () => onNavigate('import') },
@@ -512,23 +513,19 @@ function Dashboard({ onNavigate }) {
     );
   }
 
-  const handleToggleSection = (sectionId) => {
-    setExpandedSection((prev) => (prev === sectionId ? null : sectionId));
-  };
-
   // Filter active entities
   const activeContacts = contacts.filter((c) => c.Status === 'Active').length;
   const activeOrganizations = organizations.filter((o) => o.Status === 'Active').length;
   const activeLocations = locations.filter((l) => l.Status === 'Active').length;
 
   // Get recent organizations (last 5 created)
-  const recentOrganizations = organizations
+  const _recentOrganizations = organizations
     .filter((o) => o.Status === 'Active')
     .sort((a, b) => new Date(b['Created Date']) - new Date(a['Created Date']))
     .slice(0, 5);
 
   // Get recent locations (last 5 created)
-  const recentLocations = locations
+  const _recentLocations = locations
     .filter((l) => l.Status === 'Active')
     .sort((a, b) => new Date(b['Created Date']) - new Date(a['Created Date']))
     .slice(0, 5);
@@ -552,514 +549,127 @@ function Dashboard({ onNavigate }) {
     })
     .slice(0, 5);
 
+  const followUpsDue = [...overdueFollowups, ...dueTodayFollowups];
+
   return (
     <div className="dashboard-container dashboard-redesigned">
-      <HeroWelcome
-        onNavigate={onNavigate}
-        onLogTouchpoint={() => setShowLogTouchpoint(true)}
-        // Widget data props
-        todoItems={[...overdueFollowups, ...dueTodayFollowups]}
-        upcomingEvents={upcomingEvents}
-        incompleteProfiles={incompleteProfiles}
-        setupIssues={setupIssues}
-        quickActions={quickActions}
-        events={events}
-        contacts={contacts}
-        expandedSection={expandedSection}
-        onToggleSection={handleToggleSection}
-      />
+      <HeroWelcome onNavigate={onNavigate} />
 
-      <hr className="dashboard-divider" />
 
-      {/* Entity Stats Section */}
-      <div className="dashboard-stats">
+      <div className="dashboard-card-grid">
+        {/* Contacts */}
         <div
-          className="stat-card"
+          className="scard scard-contacts scard-clickable"
+          role="button"
           onClick={() => onNavigate('contacts')}
-          style={{ cursor: 'pointer' }}
         >
-          <div className="stat-label">
-            <User size={16} /> Active Contacts
-          </div>
-          <div className="stat-value" style={{ color: 'var(--color-accent-primary)' }}>
-            {activeContacts}
-          </div>
+          <span className="scard-hero">{activeContacts}</span>
+          <span className="scard-label">Active Contacts</span>
+          <span className="scard-action">View all →</span>
         </div>
+
+        {/* Events */}
         <div
-          className="stat-card"
+          className="scard scard-events scard-clickable"
+          role="button"
+          onClick={() => onNavigate('events')}
+        >
+          <span className="scard-hero">{upcomingEvents.length}</span>
+          <span className="scard-label">Upcoming Events</span>
+          {upcomingEvents.length > 0 && (
+            <span className="scard-sub">{upcomingEvents[0]['Event Name']}</span>
+          )}
+          <span className="scard-action">View all →</span>
+        </div>
+
+        {/* Tasks */}
+        <div
+          className="scard scard-tasks scard-clickable"
+          role="button"
+          onClick={() => onNavigate('tasks')}
+        >
+          <span className="scard-hero">{overdueTasks.length}</span>
+          <span className="scard-label">Overdue Tasks</span>
+          {overdueTasks.length > 0 && (
+            <span className="scard-sub">{overdueTasks[0].Title}</span>
+          )}
+          <span className="scard-action">View all →</span>
+        </div>
+
+        {/* Organizations */}
+        <div
+          className="scard scard-organizations scard-clickable"
+          role="button"
           onClick={() => onNavigate('organizations')}
-          style={{ cursor: 'pointer' }}
         >
-          <div className="stat-label">
-            <Building2 size={16} /> Active Organizations
-          </div>
-          <div className="stat-value" style={{ color: 'var(--color-accent-secondary)' }}>
-            {activeOrganizations}
-          </div>
+          <span className="scard-hero">{activeOrganizations}</span>
+          <span className="scard-label">Organizations</span>
+          <span className="scard-action">View all →</span>
         </div>
+
+        {/* Locations */}
         <div
-          className="stat-card"
+          className="scard scard-locations scard-clickable"
+          role="button"
           onClick={() => onNavigate('locations')}
-          style={{ cursor: 'pointer' }}
         >
-          <div className="stat-label">
-            <MapPin size={16} /> Active Locations
-          </div>
-          <div className="stat-value" style={{ color: 'var(--color-success)' }}>
-            {activeLocations}
-          </div>
+          <span className="scard-hero">{activeLocations}</span>
+          <span className="scard-label">Locations</span>
+          <span className="scard-action">View all →</span>
         </div>
-      </div>
 
-      {/* Recent Organizations Section */}
-      {recentOrganizations.length > 0 && (
-        <div className="dashboard-section" style={{ marginBottom: 'var(--spacing-xl)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            <h2
-              style={{
-                color: 'var(--color-accent-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-sm)',
-              }}
-            >
-              <Building2 size={16} /> Recent Organizations
-            </h2>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigate('organizations')}
-            >
-              View All
-            </button>
-          </div>
-          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-            {recentOrganizations.map((org) => (
-              <div
-                key={org['Organization ID']}
-                className="stat-card"
-                onClick={() => onNavigate('organization-profile', { id: org['Organization ID'] })}
-                style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}
+        {/* Celebrations */}
+        <div className="scard scard-celebrations">
+          <span className="scard-label">Upcoming Celebrations</span>
+          <CelebrationsWidget contacts={contacts} onNavigate={onNavigate} bare={true} />
+        </div>
+
+        {/* Follow-ups (wide) */}
+        {followUpsDue.length > 0 && (
+          <div className="scard scard-contacts scard-wide">
+            <span className="scard-hero">{followUpsDue.length}</span>
+            <span className="scard-label">Follow-ups Due</span>
+            <ul className="scard-list">
+              {followUpsDue.slice(0, 4).map((item, i) => (
+                <li
+                  key={i}
+                  className="scard-list-item"
+                  onClick={() => onNavigate('contact-profile', item.contact['Contact ID'])}
                 >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)', color: 'var(--color-accent-secondary)' }}>
-                      {org.Name}
-                    </h3>
-                    <div
-                      style={{
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {org.Type && <span>{org.Type}</span>}
-                      {org.Type && org.Industry && <span> • </span>}
-                      {org.Industry && <span>{org.Industry}</span>}
-                    </div>
-                    {org.Description && (
-                      <p
-                        style={{
-                          margin: 'var(--spacing-xs) 0 0 0',
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        {org.Description.substring(0, 100)}
-                        {org.Description.length > 100 ? '...' : ''}
-                      </p>
-                    )}
-                  </div>
-                  {org.Priority && (
-                    <span
-                      style={{
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 600,
-                        backgroundColor:
-                          org.Priority === 'Urgent'
-                            ? 'rgba(220, 38, 38, 0.1)'
-                            : org.Priority === 'High'
-                              ? 'rgba(194, 112, 62, 0.1)'
-                              : 'var(--color-bg-secondary)',
-                        color:
-                          org.Priority === 'Urgent'
-                            ? 'var(--color-danger)'
-                            : org.Priority === 'High'
-                              ? 'var(--color-accent-hover)'
-                              : 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {org.Priority}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Recent Locations Section */}
-      {recentLocations.length > 0 && (
-        <div className="dashboard-section" style={{ marginBottom: 'var(--spacing-xl)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            <h2
-              style={{
-                color: 'var(--color-success)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-sm)',
-              }}
-            >
-              <MapPin size={16} /> Recent Locations
-            </h2>
-            <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('locations')}>
-              View All
-            </button>
-          </div>
-          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-            {recentLocations.map((loc) => (
-              <div
-                key={loc['Location ID']}
-                className="stat-card"
-                onClick={() => onNavigate('location-profile', { id: loc['Location ID'] })}
-                style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)', color: 'var(--color-success)' }}>
-                      {loc.Name}
-                    </h3>
-                    <div
-                      style={{
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {loc.Type && <span>{loc.Type}</span>}
-                      {loc.Type && loc.City && <span> • </span>}
-                      {loc.City && <span>{loc.City}</span>}
-                    </div>
-                    {loc.Address && (
-                      <p
-                        style={{
-                          margin: 'var(--spacing-xs) 0 0 0',
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        {loc.Address}
-                      </p>
-                    )}
-                  </div>
-                  {loc.Priority && (
-                    <span
-                      style={{
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 600,
-                        backgroundColor:
-                          loc.Priority === 'Urgent'
-                            ? 'rgba(220, 38, 38, 0.1)'
-                            : loc.Priority === 'High'
-                              ? 'rgba(194, 112, 62, 0.1)'
-                              : 'var(--color-bg-secondary)',
-                        color:
-                          loc.Priority === 'Urgent'
-                            ? 'var(--color-danger)'
-                            : loc.Priority === 'High'
-                              ? 'var(--color-accent-hover)'
-                              : 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {loc.Priority}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Overdue Tasks Section */}
-      {overdueTasks.length > 0 && (
-        <div className="dashboard-section" style={{ marginBottom: 'var(--spacing-xl)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            <h2
-              style={{
-                color: 'var(--color-danger)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-sm)',
-              }}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="3" y="5" width="18" height="14" rx="2" />
-                <path d="M9 11h6M9 15h3" />
-              </svg>
-              Overdue Tasks
-            </h2>
-            <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('tasks')}>
-              View All Tasks
-            </button>
-          </div>
-          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-            {overdueTasks.map((task) => (
-              <div
-                key={task['Task ID']}
-                className="stat-card"
-                onClick={() => onNavigate('task-profile', task['Task ID'])}
-                style={{ cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div
-                  style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)', color: 'var(--color-danger)' }}>
-                      {task.Title}
-                    </h3>
-                    <div
-                      style={{
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {task['Due Date'] && (
-                        <span>
-                          Due: {new Date(task['Due Date']).toLocaleDateString()} (
-                          {Math.floor((today - new Date(task['Due Date'])) / (1000 * 60 * 60 * 24))} days
-                          ago)
-                        </span>
-                      )}
-                      {task['Assigned To Name'] && (
-                        <>
-                          <span> • </span>
-                          <span>Assigned to: {task['Assigned To Name']}</span>
-                        </>
-                      )}
-                    </div>
-                    {task.Description && (
-                      <p
-                        style={{
-                          margin: 'var(--spacing-xs) 0 0 0',
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        {task.Description.substring(0, 100)}
-                        {task.Description.length > 100 ? '...' : ''}
-                      </p>
-                    )}
-                  </div>
-                  {task.Priority && (
-                    <span
-                      style={{
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        borderRadius: 'var(--radius-sm)',
-                        fontSize: 'var(--font-size-xs)',
-                        fontWeight: 600,
-                        backgroundColor:
-                          task.Priority === 'Urgent'
-                            ? 'rgba(220, 38, 38, 0.1)'
-                            : task.Priority === 'High'
-                              ? 'rgba(194, 112, 62, 0.1)'
-                              : 'var(--color-bg-secondary)',
-                        color:
-                          task.Priority === 'Urgent'
-                            ? 'var(--color-danger)'
-                            : task.Priority === 'High'
-                              ? 'var(--color-accent-hover)'
-                              : 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {task.Priority}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <hr className="dashboard-divider" />
-
-      {/* Workspaces Section */}
-      <div className="dashboard-section" style={{ marginBottom: 'var(--spacing-xl)' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 'var(--spacing-md)',
-          }}
-        >
-          <h2
-            style={{
-              color: 'var(--color-primary)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-sm)',
-            }}
-          >
-            <Folder size={16} /> My Workspaces
-          </h2>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
-            <button
-              className="btn btn-secondary btn-sm"
-              onClick={() => onNavigate('workspaces/create')}
-            >
-              <Plus size={16} /> New Workspace
-            </button>
-            <button className="btn btn-secondary btn-sm" onClick={() => onNavigate('workspaces')}>
-              Manage All
-            </button>
-          </div>
-        </div>
-
-        {userWorkspaces.length === 0 ? (
-          <div
-            className="stat-card"
-            style={{
-              textAlign: 'center',
-              padding: 'var(--spacing-xl)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            <Folder size={32} style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }} />
-            <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Workspaces Yet</h3>
-            <p style={{ marginBottom: 'var(--spacing-md)' }}>
-              Create a workspace to collaborate with your team on contact management.
-            </p>
-            <button className="btn btn-primary" onClick={() => onNavigate('/workspaces/create')}>
-              Create Your First Workspace
-            </button>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-            {userWorkspaces.slice(0, 5).map((workspace) => (
-              <div
-                key={workspace.id || workspace['Workspace ID']}
-                className="stat-card"
-                onClick={() => {
-                  switchToWorkspace(workspace);
-                  onNavigate('contacts');
-                }}
-                style={{
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s, box-shadow 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-2px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'start',
-                  }}
-                >
-                  <div style={{ flex: 1 }}>
-                    <h3 style={{ margin: 0, marginBottom: 'var(--spacing-xs)' }}>
-                      <Folder
-                        size={16}
-                        style={{ display: 'inline', marginRight: 'var(--spacing-xs)' }}
-                      />
-                      {workspace.name || workspace['Workspace Name']}
-                    </h3>
-                    {workspace.description && (
-                      <p
-                        style={{
-                          margin: 'var(--spacing-xs) 0 0 0',
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
-                        }}
-                      >
-                        {workspace.description.substring(0, 100)}
-                        {workspace.description.length > 100 ? '...' : ''}
-                      </p>
-                    )}
-                    <div
-                      style={{
-                        marginTop: 'var(--spacing-xs)',
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      {workspace.type && <span>{workspace.type}</span>}
-                      {workspace.type && workspace.owner_email && <span> • </span>}
-                      {workspace.owner_email && <span>Owner: {workspace.owner_email}</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-            {userWorkspaces.length > 5 && (
-              <div style={{ textAlign: 'center', marginTop: 'var(--spacing-sm)' }}>
-                <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('workspaces')}>
-                  View all {userWorkspaces.length} workspaces →
-                </button>
-              </div>
-            )}
+                  {item.contact.Name} — {item.urgentDetail}
+                </li>
+              ))}
+            </ul>
+            <span className="scard-action">View contacts →</span>
           </div>
         )}
+
+        {/* Setup Issues */}
+        {setupIssues.length > 0 && (
+          <div className="scard scard-settings">
+            <AlertTriangle className="scard-hero-icon" />
+            <span className="scard-label">{setupIssues.length} Setup Issue{setupIssues.length !== 1 ? 's' : ''}</span>
+            <ul className="scard-list">
+              {setupIssues.map((issue, i) => (
+                <li key={i} className="scard-list-item" onClick={issue.action}>
+                  {issue.message}
+                </li>
+              ))}
+            </ul>
+            <span className="scard-action">Go to settings →</span>
+          </div>
+        )}
+
+        {/* Workspaces */}
+        <div
+          className="scard scard-workspaces scard-clickable"
+          role="button"
+          onClick={() => onNavigate('workspaces')}
+        >
+          <span className="scard-hero">{userWorkspaces.length}</span>
+          <span className="scard-label">Workspaces</span>
+          <span className="scard-action">Manage →</span>
+        </div>
       </div>
 
       {showLogTouchpoint && (

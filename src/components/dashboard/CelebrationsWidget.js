@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 
-function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30 }) {
+function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30, bare = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // eslint-disable-next-line react-hooks/preserve-manual-memoization
@@ -121,6 +121,13 @@ function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30 }) {
   };
 
   if (celebrations.length === 0) {
+    if (bare) {
+      return (
+        <div className="celebrations-widget-empty">
+          <p>No upcoming celebrations in the next {daysAhead} days</p>
+        </div>
+      );
+    }
     return (
       <div className="celebrations-widget-simple">
         <div className="celebrations-widget-header">
@@ -135,12 +142,8 @@ function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30 }) {
 
   const currentCelebration = celebrations[currentIndex];
 
-  return (
-    <div className="celebrations-widget-simple">
-      <div className="celebrations-widget-header">
-        <h3>Upcoming</h3>
-      </div>
-      <div className="celebrations-carousel">
+  const carousel = (
+    <div className="celebrations-carousel">
         <button
           className="celebrations-carousel-arrow celebrations-carousel-prev"
           onClick={handlePrev}
@@ -177,6 +180,18 @@ function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30 }) {
           ›
         </button>
       </div>
+  );
+
+  if (bare) {
+    return carousel;
+  }
+
+  return (
+    <div className="celebrations-widget-simple">
+      <div className="celebrations-widget-header">
+        <h3>Upcoming</h3>
+      </div>
+      {carousel}
     </div>
   );
 }
