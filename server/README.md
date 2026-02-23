@@ -1,4 +1,4 @@
-# Touchpoint Billing Server
+# Folkbase Billing Server
 
 Lightweight Node.js/Express backend for handling Stripe billing and subscription management.
 

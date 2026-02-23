@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Window Template System provides a consistent, reusable foundation for all windows, dialogs, and modals throughout the Touchpoint CRM application. It ensures visual consistency while maintaining flexibility for different use cases.
+The Window Template System provides a consistent, reusable foundation for all windows, dialogs, and modals throughout the Folkbase application. It ensures visual consistency while maintaining flexibility for different use cases.
 
 ## Core Components
 

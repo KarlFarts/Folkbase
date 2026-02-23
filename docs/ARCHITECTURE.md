@@ -1,4 +1,4 @@
-# Touchpoint CRM - Architecture Overview
+# Folkbase - Architecture Overview
 
 > Visual guide to the 100% free production architecture
 

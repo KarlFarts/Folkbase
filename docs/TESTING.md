@@ -1,6 +1,6 @@
 # Testing Documentation
 
-This document describes the testing infrastructure and patterns used in Touchpoint CRM.
+This document describes the testing infrastructure and patterns used in Folkbase.
 
 ## Table of Contents
 1. [Test Setup](#test-setup)
@@ -59,7 +59,7 @@ npm test -- --grep="contact"
 
 ## Dev Mode vs Production Mode Testing
 
-Touchpoint CRM has two operating modes that significantly affect testing:
+Folkbase has two operating modes that significantly affect testing:
 
 ### Development Mode (`VITE_DEV_MODE=true`)
 - Uses **localStorage** for data storage

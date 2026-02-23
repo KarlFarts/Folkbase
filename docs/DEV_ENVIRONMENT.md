@@ -1,4 +1,4 @@
-# Touchpoint Development Environment
+# Folkbase Development Environment
 
 **Last Updated:** 2025-12-29
 **Purpose:** Enable focused UI development with pre-seeded test data and mock authentication - no Firebase or Google Sheets credentials required.
@@ -223,7 +223,7 @@ console.log(stats);
 
 ### UI Resilience & Empty States
 
-All components in Touchpoint gracefully handle empty states:
+All components in Folkbase gracefully handle empty states:
 
 #### What's Guaranteed
 

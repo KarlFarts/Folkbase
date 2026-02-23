@@ -1,6 +1,6 @@
 # Production Deployment Checklist
 
-This guide walks you through deploying Touchpoint CRM to production (moving from dev mode to Google Sheets API).
+This guide walks you through deploying Folkbase to production (moving from dev mode to Google Sheets API).
 
 ## Pre-Deployment: Critical Fixes Completed ✅
 
@@ -22,12 +22,12 @@ The following critical issues have been fixed and are ready for production:
 ### 1.1 Create OAuth 2.0 Credentials
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing: "Touchpoint CRM"
+2. Create a new project or select existing: "Folkbase"
 3. Navigate to **APIs & Services > Credentials**
 4. Click **Create Credentials > OAuth client ID**
 5. Choose **Web application**
 6. Configure:
-   - **Name:** Touchpoint CRM Production
+   - **Name:** Folkbase Production
    - **Authorized JavaScript origins:**
      - `https://your-production-domain.com`
      - `http://localhost:3000` (for local testing)
@@ -58,7 +58,7 @@ Enable these APIs in your Google Cloud project:
 1. Go to **APIs & Services > OAuth consent screen**
 2. Choose **External** (unless you have a Google Workspace domain)
 3. Fill in required fields:
-   - **App name:** Touchpoint CRM
+   - **App name:** Folkbase
    - **User support email:** your-email@example.com
    - **Developer contact email:** your-email@example.com
 4. Add scopes:

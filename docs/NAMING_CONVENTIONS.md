@@ -1,6 +1,6 @@
 # Naming Conventions
 
-This document outlines the naming conventions used throughout the Touchpoint CRM codebase.
+This document outlines the naming conventions used throughout the Folkbase codebase.
 
 ## JavaScript Code
 

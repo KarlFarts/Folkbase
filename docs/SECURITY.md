@@ -2,7 +2,7 @@
 
 ## Overview
 
-Touchpoint CRM is a client-side application that prioritizes user privacy and data security. This document outlines our security architecture, threat model, and best practices.
+Folkbase is a client-side application that prioritizes user privacy and data security. This document outlines our security architecture, threat model, and best practices.
 
 **Last Security Audit:** 2026-02-15
 **Security Grade:** A-
@@ -28,7 +28,7 @@ Touchpoint CRM is a client-side application that prioritizes user privacy and da
 
 ### Client-Side Application Model
 
-Touchpoint CRM is a **100% client-side application** with no traditional backend:
+Folkbase is a **100% client-side application** with no traditional backend:
 
 ```
 ┌─────────────┐
@@ -127,7 +127,7 @@ As a client-only app, we cannot use httpOnly cookies (requires a backend). Howev
 **Google Drive Folder Structure:**
 ```
 Google Drive
-└── Touchpoint CRM/
+└── Folkbase/
     ├── [Main Sheet]       - Contact data, events, etc.
     ├── Exports/           - CSV, vCard exports
     ├── Backups/           - Timestamped backups

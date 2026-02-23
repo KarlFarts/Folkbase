@@ -47,12 +47,12 @@ flow: 'auth-code'  // Changed from 'implicit'
 
 ## Decision
 
-**Use OAuth 2.0 Implicit Flow** - This is the architecturally correct choice for Touchpoint CRM.
+**Use OAuth 2.0 Implicit Flow** - This is the architecturally correct choice for Folkbase.
 
 ### Rationale
 
 1. **Client-Only Architecture**
-   - Touchpoint CRM is intentionally 100% client-side
+   - Folkbase is intentionally 100% client-side
    - No backend server exists or is planned
    - Zero-trust model: we never see user data
 
@@ -234,4 +234,4 @@ Content-Security-Policy:
 
 ---
 
-**Summary:** OAuth implicit flow is not a vulnerability for Touchpoint CRM. It is the architecturally appropriate choice given our client-only design. Strong mitigations are in place, and the decision aligns with industry best practices for client-side JavaScript applications.
+**Summary:** OAuth implicit flow is not a vulnerability for Folkbase. It is the architecturally appropriate choice given our client-only design. Strong mitigations are in place, and the decision aligns with industry best practices for client-side JavaScript applications.

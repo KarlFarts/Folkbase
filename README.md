@@ -1,10 +1,10 @@
-# Touchpoint CRM
+# Folkbase
 
 A powerful, privacy-first contact relationship management system for teams, nonprofits, and community organizations. Built with React and Google Sheets as the database - giving you complete control over your data.
 
-## Why Touchpoint?
+## Why Folkbase?
 
-Most CRMs are expensive, complicated, or lock your data behind proprietary systems. Touchpoint is different:
+Most CRMs are expensive, complicated, or lock your data behind proprietary systems. Folkbase is different:
 
 - Your data lives in a Google Sheet you own and control
 - 100% free architecture - no database hosting costs
@@ -165,7 +165,7 @@ No code needed! Just edit your Google Sheet:
 
 1. Add a column header in Google Sheets (e.g., "Source")
 2. (Optional) Add data validation for dropdown values
-3. Refresh Touchpoint CRM
+3. Refresh Folkbase
 4. New field appears in forms automatically!
 
 ### Workspaces - Team Collaboration
@@ -195,7 +195,7 @@ Easily import contacts from your phone or other devices:
    - **iPhone**: iCloud.com → Contacts → Export vCard
    - **Android**: contacts.google.com → Export → vCard
    - **Outlook**: File → Export → CSV
-3. Drop the file into Touchpoint
+3. Drop the file into Folkbase
 4. Review new contacts (duplicates auto-filtered)
 5. Add context (how you met, tags, priority)
 6. Click "Add" or "Add All"
@@ -208,7 +208,7 @@ Keep your CRM events and Google Calendar in sync:
 
 1. Enable Calendar Sync in Settings
 2. Grant Google Calendar permissions
-3. Events you create in Touchpoint appear in Google Calendar
+3. Events you create in Folkbase appear in Google Calendar
 4. Import personal calendar events as CRM events or touchpoints
 5. Automatic conflict detection and resolution
 
