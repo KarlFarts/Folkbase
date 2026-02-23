@@ -1,189 +1,81 @@
 import React, { useEffect, useState } from 'react';
-import { Handshake, CheckCircle, Sparkles, Link, Search, FolderCheck } from 'lucide-react';
+import { Sparkles, Link, Search, FolderCheck, ArrowRight } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { extractSheetId } from '../../../utils/sheetCreation';
 import { hasDriveMetadataScope, findExistingSheets } from '../../../utils/sheetDiscovery';
 
 /**
- * Welcome step — handles auth and sheet choice (create new or connect existing)
- * No side effects here — sheet creation is deferred to CompletionStep
+ * Step 1 — Binary choice: create new sheet or connect existing.
+ * Auth is complete before this step renders.
  */
 const WelcomeAuthStep = ({ wizardData, onUpdate, onNext }) => {
-  const { user, accessToken, signInWithGoogle } = useAuth();
-  const [isSigningIn, setIsSigningIn] = useState(false);
-  const [sheetChoice, setSheetChoice] = useState(wizardData.sheetMethod || 'create');
+  const { user, accessToken } = useAuth();
+  const [choice, setChoice] = useState(wizardData.sheetMethod || 'create');
   const [sheetInput, setSheetInput] = useState('');
   const [inputError, setInputError] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [discoveredSheets, setDiscoveredSheets] = useState(null);
   const [discoveryError, setDiscoveryError] = useState(null);
 
-  // Sync auth data into wizard state when signed in
+  // Sync auth into wizard on mount
   useEffect(() => {
     if (user && accessToken) {
-      onUpdate({
-        user,
-        accessToken,
-        displayName: user.displayName || user.email?.split('@')[0] || 'User',
-      });
+      onUpdate({ user, accessToken, displayName: user.displayName || user.email?.split('@')[0] || 'User' });
     }
-  }, [user, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Auto-discover existing sheets after sign-in
+  // Auto-discover existing sheets
   useEffect(() => {
-    const discoverSheets = async () => {
-      if (!user || !accessToken || isSearching || discoveredSheets !== null) {
-        return;
-      }
-
+    if (!user || !accessToken || isSearching || discoveredSheets !== null) return;
+    const run = async () => {
       setIsSearching(true);
-      setDiscoveryError(null);
-
       try {
-        // Check if token has Drive scope
         const hasScope = await hasDriveMetadataScope(accessToken);
-
-        if (!hasScope) {
-          // Legacy token without Drive scope - skip discovery
-          setDiscoveredSheets([]);
-          setIsSearching(false);
-          return;
-        }
-
-        // Search for existing sheets
+        if (!hasScope) { setDiscoveredSheets([]); return; }
         const result = await findExistingSheets(accessToken);
-
-        if (result.success) {
-          setDiscoveredSheets(result.sheets);
-        } else {
-          setDiscoveryError(result.error);
-          setDiscoveredSheets([]);
-        }
-      } catch (error) {
-        console.error('Sheet discovery error:', error);
-        setDiscoveryError(error.message);
+        setDiscoveredSheets(result.success ? result.sheets : []);
+        if (!result.success) setDiscoveryError(result.error);
+      } catch (err) {
         setDiscoveredSheets([]);
+        setDiscoveryError(err.message);
       } finally {
         setIsSearching(false);
       }
     };
-
-    discoverSheets();
-  }, [user, accessToken, isSearching, discoveredSheets]);
-
-  const handleSignIn = async () => {
-    setIsSigningIn(true);
-    try {
-      await signInWithGoogle();
-    } catch (error) {
-      console.error('Sign-in failed:', error);
-      setIsSigningIn(false);
-    }
-  };
+    run();
+  }, [user, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleReconnect = (sheet) => {
-    onUpdate({
-      sheetMethod: 'existing',
-      sheetId: sheet.id,
-      sheetTitle: sheet.name,
-    });
+    onUpdate({ sheetMethod: 'existing', sheetId: sheet.id, sheetTitle: sheet.name });
     onNext();
   };
 
-  const handleContinue = () => {
-    if (sheetChoice === 'existing') {
-      // Validate the input before continuing
+  const handleProceed = () => {
+    if (choice === 'existing') {
       const sheetId = extractSheetId(sheetInput.trim());
-      if (!sheetId) {
-        setInputError('Please enter a valid Google Sheet URL or ID.');
-        return;
-      }
-      onUpdate({
-        sheetMethod: 'existing',
-        sheetId,
-        sheetTitle: 'Connected Sheet',
-      });
+      if (!sheetId) { setInputError('Please enter a valid Google Sheet URL or ID.'); return; }
+      onUpdate({ sheetMethod: 'existing', sheetId, sheetTitle: 'Connected Sheet' });
     } else {
       onUpdate({ sheetMethod: 'create' });
     }
     onNext();
   };
 
-  // Not signed in — show welcome + sign-in button
-  if (!user || !accessToken) {
-    return (
-      <div className="wizard-step">
-        <div className="wizard-step-header">
-          <div className="wizard-step-icon">
-            <Handshake size={64} />
-          </div>
-          <h2 className="wizard-step-title">Welcome to Folkbase</h2>
-          <p className="wizard-step-description">
-            Your personal CRM powered by Google Sheets — 100% free, 100% yours.
-          </p>
-        </div>
-
-        <div className="wizard-step-body">
-          <div className="wizard-info-box">
-            <strong>Your privacy matters:</strong> All your data stays in your own Google account.
-            Folkbase never uploads your contacts to external servers.
-          </div>
-
-          <div className="wizard-step-actions">
-            <button
-              type="button"
-              onClick={handleSignIn}
-              disabled={isSigningIn}
-              className="btn btn-primary btn-lg"
-            >
-              {isSigningIn ? 'Signing In...' : 'Sign in with Google'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Signed in — show welcome + sheet choice
   return (
     <div className="wizard-step">
       <div className="wizard-step-header">
-        <div className="wizard-step-icon success">
-          <CheckCircle size={64} />
-        </div>
-        <h2 className="wizard-step-title">Welcome, {user.displayName || user.email}!</h2>
+        <h2 className="wizard-step-title">How would you like to get started?</h2>
         <p className="wizard-step-description">
-          {isSearching
-            ? 'Checking for existing databases...'
-            : 'How would you like to set up your database?'}
+          {isSearching ? 'Checking for existing databases...' : 'Choose an option below to continue.'}
         </p>
       </div>
 
       <div className="wizard-step-body">
-        {/* Searching state */}
-        {isSearching && (
-          <div className="wizard-searching">
-            <Search size={48} className="wizard-searching-icon" />
-            <p className="wizard-searching-text">
-              Searching your Google Drive for Folkbase sheets...
-            </p>
-          </div>
-        )}
-
-        {/* Discovery error warning */}
-        {!isSearching && discoveryError && (
-          <div className="wizard-info-box warning wizard-info-box-spaced">
-            <strong>Note:</strong> Could not search for existing sheets. You can still create a new
-            sheet or enter a URL manually.
-          </div>
-        )}
-
-        {/* Discovered sheets list */}
+        {/* Discovered sheets */}
         {!isSearching && discoveredSheets && discoveredSheets.length > 0 && (
           <div className="wizard-step-section">
             <h3 className="wizard-section-title">
-              We found {discoveredSheets.length} existing{' '}
-              {discoveredSheets.length === 1 ? 'sheet' : 'sheets'}:
+              We found {discoveredSheets.length} existing {discoveredSheets.length === 1 ? 'sheet' : 'sheets'}:
             </h3>
             <div className="discovered-sheets-list">
               {discoveredSheets.map((sheet) => (
@@ -192,9 +84,7 @@ const WelcomeAuthStep = ({ wizardData, onUpdate, onNext }) => {
                     <div className="discovered-sheet-header">
                       <h4 className="discovered-sheet-name">{sheet.name}</h4>
                       {sheet.inFolder && (
-                        <span className="folder-badge" title="Already in Folkbase folder">
-                          <FolderCheck size={14} />
-                        </span>
+                        <span className="folder-badge"><FolderCheck size={14} /></span>
                       )}
                     </div>
                     <p className="discovered-sheet-meta">
@@ -202,57 +92,74 @@ const WelcomeAuthStep = ({ wizardData, onUpdate, onNext }) => {
                       {!sheet.inFolder && ' • Will be moved to folder'}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleReconnect(sheet)}
-                    className="btn btn-primary btn-sm"
-                  >
+                  <button type="button" onClick={() => handleReconnect(sheet)} className="btn btn-primary btn-sm">
                     Reconnect
                   </button>
                 </div>
               ))}
             </div>
-            <p className="wizard-section-note">Or create a new sheet or connect manually:</p>
+            <p className="wizard-section-note">Or choose an option below:</p>
           </div>
         )}
 
-        {/* Only show choice cards after discovery completes */}
-        {!isSearching && discoveredSheets !== null && (
+        {discoveryError && (
+          <div className="wizard-info-box warning">
+            <strong>Note:</strong> Could not search for existing sheets. You can still create or connect manually.
+          </div>
+        )}
+
+        {/* Binary choice cards */}
+        {!isSearching && (
           <>
-            <div className="path-selection">
+            <div className="wizard-choice-cards">
+              {/* New User card */}
               <div
-                className={`path-card recommended ${sheetChoice === 'create' ? 'selected' : ''}`}
-                onClick={() => {
-                  setSheetChoice('create');
-                  setInputError(null);
-                }}
+                className={`wizard-choice-card ${choice === 'create' ? 'selected' : ''}`}
+                onClick={() => { setChoice('create'); setInputError(null); }}
               >
-                <div className="path-card-icon">
-                  <Sparkles size={32} />
+                <div className="wizard-choice-card-icon">
+                  <Sparkles size={36} />
                 </div>
-                <h3 className="path-card-title">Create New Sheet</h3>
-                <p className="path-card-description">
-                  We&apos;ll create a Google Sheet in your Drive with everything set up.
+                <h3 className="wizard-choice-card-title">New User</h3>
+                <p className="wizard-choice-card-description">
+                  We'll create a Google Sheet in your Drive with everything ready to go.
                 </p>
+                <button
+                  type="button"
+                  className={`wizard-choice-card-btn ${choice === 'create' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); setChoice('create'); handleProceed(); }}
+                  aria-label="Create new sheet and continue"
+                >
+                  <ArrowRight size={18} />
+                </button>
               </div>
 
+              {/* Connect Existing card */}
               <div
-                className={`path-card ${sheetChoice === 'existing' ? 'selected' : ''}`}
-                onClick={() => setSheetChoice('existing')}
+                className={`wizard-choice-card ${choice === 'existing' ? 'selected' : ''}`}
+                onClick={() => setChoice('existing')}
               >
-                <div className="path-card-icon">
-                  <Link size={32} />
+                <div className="wizard-choice-card-icon">
+                  <Link size={36} />
                 </div>
-                <h3 className="path-card-title">Connect Existing Sheet</h3>
-                <p className="path-card-description">
-                  Already have a Folkbase sheet? Paste the URL to connect.
+                <h3 className="wizard-choice-card-title">Connect to Existing</h3>
+                <p className="wizard-choice-card-description">
+                  Already have a Folkbase sheet? Paste your URL to reconnect.
                 </p>
+                <button
+                  type="button"
+                  className={`wizard-choice-card-btn ${choice === 'existing' ? 'active' : ''}`}
+                  onClick={(e) => { e.stopPropagation(); setChoice('existing'); }}
+                  aria-label="Connect existing sheet"
+                >
+                  <ArrowRight size={18} />
+                </button>
               </div>
             </div>
 
-            {/* Existing sheet input */}
-            {sheetChoice === 'existing' && (
-              <div className="wizard-form-group wizard-form-group-spaced">
+            {/* Sheet URL input — only shown when 'existing' is selected */}
+            {choice === 'existing' && (
+              <div className="wizard-form-group">
                 <label htmlFor="sheet-input" className="wizard-form-label">
                   Google Sheet URL or ID
                 </label>
@@ -262,21 +169,24 @@ const WelcomeAuthStep = ({ wizardData, onUpdate, onNext }) => {
                   className={`wizard-form-input ${inputError ? 'error' : ''}`}
                   placeholder="https://docs.google.com/spreadsheets/d/..."
                   value={sheetInput}
-                  onChange={(e) => {
-                    setSheetInput(e.target.value);
-                    setInputError(null);
-                  }}
+                  onChange={(e) => { setSheetInput(e.target.value); setInputError(null); }}
                 />
                 {inputError && <p className="wizard-form-error">{inputError}</p>}
+                <div className="wizard-step-actions">
+                  <button type="button" onClick={handleProceed} className="btn btn-primary btn-lg">
+                    Connect &amp; Continue
+                  </button>
+                </div>
               </div>
             )}
-
-            <div className="wizard-step-actions">
-              <button type="button" onClick={handleContinue} className="btn btn-primary btn-lg">
-                Continue
-              </button>
-            </div>
           </>
+        )}
+
+        {isSearching && (
+          <div className="wizard-searching">
+            <Search size={40} className="wizard-searching-icon spinner" />
+            <p className="wizard-searching-text">Searching your Google Drive...</p>
+          </div>
         )}
       </div>
     </div>
