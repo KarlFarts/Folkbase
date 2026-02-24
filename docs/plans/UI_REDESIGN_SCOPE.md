@@ -1,7 +1,7 @@
 # Folkbase UI Redesign Scope
 
 ## Auth & Onboarding
-- [ ] **SetupWizard** (3 steps: Welcome/Auth, Profile, Completion) — `src/components/SetupWizard/`
+- [x] **SetupWizard** (3 steps: Welcome/Auth, Profile, Completion) — `src/components/SetupWizard/`
 - [ ] **Login/OAuth flow** (Google sign-in in navbar)
 
 ## Main Layout & Navigation
