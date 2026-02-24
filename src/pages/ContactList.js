@@ -161,7 +161,7 @@ function BulkCopyModal({
             onChange={(e) => setCreateLink(e.target.checked)}
             disabled={isLoading}
           />
-          <span style={{ marginLeft: '0.5rem' }}>
+          <span className="bulk-copy-checkbox-label">
             Create sync links (changes will sync between workspaces)
           </span>
         </label>
@@ -222,18 +222,9 @@ function BulkCopyModal({
           {syncStrategy === 'custom' && (
             <div className="form-group">
               <label className="form-label">Select Fields to Sync</label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '0.5rem',
-                }}
-              >
+              <div className="bulk-copy-field-grid">
                 {FIELD_OPTIONS.map((field) => (
-                  <label
-                    key={field}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                  >
+                  <label key={field} className="bulk-copy-field-option">
                     <input
                       type="checkbox"
                       checked={customFields.includes(field)}
@@ -841,22 +832,7 @@ function ContactList({ onNavigate }) {
     <div>
       {/* Update notification toast */}
       {updateNotification && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 'var(--spacing-lg)',
-            right: 'var(--spacing-lg)',
-            backgroundColor: 'var(--color-success)',
-            color: 'white',
-            padding: 'var(--spacing-md) var(--spacing-lg)',
-            borderRadius: 'var(--border-radius)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            zIndex: 1000,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+        <div className="cl-toast">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -879,7 +855,7 @@ function ContactList({ onNavigate }) {
             {filteredContacts.length} of {contacts.length} contacts
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+        <div className="cl-header-actions">
           <button className="btn btn-secondary" onClick={() => onNavigate('import')}>
             Import
           </button>
@@ -899,11 +875,10 @@ function ContactList({ onNavigate }) {
             Export
           </button>
           <button
-            className="btn btn-ghost"
+            className={`btn btn-ghost btn-icon-compact${refreshing ? ' spinning' : ''}`}
             onClick={handleManualRefresh}
             disabled={refreshing}
             title="Refresh from Google Sheets"
-            style={{ padding: 'var(--spacing-sm) var(--spacing-md)' }}
           >
             <svg
               viewBox="0 0 24 24"
@@ -912,9 +887,6 @@ function ContactList({ onNavigate }) {
               strokeWidth="2"
               width="20"
               height="20"
-              style={{
-                animation: refreshing ? 'spin 1s linear infinite' : 'none',
-              }}
             >
               <polyline points="23 4 23 10 17 10" />
               <polyline points="1 20 1 14 7 14" />
@@ -941,23 +913,11 @@ function ContactList({ onNavigate }) {
           </button>
 
           {/* View toggle buttons */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '2px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--color-bg-tertiary)',
-              padding: '2px',
-            }}
-          >
+          <div className="cl-view-toggle">
             <button
               className={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setViewMode('grid')}
               title="Grid view"
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                fontSize: 'var(--font-size-sm)',
-              }}
             >
               ⊞
             </button>
@@ -965,10 +925,6 @@ function ContactList({ onNavigate }) {
               className={`btn ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setViewMode('table')}
               title="Table view"
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                fontSize: 'var(--font-size-sm)',
-              }}
             >
               ≡
             </button>
@@ -987,24 +943,9 @@ function ContactList({ onNavigate }) {
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-
       {/* Search and Filters */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--spacing-md)',
-          marginBottom: 'var(--spacing-lg)',
-          flexWrap: 'wrap',
-          alignItems: 'flex-start',
-        }}
-      >
-        <div className="search-container" style={{ flex: '1', minWidth: '250px' }}>
+      <div className="cl-filters-row">
+        <div className="search-container">
           <svg
             className="search-icon"
             viewBox="0 0 24 24"
@@ -1025,8 +966,7 @@ function ContactList({ onNavigate }) {
         </div>
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
         >
@@ -1039,8 +979,7 @@ function ContactList({ onNavigate }) {
         </select>
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -1054,8 +993,7 @@ function ContactList({ onNavigate }) {
 
         {availableTags.length > 0 && (
           <select
-            className="form-select"
-            style={{ width: 'auto', minWidth: '150px' }}
+            className="form-select cl-filter-select"
             value={tagFilter}
             onChange={(e) => setTagFilter(e.target.value)}
           >
@@ -1069,8 +1007,7 @@ function ContactList({ onNavigate }) {
         )}
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -1137,19 +1074,7 @@ function ContactList({ onNavigate }) {
                     onNavigate('contact-profile', contact['Contact ID']);
                   }
                 }}
-                style={{
-                  cursor: 'pointer',
-                  border: selectedIds.has(contact['Contact ID'])
-                    ? '3px solid var(--color-accent-primary)'
-                    : 'none',
-                  borderRadius: 'var(--radius-lg)',
-                  backgroundColor: selectedIds.has(contact['Contact ID'])
-                    ? 'rgba(194, 112, 62, 0.15)'
-                    : 'transparent',
-                  transition: 'all 0.2s ease',
-                  width: '100%',
-                  boxSizing: 'border-box',
-                }}
+                className={`cl-grid-item${selectedIds.has(contact['Contact ID']) ? ' cl-grid-item--selected' : ''}`}
               >
                 <ContactCard contact={contact} />
               </div>
@@ -1185,19 +1110,8 @@ function ContactList({ onNavigate }) {
       )}
 
       {/* Manage Tags Button */}
-      <div style={{ marginBottom: '15px' }}>
-        <button
-          onClick={() => setShowTagManager(true)}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: 'var(--color-accent-primary)',
-            color: 'var(--color-text-inverse)',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '0.95em',
-          }}
-        >
+      <div className="cl-manage-tags">
+        <button className="btn btn-primary" onClick={() => setShowTagManager(true)}>
           Manage Tags
         </button>
       </div>
