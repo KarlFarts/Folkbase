@@ -25,12 +25,11 @@ function Navbar({ onNavigate }) {
 
   return (
     <>
-      <nav className="navbar">
+      <nav className="navbar" aria-label="Main navigation">
         <div className="navbar-left">
           <div
             className="navbar-brand"
             onClick={() => onNavigate('dashboard')}
-            style={{ cursor: 'pointer' }}
           >
             <img src="/logo.svg" alt="Folkbase Logo" className="navbar-logo" />
             FOLKBASE

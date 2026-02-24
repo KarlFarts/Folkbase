@@ -48,14 +48,7 @@ const WorkspaceSwitcher = () => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className="workspace-name">{displayName}</span>
-        <ChevronDown
-          size={14}
-          className="dropdown-arrow"
-          style={{
-            transition: 'transform 0.2s ease',
-            transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
-        />
+        <ChevronDown size={14} className={`dropdown-arrow${isOpen ? ' open' : ''}`} />
       </button>
 
       {isOpen && (

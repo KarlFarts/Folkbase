@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 
 const ContactsDropdown = ({ mobileMenuOpen, setMobileMenuOpen }) => {
   const navigate = useNavigate();
@@ -45,7 +46,7 @@ const ContactsDropdown = ({ mobileMenuOpen, setMobileMenuOpen }) => {
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>Contacts</span>
-        <span className="dropdown-arrow">{isOpen ? '▲' : '▼'}</span>
+        <ChevronDown size={14} className={`dropdown-arrow${isOpen ? ' open' : ''}`} />
       </button>
 
       {isOpen && (
