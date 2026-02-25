@@ -46,7 +46,7 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
           value={contact[field.key]}
           isEditing={isEditing}
           editValue={editData[field.key]}
-          onChange={(value) => onChange({ ...editData, [field.key]: value })}
+          onChange={(value) => onChange({ ...editData, [field.key]: value }, field.key)}
         />
       ))}
     </div>

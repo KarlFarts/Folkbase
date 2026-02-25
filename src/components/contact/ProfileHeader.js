@@ -73,8 +73,8 @@ function ProfileHeader({
                   name={editData['Display Name'] || editData.Name}
                   currentColor={editData['Avatar Color'] || null}
                   currentIcon={editData['Avatar Icon'] || null}
-                  onColorChange={(color) => onChange({ ...editData, 'Avatar Color': color || '' })}
-                  onIconChange={(icon) => onChange({ ...editData, 'Avatar Icon': icon || '' })}
+                  onColorChange={(color) => onChange({ ...editData, 'Avatar Color': color || '' }, 'Avatar Color')}
+                  onIconChange={(icon) => onChange({ ...editData, 'Avatar Icon': icon || '' }, 'Avatar Icon')}
                 />
               )}
             </div>
@@ -87,7 +87,7 @@ function ProfileHeader({
                     type="text"
                     className="form-input"
                     value={editData.Name || ''}
-                    onChange={(e) => onChange({ ...editData, Name: e.target.value })}
+                    onChange={(e) => onChange({ ...editData, Name: e.target.value }, 'Name')}
                     placeholder="Full name"
                     style={{ fontSize: 'var(--font-size-xl)', fontWeight: '600' }}
                   />
@@ -102,14 +102,14 @@ function ProfileHeader({
                       type="text"
                       className="form-input"
                       value={editData.Organization || ''}
-                      onChange={(e) => onChange({ ...editData, Organization: e.target.value })}
+                      onChange={(e) => onChange({ ...editData, Organization: e.target.value }, 'Organization')}
                       placeholder="Organization"
                     />
                     <input
                       type="text"
                       className="form-input"
                       value={editData.Role || ''}
-                      onChange={(e) => onChange({ ...editData, Role: e.target.value })}
+                      onChange={(e) => onChange({ ...editData, Role: e.target.value }, 'Role')}
                       placeholder="Role"
                     />
                   </div>
@@ -143,7 +143,7 @@ function ProfileHeader({
                     <select
                       className="form-select"
                       value={editData.Priority || ''}
-                      onChange={(e) => onChange({ ...editData, Priority: e.target.value })}
+                      onChange={(e) => onChange({ ...editData, Priority: e.target.value }, 'Priority')}
                       style={{ width: 'auto' }}
                     >
                       <option value="">Priority...</option>
@@ -156,7 +156,7 @@ function ProfileHeader({
                     <select
                       className="form-select"
                       value={editData.Status || ''}
-                      onChange={(e) => onChange({ ...editData, Status: e.target.value })}
+                      onChange={(e) => onChange({ ...editData, Status: e.target.value }, 'Status')}
                       style={{ width: 'auto' }}
                     >
                       <option value="">Status...</option>

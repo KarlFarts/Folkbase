@@ -171,16 +171,28 @@ function ContactProfile({ onNavigate }) {
   const handleSaveEdit = async () => {
     try {
       actions.setSaving(true);
+      // Only send fields the user actually changed
+      const changedData = {};
+      for (const key of state.dirtyFields) {
+        changedData[key] = state.editData[key];
+      }
+      // If nothing changed, just exit edit mode
+      if (Object.keys(changedData).length === 0) {
+        actions.setIsEditing(false);
+        return;
+      }
       await updateContact(
         accessToken,
         sheetId,
         contactId,
         state.contact,
-        state.editData,
+        changedData,
         user.email
       );
-      actions.setContact(state.editData);
+      // Merge changes back into contact state
+      actions.setContact({ ...state.contact, ...changedData });
       actions.setIsEditing(false);
+      actions.clearDirtyFields();
     } catch {
       notify.error('Failed to save changes');
     } finally {
@@ -496,7 +508,10 @@ function ContactProfile({ onNavigate }) {
               contact={state.contact}
               isEditing={state.isEditing}
               editData={state.editData}
-              onChange={actions.setEditData}
+              onChange={(newEditData, changedKey) => {
+                actions.setEditData(newEditData);
+                if (changedKey) actions.markFieldDirty(changedKey);
+              }}
               getPriorityClass={getPriorityClass}
               getStatusClass={getStatusClass}
             />
@@ -590,7 +605,10 @@ function ContactProfile({ onNavigate }) {
                   contact={state.contact}
                   isEditing={state.isEditing}
                   editData={state.editData}
-                  onChange={actions.setEditData}
+                  onChange={(newEditData, changedKey) => {
+                    actions.setEditData(newEditData);
+                    if (changedKey) actions.markFieldDirty(changedKey);
+                  }}
                 />
               </div>
             </div>

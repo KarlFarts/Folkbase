@@ -19,6 +19,8 @@ const ACTIONS = {
   SET_IS_EDITING: 'SET_IS_EDITING',
   SET_EDIT_DATA: 'SET_EDIT_DATA',
   CANCEL_EDIT: 'CANCEL_EDIT',
+  MARK_FIELD_DIRTY: 'MARK_FIELD_DIRTY',
+  CLEAR_DIRTY_FIELDS: 'CLEAR_DIRTY_FIELDS',
 
   // Modal states
   TOGGLE_LOG_MODAL: 'TOGGLE_LOG_MODAL',
@@ -62,6 +64,7 @@ const initialState = {
   // Edit mode
   isEditing: false,
   editData: {},
+  dirtyFields: new Set(),
 
   // Modal states
   showLogModal: false,
@@ -145,7 +148,16 @@ function contactProfileReducer(state, action) {
       return { ...state, editData: action.payload };
 
     case ACTIONS.CANCEL_EDIT:
-      return { ...state, isEditing: false, editData: state.contact };
+      return { ...state, isEditing: false, editData: state.contact, dirtyFields: new Set() };
+
+    case ACTIONS.MARK_FIELD_DIRTY:
+      return {
+        ...state,
+        dirtyFields: new Set([...state.dirtyFields, action.payload]),
+      };
+
+    case ACTIONS.CLEAR_DIRTY_FIELDS:
+      return { ...state, dirtyFields: new Set() };
 
     case ACTIONS.TOGGLE_LOG_MODAL:
       return { ...state, showLogModal: action.payload };
@@ -274,6 +286,14 @@ export function useContactProfile() {
 
       cancelEdit: () => {
         dispatch({ type: ACTIONS.CANCEL_EDIT });
+      },
+
+      markFieldDirty: (fieldKey) => {
+        dispatch({ type: ACTIONS.MARK_FIELD_DIRTY, payload: fieldKey });
+      },
+
+      clearDirtyFields: () => {
+        dispatch({ type: ACTIONS.CLEAR_DIRTY_FIELDS });
       },
 
       toggleLogModal: (show) => {
