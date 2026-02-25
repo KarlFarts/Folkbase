@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -176,56 +176,27 @@ function LocationProfile({ onNavigate }) {
   };
 
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="lp-page">
       {/* Back button */}
-      <button
-        className="btn btn-ghost btn-sm"
-        onClick={() => onNavigate('locations')}
-        style={{ marginBottom: 'var(--spacing-md)' }}
-      >
+      <button className="btn btn-ghost btn-sm lp-back-btn" onClick={() => onNavigate('locations')}>
         ← Back to Locations
       </button>
 
       {/* Profile Header */}
-      <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+      <div className="card lp-header-card">
         <div className="card-body">
-          <div style={{ display: 'flex', gap: 'var(--spacing-lg)', alignItems: 'flex-start' }}>
+          <div className="lp-header-inner">
             {/* Icon */}
-            <div
-              style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(5, 150, 105, 0.1)',
-                border: '3px solid var(--color-success)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
+            <div className="lp-icon">
               <MapPin size={40} color="var(--color-success)" />
             </div>
 
             {/* Name and Info */}
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
+            <div className="lp-header-body">
+              <div className="lp-header-top">
                 <div>
-                  <h1 style={{ marginBottom: 'var(--spacing-xs)' }}>{displayData['Name']}</h1>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 'var(--spacing-md)',
-                      flexWrap: 'wrap',
-                      marginBottom: 'var(--spacing-sm)',
-                    }}
-                  >
+                  <h1 className="lp-name">{displayData['Name']}</h1>
+                  <div className="lp-meta-row">
                     <span className="text-muted">{displayData['Type']}</span>
                     {displayData['Capacity'] && (
                       <>
@@ -234,7 +205,7 @@ function LocationProfile({ onNavigate }) {
                       </>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+                  <div className="lp-badges">
                     {displayData['Priority'] && (
                       <span className={`badge ${getPriorityClass(displayData['Priority'])}`}>
                         {displayData['Priority']}
@@ -247,49 +218,32 @@ function LocationProfile({ onNavigate }) {
                     )}
                     {displayData['Tags'] &&
                       displayData['Tags'].split(',').map((tag, i) => (
-                        <span key={i} className="tag">
-                          {tag.trim()}
-                        </span>
+                        <span key={i} className="tag">{tag.trim()}</span>
                       ))}
                   </div>
                 </div>
 
                 {/* Action buttons */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                <div className="lp-header-actions">
                   {!isEditing ? (
                     <>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleEdit}
-                        title="Edit location"
-                      >
+                      <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit location">
                         <Edit size={16} />
                       </button>
                       <button
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-ghost btn-sm lp-delete-btn"
                         onClick={() => setShowDeleteConfirm(true)}
                         title="Delete location"
-                        style={{ color: 'var(--color-danger)' }}
                       >
                         <Trash2 size={16} />
                       </button>
                     </>
                   ) : (
                     <>
-                      <button
-                        className="btn btn-primary btn-sm"
-                        onClick={handleSaveEdit}
-                        disabled={saving}
-                        title="Save changes"
-                      >
+                      <button className="btn btn-primary btn-sm" onClick={handleSaveEdit} disabled={saving} title="Save changes">
                         <Check size={16} /> {saving ? 'Saving...' : 'Save'}
                       </button>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleCancelEdit}
-                        disabled={saving}
-                        title="Cancel editing"
-                      >
+                      <button className="btn btn-ghost btn-sm" onClick={handleCancelEdit} disabled={saving} title="Cancel editing">
                         <X size={16} /> Cancel
                       </button>
                     </>
@@ -298,43 +252,24 @@ function LocationProfile({ onNavigate }) {
               </div>
 
               {/* Quick actions */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-sm)',
-                  marginTop: 'var(--spacing-md)',
-                }}
-              >
+              <div className="lp-quick-actions">
                 {displayData['Phone'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('call')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('call')}>
                     <Phone size={16} /> Call
                   </button>
                 )}
                 {displayData['Website'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('website')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('website')}>
                     <Globe size={16} /> Website
                   </button>
                 )}
                 {displayData['Address'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('map')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('map')}>
                     <MapPin size={16} /> View on Map
                   </button>
                 )}
                 {!isEditing && (
-                  <button
-                    className="btn btn-primary btn-sm"
-                    onClick={() => setShowLogVisitModal(true)}
-                    style={{ marginLeft: 'auto' }}
-                  >
+                  <button className="btn btn-primary btn-sm lp-log-visit-btn" onClick={() => setShowLogVisitModal(true)}>
                     <Calendar size={16} /> Log Visit
                   </button>
                 )}
@@ -344,85 +279,45 @@ function LocationProfile({ onNavigate }) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ marginBottom: 'var(--spacing-md)' }}>
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--spacing-sm)',
-            borderBottom: '1px solid var(--border-color-default)',
-          }}
+      {/* Tabs — reuse cp-tab-bar system */}
+      <div className="cp-tab-bar">
+        <button
+          className={`cp-tab${activeTab === 'details' ? ' cp-tab--active' : ''}`}
+          onClick={() => setActiveTab('details')}
         >
-          <button
-            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-            onClick={() => setActiveTab('details')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom: activeTab === 'details' ? '2px solid var(--color-success)' : 'none',
-            }}
-          >
-            Details
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'visits' ? 'active' : ''}`}
-            onClick={() => setActiveTab('visits')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom: activeTab === 'visits' ? '2px solid var(--color-success)' : 'none',
-            }}
-          >
-            Visit History ({visits.length})
-          </button>
-        </div>
+          Details
+        </button>
+        <button
+          className={`cp-tab${activeTab === 'visits' ? ' cp-tab--active' : ''}`}
+          onClick={() => setActiveTab('visits')}
+        >
+          Visit History ({visits.length})
+        </button>
       </div>
 
       {/* Tab Content */}
       {activeTab === 'details' && (
         <div className="card">
           <div className="card-body">
-            <h3 style={{ marginBottom: 'var(--spacing-md)' }}>Location Details</h3>
+            <h3 className="lp-section-title">Location Details</h3>
 
-            <div
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}
-            >
+            <div className="lp-details-grid">
               {/* Contact Information */}
               <div>
-                <h4
-                  style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}
-                >
-                  Contact Information
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                <h4 className="lp-subsection-title">Contact Information</h4>
+                <div className="op-field-stack">
                   <div>
                     <label className="form-label">Address</label>
                     {isEditing ? (
-                      <textarea
-                        className="form-textarea"
-                        value={editData['Address'] || ''}
-                        onChange={(e) => handleChange('Address', e.target.value)}
-                        rows={3}
-                      />
+                      <textarea className="form-textarea" value={editData['Address'] || ''} onChange={(e) => handleChange('Address', e.target.value)} rows={3} />
                     ) : (
-                      <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                        {displayData['Address'] || 'Not provided'}
-                      </p>
+                      <p className="text-muted lp-pre-line">{displayData['Address'] || 'Not provided'}</p>
                     )}
                   </div>
                   <div>
                     <label className="form-label">Phone</label>
                     {isEditing ? (
-                      <input
-                        type="tel"
-                        className="form-input"
-                        value={editData['Phone'] || ''}
-                        onChange={(e) => handleChange('Phone', e.target.value)}
-                      />
+                      <input type="tel" className="form-input" value={editData['Phone'] || ''} onChange={(e) => handleChange('Phone', e.target.value)} />
                     ) : (
                       <p className="text-muted">{displayData['Phone'] || 'Not provided'}</p>
                     )}
@@ -430,25 +325,12 @@ function LocationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Website</label>
                     {isEditing ? (
-                      <input
-                        type="url"
-                        className="form-input"
-                        value={editData['Website'] || ''}
-                        onChange={(e) => handleChange('Website', e.target.value)}
-                      />
+                      <input type="url" className="form-input" value={editData['Website'] || ''} onChange={(e) => handleChange('Website', e.target.value)} />
                     ) : (
                       <p className="text-muted">
                         {displayData['Website'] ? (
-                          <a
-                            href={displayData['Website']}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {displayData['Website']}
-                          </a>
-                        ) : (
-                          'Not provided'
-                        )}
+                          <a href={displayData['Website']} target="_blank" rel="noopener noreferrer">{displayData['Website']}</a>
+                        ) : 'Not provided'}
                       </p>
                     )}
                   </div>
@@ -457,20 +339,12 @@ function LocationProfile({ onNavigate }) {
 
               {/* Location Details */}
               <div>
-                <h4
-                  style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}
-                >
-                  Details
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                <h4 className="lp-subsection-title">Details</h4>
+                <div className="op-field-stack">
                   <div>
                     <label className="form-label">Type</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Type'] || ''}
-                        onChange={(e) => handleChange('Type', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Type'] || ''} onChange={(e) => handleChange('Type', e.target.value)}>
                         <option value="Office">Office</option>
                         <option value="Store">Store</option>
                         <option value="Restaurant">Restaurant</option>
@@ -487,11 +361,7 @@ function LocationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Priority</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Priority'] || ''}
-                        onChange={(e) => handleChange('Priority', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Priority'] || ''} onChange={(e) => handleChange('Priority', e.target.value)}>
                         <option value="Urgent">Urgent</option>
                         <option value="High">High</option>
                         <option value="Medium">Medium</option>
@@ -505,11 +375,7 @@ function LocationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Status</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Status'] || ''}
-                        onChange={(e) => handleChange('Status', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Status'] || ''} onChange={(e) => handleChange('Status', e.target.value)}>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                         <option value="Closed">Closed</option>
@@ -521,13 +387,7 @@ function LocationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Capacity</label>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editData['Capacity'] || ''}
-                        onChange={(e) => handleChange('Capacity', e.target.value)}
-                        placeholder="Max occupancy (e.g., 100 people)"
-                      />
+                      <input type="text" className="form-input" value={editData['Capacity'] || ''} onChange={(e) => handleChange('Capacity', e.target.value)} placeholder="Max occupancy (e.g., 100 people)" />
                     ) : (
                       <p className="text-muted">{displayData['Capacity'] || 'Not specified'}</p>
                     )}
@@ -537,68 +397,36 @@ function LocationProfile({ onNavigate }) {
             </div>
 
             {/* Operations */}
-            <div style={{ marginTop: 'var(--spacing-lg)' }}>
-              <h4 style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}>
-                Operations
-              </h4>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 'var(--spacing-lg)',
-                }}
-              >
+            <div className="lp-operations">
+              <h4 className="lp-subsection-title">Operations</h4>
+              <div className="lp-details-grid">
                 <div>
                   <label className="form-label">Business Hours</label>
                   {isEditing ? (
-                    <textarea
-                      className="form-textarea"
-                      value={editData['Business Hours'] || ''}
-                      onChange={(e) => handleChange('Business Hours', e.target.value)}
-                      rows={4}
-                      placeholder="Mon-Fri: 9am-5pm&#10;Sat: 10am-2pm&#10;Sun: Closed"
-                    />
+                    <textarea className="form-textarea" value={editData['Business Hours'] || ''} onChange={(e) => handleChange('Business Hours', e.target.value)} rows={4} placeholder="Mon-Fri: 9am-5pm&#10;Sat: 10am-2pm&#10;Sun: Closed" />
                   ) : (
-                    <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                      {displayData['Business Hours'] || 'Not specified'}
-                    </p>
+                    <p className="text-muted lp-pre-line">{displayData['Business Hours'] || 'Not specified'}</p>
                   )}
                 </div>
                 <div>
                   <label className="form-label">Accessibility Notes</label>
                   {isEditing ? (
-                    <textarea
-                      className="form-textarea"
-                      value={editData['Accessibility Notes'] || ''}
-                      onChange={(e) => handleChange('Accessibility Notes', e.target.value)}
-                      rows={4}
-                      placeholder="Wheelchair accessible, elevator available, etc."
-                    />
+                    <textarea className="form-textarea" value={editData['Accessibility Notes'] || ''} onChange={(e) => handleChange('Accessibility Notes', e.target.value)} rows={4} placeholder="Wheelchair accessible, elevator available, etc." />
                   ) : (
-                    <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                      {displayData['Accessibility Notes'] || 'Not specified'}
-                    </p>
+                    <p className="text-muted lp-pre-line">{displayData['Accessibility Notes'] || 'Not specified'}</p>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Notes and Tags */}
-            <div style={{ marginTop: 'var(--spacing-lg)' }}>
-              <h4 style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}>
-                Additional Information
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="lp-additional-info">
+              <h4 className="lp-subsection-title">Additional Information</h4>
+              <div className="op-field-stack">
                 <div>
                   <label className="form-label">Tags</label>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={editData['Tags'] || ''}
-                      onChange={(e) => handleChange('Tags', e.target.value)}
-                      placeholder="downtown, accessible, parking"
-                    />
+                    <input type="text" className="form-input" value={editData['Tags'] || ''} onChange={(e) => handleChange('Tags', e.target.value)} placeholder="downtown, accessible, parking" />
                   ) : (
                     <p className="text-muted">{displayData['Tags'] || 'No tags'}</p>
                   )}
@@ -606,16 +434,9 @@ function LocationProfile({ onNavigate }) {
                 <div>
                   <label className="form-label">Notes</label>
                   {isEditing ? (
-                    <textarea
-                      className="form-textarea"
-                      value={editData['Notes'] || ''}
-                      onChange={(e) => handleChange('Notes', e.target.value)}
-                      rows={6}
-                    />
+                    <textarea className="form-textarea" value={editData['Notes'] || ''} onChange={(e) => handleChange('Notes', e.target.value)} rows={6} />
                   ) : (
-                    <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                      {displayData['Notes'] || 'No notes'}
-                    </p>
+                    <p className="text-muted lp-pre-line">{displayData['Notes'] || 'No notes'}</p>
                   )}
                 </div>
               </div>
@@ -627,14 +448,7 @@ function LocationProfile({ onNavigate }) {
       {activeTab === 'visits' && (
         <div className="card">
           <div className="card-body">
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 'var(--spacing-md)',
-              }}
-            >
+            <div className="lp-visits-header">
               <h3>Visit History</h3>
               <button className="btn btn-primary btn-sm" onClick={() => setShowLogVisitModal(true)}>
                 <Calendar size={16} /> Log Visit
@@ -644,48 +458,24 @@ function LocationProfile({ onNavigate }) {
             {visits.length === 0 ? (
               <p className="text-muted">No visits logged yet</p>
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+              <div className="tl-item-list">
                 {visits.map((visit, index) => (
-                  <div
-                    key={index}
-                    style={{
-                      padding: 'var(--spacing-md)',
-                      border: '1px solid var(--border-color-default)',
-                      borderRadius: 'var(--radius-md)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: 'var(--spacing-xs)',
-                      }}
-                    >
+                  <div key={index} className="lp-visit-item">
+                    <div className="lp-visit-row">
                       <strong>{visit['Purpose'] || 'Visit'}</strong>
                       <span className="text-muted">{visit['Date']}</span>
                     </div>
                     {visit['Duration'] && (
-                      <p className="text-muted" style={{ marginBottom: 'var(--spacing-xs)' }}>
-                        Duration: {visit['Duration']}
-                      </p>
+                      <p className="text-muted lp-visit-meta">Duration: {visit['Duration']}</p>
                     )}
                     {visit['Contact ID'] && (
-                      <p className="text-muted" style={{ marginBottom: 'var(--spacing-xs)' }}>
-                        Contact: {visit['Contact ID']}
-                      </p>
+                      <p className="text-muted lp-visit-meta">Contact: {visit['Contact ID']}</p>
                     )}
                     {visit['Notes'] && (
-                      <p style={{ marginTop: 'var(--spacing-xs)' }}>{visit['Notes']}</p>
+                      <p className="lp-visit-notes">{visit['Notes']}</p>
                     )}
                     {visit['Follow-up Needed'] === 'Yes' && (
-                      <div
-                        style={{
-                          marginTop: 'var(--spacing-xs)',
-                          padding: 'var(--spacing-xs)',
-                          background: 'rgba(217, 119, 6, 0.1)',
-                          borderRadius: 'var(--radius-sm)',
-                        }}
-                      >
+                      <div className="lp-followup-badge">
                         <strong>Follow-up needed</strong>
                         {visit['Follow-up Date'] && ` by ${visit['Follow-up Date']}`}
                       </div>
@@ -763,33 +553,10 @@ function LogVisitModal({ isOpen, onClose, locationId, locationName, onVisitLogge
   if (!isOpen) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-      }}
-    >
-      <div
-        className="card"
-        style={{ width: '90%', maxWidth: '600px', maxHeight: '90vh', overflow: 'auto' }}
-      >
+    <div className="tl-modal-overlay">
+      <div className="card lp-modal-card">
         <div className="card-body">
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
+          <div className="lp-modal-header">
             <h3>Log Visit to {locationName}</h3>
             <button className="btn btn-ghost btn-sm" onClick={onClose}>
               <X size={20} />
@@ -797,7 +564,7 @@ function LogVisitModal({ isOpen, onClose, locationId, locationName, onVisitLogge
           </div>
 
           <form onSubmit={handleSubmit}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="lp-modal-form">
               <div>
                 <label className="form-label">Date</label>
                 <input
@@ -883,14 +650,7 @@ function LogVisitModal({ isOpen, onClose, locationId, locationName, onVisitLogge
                 </div>
               )}
 
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-sm)',
-                  justifyContent: 'flex-end',
-                  marginTop: 'var(--spacing-md)',
-                }}
-              >
+              <div className="lp-modal-footer">
                 <button type="button" className="btn btn-ghost" onClick={onClose} disabled={saving}>
                   Cancel
                 </button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   AlertTriangle,
   Settings,
@@ -352,91 +352,33 @@ function SettingsPage({ onShowSetup, onNavigate }) {
     !!user && !!accessToken && sheetsStatus.connected && !!config.personalSheetId;
 
   return (
-    <div
-      className="page-container"
-      style={{ maxWidth: '800px', margin: '0 auto', padding: 'var(--spacing-lg)' }}
-    >
-      <div style={{ marginBottom: 'var(--spacing-xl)' }}>
-        <h1
-          style={{
-            fontSize: 'var(--font-size-2xl)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-xs)',
-          }}
-        >
-          <Settings
-            size={24}
-            style={{ marginRight: 'var(--spacing-sm)', verticalAlign: 'middle' }}
-          />
+    <div className="page-container sp-page">
+      <div className="sp-heading">
+        <h1 className="sp-title">
+          <Settings size={24} className="sp-title-icon" />
           Settings
         </h1>
-        <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-base)' }}>
-          Manage your account, connection, and application settings.
-        </p>
+        <p className="sp-subtitle">Manage your account, connection, and application settings.</p>
       </div>
 
       {/* Account Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <User size={18} />
           Account
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 'var(--spacing-sm) 0',
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-              Email
-            </span>
-            <span
-              style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}
-            >
-              {user?.email || 'Not signed in'}
-            </span>
+        <div className="sp-field-list">
+          <div className="sp-field-row sp-field-row--bordered">
+            <span className="sp-field-label">Email</span>
+            <span className="sp-field-value">{user?.email || 'Not signed in'}</span>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 'var(--spacing-sm) 0',
-            }}
-          >
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-              Display Name
-            </span>
-            <span
-              style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}
-            >
-              {user?.displayName || 'Not set'}
-            </span>
+          <div className="sp-field-row">
+            <span className="sp-field-label">Display Name</span>
+            <span className="sp-field-value">{user?.displayName || 'Not set'}</span>
           </div>
         </div>
         {user && (
-          <div style={{ marginTop: 'var(--spacing-md)' }}>
+          <div className="sp-section-actions">
             <button
               className="btn btn-secondary btn-sm"
               onClick={() => setShowSignOutConfirm(true)}
@@ -448,61 +390,29 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       </section>
 
       {/* Connection Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <Database size={18} />
           Connection
         </h2>
 
         {/* Overall status banner */}
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            borderRadius: 'var(--radius-md)',
-            marginBottom: 'var(--spacing-md)',
-            background: allConnected
-              ? 'var(--color-success-bg, rgba(34, 197, 94, 0.1))'
-              : 'var(--color-warning-bg)',
-            border: `1px solid ${allConnected ? 'var(--color-success)' : 'var(--color-warning)'}`,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-            fontSize: 'var(--font-size-sm)',
-            fontWeight: 'var(--font-weight-medium)',
-          }}
-        >
+        <div className={`sp-status-banner${allConnected ? ' sp-status-banner--ok' : ' sp-status-banner--warn'}`}>
           {allConnected ? (
             <>
-              <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
+              <CheckCircle size={16} className="sp-icon-success" />
               All systems connected
             </>
           ) : (
             <>
-              <AlertTriangle size={16} style={{ color: 'var(--color-warning)' }} />
+              <AlertTriangle size={16} className="sp-icon-warn" />
               Connection issues detected
             </>
           )}
         </div>
 
         {/* Three-item checklist */}
-        <div style={{ marginBottom: 'var(--spacing-md)' }}>
+        <div className="sp-checklist">
           {[
             {
               label: 'Google Account',
@@ -529,37 +439,17 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                   : 'Sheet not found',
             },
           ].map((check) => (
-            <div
-              key={check.label}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 'var(--spacing-sm)',
-                padding: 'var(--spacing-sm) 0',
-                borderBottom: '1px solid var(--color-border)',
-              }}
-            >
+            <div key={check.label} className="sp-check-row">
               {check.loading ? (
-                <Loader
-                  size={16}
-                  className="spinner"
-                  style={{ color: 'var(--color-text-muted)' }}
-                />
+                <Loader size={16} className="spinner sp-icon-muted" />
               ) : check.passed ? (
-                <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
+                <CheckCircle size={16} className="sp-icon-success" />
               ) : (
-                <XCircle size={16} style={{ color: 'var(--color-error)' }} />
+                <XCircle size={16} className="sp-icon-error" />
               )}
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: 'var(--font-weight-medium)',
-                  }}
-                >
-                  {check.label}
-                </div>
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div className="sp-check-body">
+                <div className="sp-check-label">{check.label}</div>
+                <div className="sp-check-detail">
                   {check.loading ? 'Checking...' : check.detail}
                 </div>
               </div>
@@ -569,28 +459,12 @@ function SettingsPage({ onShowSetup, onNavigate }) {
 
         {/* Token expiry */}
         {sheetsStatus.tokenExpiresIn !== undefined && (
-          <div
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color:
-                sheetsStatus.tokenExpiresIn < 10
-                  ? 'var(--color-warning)'
-                  : 'var(--color-text-muted)',
-              padding: 'var(--spacing-sm) 0',
-            }}
-          >
+          <div className={`sp-token-expiry${sheetsStatus.tokenExpiresIn < 10 ? ' sp-token-expiry--warn' : ''}`}>
             Session expires in {sheetsStatus.tokenExpiresIn} minutes
           </div>
         )}
 
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--spacing-sm)',
-            marginTop: 'var(--spacing-md)',
-            flexWrap: 'wrap',
-          }}
-        >
+        <div className="sp-btn-group">
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => onShowSetup?.()}
@@ -614,41 +488,17 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       </section>
 
       {/* Data Management Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <Database size={18} />
           Data Management
         </h2>
-        <p
-          style={{
-            color: 'var(--color-text-secondary)',
-            fontSize: 'var(--font-size-sm)',
-            marginBottom: 'var(--spacing-md)',
-          }}
-        >
+        <p className="sp-section-desc">
           Protect your data with backups and monitor your database health.
         </p>
         <button
-          className="btn btn-secondary btn-sm"
+          className="btn btn-secondary btn-sm sp-icon-btn"
           onClick={() => onNavigate?.('backup')}
-          style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
         >
           <Download size={16} />
           Backup & Restore
@@ -656,83 +506,26 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       </section>
 
       {/* Folder Migration Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <FolderSync size={18} />
           Folder Organization
         </h2>
-        <p
-          style={{
-            color: 'var(--color-text-secondary)',
-            fontSize: 'var(--font-size-sm)',
-            marginBottom: 'var(--spacing-md)',
-          }}
-        >
+        <p className="sp-section-desc">
           All Folkbase sheets should be in the &quot;Folkbase&quot; folder in your Google
           Drive. Scan for sheets outside the folder and migrate them.
         </p>
 
         {migrationStatus.error && (
-          <div
-            style={{
-              padding: 'var(--spacing-sm)',
-              background: 'var(--color-error-bg)',
-              border: '1px solid var(--color-error)',
-              borderRadius: 'var(--radius-md)',
-              color: 'var(--color-error-text)',
-              fontSize: 'var(--font-size-sm)',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            {migrationStatus.error}
-          </div>
+          <div className="sp-error-box">{migrationStatus.error}</div>
         )}
 
         {migrationStatus.sheets.length > 0 && (
-          <div
-            style={{
-              padding: 'var(--spacing-md)',
-              background: 'var(--color-warning-bg)',
-              border: '1px solid var(--color-warning)',
-              borderRadius: 'var(--radius-md)',
-              marginBottom: 'var(--spacing-md)',
-            }}
-          >
-            <p
-              style={{
-                color: 'var(--color-warning-text)',
-                fontSize: 'var(--font-size-sm)',
-                marginBottom: 'var(--spacing-sm)',
-                fontWeight: 'var(--font-weight-semibold)',
-              }}
-            >
+          <div className="sp-warning-box">
+            <p className="sp-warning-box-title">
               Found {migrationStatus.sheets.length} sheet(s) outside the folder:
             </p>
-            <ul
-              style={{
-                margin: 0,
-                paddingLeft: '20px',
-                color: 'var(--color-warning-text)',
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
+            <ul className="sp-warning-box-list">
               {migrationStatus.sheets.map((sheet) => (
                 <li key={sheet.id}>{sheet.name}</li>
               ))}
@@ -740,12 +533,11 @@ function SettingsPage({ onShowSetup, onNavigate }) {
           </div>
         )}
 
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+        <div className="sp-btn-group">
           <button
-            className="btn btn-secondary btn-sm"
+            className="btn btn-secondary btn-sm sp-icon-btn"
             onClick={handleScanForSheets}
             disabled={migrationStatus.scanning || migrationStatus.migrating || !accessToken}
-            style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
           >
             {migrationStatus.scanning ? (
               <>
@@ -762,10 +554,9 @@ function SettingsPage({ onShowSetup, onNavigate }) {
 
           {migrationStatus.sheets.length > 0 && (
             <button
-              className="btn btn-primary btn-sm"
+              className="btn btn-primary btn-sm sp-icon-btn"
               onClick={handleMigrateSheets}
               disabled={migrationStatus.migrating}
-              style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
             >
               {migrationStatus.migrating ? (
                 <>
@@ -784,35 +575,16 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       </section>
 
       {/* API Status Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <Activity size={18} />
           API Status
         </h2>
 
         {serviceStatuses.length === 0 ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            No API services registered yet.
-          </p>
+          <p className="sp-muted-sm">No API services registered yet.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+          <div className="sp-service-list">
             {serviceStatuses.map((service) => {
               const status = service.rateStatus?.status || 'unknown';
               const statusColor =
@@ -825,52 +597,16 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                       : 'var(--color-text-muted)';
 
               return (
-                <div
-                  key={service.id}
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    padding: 'var(--spacing-sm) var(--spacing-md)',
-                    background: 'var(--color-bg-primary)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border)',
-                  }}
-                >
+                <div key={service.id} className="sp-service-row">
                   <div>
-                    <div
-                      style={{
-                        fontSize: 'var(--font-size-sm)',
-                        fontWeight: 'var(--font-weight-medium)',
-                      }}
-                    >
-                      {service.name}
-                    </div>
-                    <div
-                      style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}
-                    >
+                    <div className="sp-service-name">{service.name}</div>
+                    <div className="sp-service-meta">
                       {service.quotas?.length || 0} quota{service.quotas?.length !== 1 ? 's' : ''}{' '}
                       tracked
                     </div>
                   </div>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-xs)',
-                      fontSize: 'var(--font-size-sm)',
-                      color: statusColor,
-                      fontWeight: 'var(--font-weight-medium)',
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: statusColor,
-                      }}
-                    />
+                  <div className="sp-service-status" style={{ color: statusColor }}>
+                    <div className="sp-service-dot" style={{ background: statusColor }} />
                     {status === 'safe'
                       ? 'Healthy'
                       : status === 'warning'
@@ -887,222 +623,75 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       </section>
 
       {/* Data Health Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
           <Database size={18} />
           Data Health
         </h2>
 
         {loadingHealth ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            Loading data health metrics...
-          </p>
+          <p className="sp-muted-sm">Loading data health metrics...</p>
         ) : !dataHealth ? (
-          <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)' }}>
-            Connect your Google Sheet to view data health metrics.
-          </p>
+          <p className="sp-muted-sm">Connect your Google Sheet to view data health metrics.</p>
         ) : (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-              gap: 'var(--spacing-md)',
-            }}
-          >
+          <div className="sp-health-grid">
             {/* Total Records Card */}
-            <div
-              className="card"
-              style={{
-                padding: 'var(--spacing-md)',
-                background: 'var(--color-bg-primary)',
-                border: '1px solid var(--color-border)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-sm)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
-                <Database size={16} style={{ color: 'var(--color-text-muted)' }} />
-                <span
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    fontWeight: 'var(--font-weight-medium)',
-                  }}
-                >
-                  Records
-                </span>
+            <div className="card sp-health-card">
+              <div className="sp-health-card-label">
+                <Database size={16} className="sp-icon-muted" />
+                <span className="sp-health-card-label-text">Records</span>
               </div>
-              <div
-                style={{
-                  fontSize: '2rem',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
+              <div className="sp-health-card-value">
                 {Object.values(dataHealth.entityCounts)
                   .reduce((sum, count) => sum + count, 0)
                   .toLocaleString()}
               </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                Total records
-              </div>
+              <div className="sp-health-card-sub">Total records</div>
             </div>
 
             {/* Storage Card */}
-            <div
-              className="card"
-              style={{
-                padding: 'var(--spacing-md)',
-                background: 'var(--color-bg-primary)',
-                border: '1px solid var(--color-border)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-sm)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
-                <HardDrive size={16} style={{ color: 'var(--color-text-muted)' }} />
-                <span
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    fontWeight: 'var(--font-weight-medium)',
-                  }}
-                >
-                  Storage
-                </span>
+            <div className="card sp-health-card">
+              <div className="sp-health-card-label">
+                <HardDrive size={16} className="sp-icon-muted" />
+                <span className="sp-health-card-label-text">Storage</span>
               </div>
-              <div
-                style={{
-                  fontSize: '2rem',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
+              <div className="sp-health-card-value">
                 {dataHealth.storageEstimate.percentage.toFixed(1)}%
               </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div className="sp-health-card-sub">
                 {dataHealth.storageEstimate.cellsUsed.toLocaleString()} /{' '}
                 {(dataHealth.storageEstimate.cellLimit / 1000000).toFixed(0)}M cells
               </div>
             </div>
 
             {/* API Usage Card */}
-            <div
-              className="card"
-              style={{
-                padding: 'var(--spacing-md)',
-                background: 'var(--color-bg-primary)',
-                border: '1px solid var(--color-border)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-sm)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
-                <Activity size={16} style={{ color: 'var(--color-text-muted)' }} />
-                <span
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    fontWeight: 'var(--font-weight-medium)',
-                  }}
-                >
-                  API Usage
-                </span>
+            <div className="card sp-health-card">
+              <div className="sp-health-card-label">
+                <Activity size={16} className="sp-icon-muted" />
+                <span className="sp-health-card-label-text">API Usage</span>
               </div>
-              <div
-                style={{
-                  fontSize: '2rem',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
+              <div className="sp-health-card-value">
                 {dataHealth.apiUsage?.windows?.['100seconds']?.calls || 0}
               </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                Calls (last 100s)
-              </div>
+              <div className="sp-health-card-sub">Calls (last 100s)</div>
             </div>
 
             {/* Integrity Card */}
-            <div
-              className="card"
-              style={{
-                padding: 'var(--spacing-md)',
-                background: 'var(--color-bg-primary)',
-                border: '1px solid var(--color-border)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-sm)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
+            <div className="card sp-health-card">
+              <div className="sp-health-card-label">
                 {dataHealth.integrityIssues.length === 0 ? (
-                  <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
+                  <CheckCircle size={16} className="sp-icon-success" />
                 ) : (
-                  <AlertTriangle size={16} style={{ color: 'var(--color-warning)' }} />
+                  <AlertTriangle size={16} className="sp-icon-warn" />
                 )}
-                <span
-                  style={{
-                    fontSize: 'var(--font-size-xs)',
-                    color: 'var(--color-text-muted)',
-                    textTransform: 'uppercase',
-                    fontWeight: 'var(--font-weight-medium)',
-                  }}
-                >
-                  Integrity
-                </span>
+                <span className="sp-health-card-label-text">Integrity</span>
               </div>
-              <div
-                style={{
-                  fontSize: '2rem',
-                  fontWeight: 'var(--font-weight-bold)',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
+              <div className="sp-health-card-value">
                 {dataHealth.integrityIssues.length === 0
                   ? 'Healthy'
                   : dataHealth.integrityIssues.length}
               </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div className="sp-health-card-sub">
                 {dataHealth.integrityIssues.length === 0
                   ? 'No issues found'
                   : `Issue${dataHealth.integrityIssues.length !== 1 ? 's' : ''} detected`}
@@ -1116,150 +705,168 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       <CacheConfigSection />
 
       {/* Calendar Sync Section */}
-      <section
-          style={{
-            background: 'var(--color-bg-elevated)',
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--color-border)',
-            padding: 'var(--spacing-lg)',
-            marginBottom: 'var(--spacing-lg)',
-          }}
-        >
-          <h2
-            style={{
-              fontSize: 'var(--font-size-lg)',
-              fontWeight: 'var(--font-weight-semibold)',
-              marginBottom: 'var(--spacing-md)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-sm)',
-            }}
-          >
-            <Calendar size={18} />
-            Google Calendar Sync
-          </h2>
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
+          <Calendar size={18} />
+          Google Calendar Sync
+        </h2>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-            <p style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-              Sync CRM events with your Google Calendar. Your personal calendar events can be
-              imported as CRM events or touchpoints.
-            </p>
+        <div className="sp-cal-body">
+          <p className="sp-section-desc">
+            Sync CRM events with your Google Calendar. Your personal calendar events can be
+            imported as CRM events or touchpoints.
+          </p>
 
-            {!calendarAccess ? (
-              <div>
-                <button
-                  onClick={async () => {
-                    setRequestingCalendarAccess(true);
-                    try {
-                      await requestCalendarAccess();
-                      setCalendarAccess(true);
-                      notify('Calendar access granted', 'success');
-                    } catch (error) {
-                      notify('Failed to connect calendar: ' + error.message, 'error');
-                    } finally {
-                      setRequestingCalendarAccess(false);
-                    }
-                  }}
-                  disabled={requestingCalendarAccess}
-                  className="btn btn-primary"
-                  style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-                >
-                  {requestingCalendarAccess ? (
-                    <Loader size={16} className="spin" />
-                  ) : (
-                    <Calendar size={16} />
-                  )}
-                  {requestingCalendarAccess ? 'Connecting...' : 'Connect Google Calendar'}
-                </button>
-                <p
-                  style={{
-                    color: 'var(--color-text-secondary)',
-                    fontSize: 'var(--font-size-xs)',
-                    marginTop: 'var(--spacing-xs)',
-                  }}
-                >
-                  This will open a popup to grant calendar access. Your existing permissions remain
-                  unchanged.
-                </p>
+          {!calendarAccess ? (
+            <div>
+              <button
+                onClick={async () => {
+                  setRequestingCalendarAccess(true);
+                  try {
+                    await requestCalendarAccess();
+                    setCalendarAccess(true);
+                    notify('Calendar access granted', 'success');
+                  } catch (error) {
+                    notify('Failed to connect calendar: ' + error.message, 'error');
+                  } finally {
+                    setRequestingCalendarAccess(false);
+                  }
+                }}
+                disabled={requestingCalendarAccess}
+                className="btn btn-primary sp-icon-btn"
+              >
+                {requestingCalendarAccess ? (
+                  <Loader size={16} className="spin" />
+                ) : (
+                  <Calendar size={16} />
+                )}
+                {requestingCalendarAccess ? 'Connecting...' : 'Connect Google Calendar'}
+              </button>
+              <p className="sp-cal-hint">
+                This will open a popup to grant calendar access. Your existing permissions remain
+                unchanged.
+              </p>
+            </div>
+          ) : (
+            <div className="sp-cal-settings">
+              <div className="sp-cal-connected">
+                <CheckCircle size={16} className="sp-icon-success" />
+                <span className="sp-cal-connected-label">Calendar Connected</span>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
-                  <CheckCircle size={16} style={{ color: 'var(--color-success)' }} />
-                  <span
-                    style={{
-                      fontSize: 'var(--font-size-sm)',
-                      fontWeight: 'var(--font-weight-medium)',
-                    }}
-                  >
-                    Calendar Connected
-                  </span>
-                </div>
 
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-md)',
-                    padding: 'var(--spacing-sm) 0',
+              <div className="sp-cal-toggle-row">
+                <label className="sp-cal-setting-label">Enable Sync</label>
+                <input
+                  type="checkbox"
+                  checked={calendarSettings.enabled}
+                  onChange={(e) => {
+                    const newSettings = { ...calendarSettings, enabled: e.target.checked };
+                    setCalendarSettings(newSettings);
+                    localStorage.setItem(
+                      'touchpoint_calendar_settings',
+                      JSON.stringify(newSettings)
+                    );
                   }}
-                >
-                  <label
-                    style={{
-                      fontSize: 'var(--font-size-sm)',
-                      color: 'var(--color-text-secondary)',
-                    }}
-                  >
-                    Enable Sync
-                  </label>
-                  <input
-                    type="checkbox"
-                    checked={calendarSettings.enabled}
-                    onChange={(e) => {
-                      const newSettings = { ...calendarSettings, enabled: e.target.checked };
-                      setCalendarSettings(newSettings);
-                      localStorage.setItem(
-                        'touchpoint_calendar_settings',
-                        JSON.stringify(newSettings)
-                      );
-                    }}
-                    style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                  />
-                </div>
+                  className="sp-cal-checkbox"
+                />
+              </div>
 
-                {calendarSettings.enabled && (
-                  <>
-                    {/* Calendar Selector */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 'var(--spacing-xs)',
-                        paddingLeft: 'var(--spacing-md)',
-                      }}
-                    >
-                      <label
-                        style={{
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
+              {calendarSettings.enabled && (
+                <>
+                  {/* Calendar Selector */}
+                  <div className="sp-cal-subsection">
+                    <label className="sp-cal-setting-label">Which Calendar to Sync</label>
+                    {loadingCalendars ? (
+                      <div className="sp-cal-loading">
+                        <Loader size={14} className="spin" />
+                        <span className="sp-cal-loading-text">Loading calendars...</span>
+                      </div>
+                    ) : (
+                      <select
+                        value={calendarSettings.selectedCalendarId}
+                        onChange={(e) => {
+                          const newSettings = {
+                            ...calendarSettings,
+                            selectedCalendarId: e.target.value,
+                          };
+                          setCalendarSettings(newSettings);
+                          localStorage.setItem(
+                            'touchpoint_calendar_settings',
+                            JSON.stringify(newSettings)
+                          );
                         }}
+                        className="form-select sp-cal-select"
                       >
-                        Which Calendar to Sync
-                      </label>
-                      {loadingCalendars ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
-                          <Loader size={14} className="spin" />
-                          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                            Loading calendars...
-                          </span>
-                        </div>
+                        {calendars.map((cal) => (
+                          <option key={cal.id} value={cal.id}>
+                            {cal.summary} {cal.primary ? '(Primary)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {/* Sync Status */}
+                  {syncStatus.lastSyncedAt && (
+                    <div className="sp-cal-sync-status">
+                      <div className="sp-cal-sync-row">
+                        <CheckCircle size={14} className="sp-icon-success" />
+                        <span className="sp-cal-sync-text">
+                          Last synced: {new Date(syncStatus.lastSyncedAt).toLocaleString()}
+                        </span>
+                      </div>
+                      <span className="sp-cal-sync-text">
+                        Pushed {syncStatus.lastPushed} events, pulled {syncStatus.lastPulled} updates
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Manual Sync Button */}
+                  <div className="sp-cal-subsection">
+                    <button
+                      onClick={handleManualSync}
+                      disabled={syncStatus.syncing}
+                      className="btn btn-secondary btn-sm sp-icon-btn"
+                    >
+                      {syncStatus.syncing ? (
+                        <Loader size={14} className="spin" />
                       ) : (
+                        <FolderSync size={14} />
+                      )}
+                      {syncStatus.syncing ? 'Syncing...' : 'Sync Now'}
+                    </button>
+                  </div>
+
+                  {/* Auto-Sync Settings */}
+                  <div className="sp-cal-subsection">
+                    <div className="sp-cal-toggle-row">
+                      <label className="sp-cal-setting-label">Auto-Sync</label>
+                      <input
+                        type="checkbox"
+                        checked={calendarSettings.autoSync}
+                        onChange={(e) => {
+                          const newSettings = { ...calendarSettings, autoSync: e.target.checked };
+                          setCalendarSettings(newSettings);
+                          localStorage.setItem(
+                            'touchpoint_calendar_settings',
+                            JSON.stringify(newSettings)
+                          );
+                        }}
+                        className="sp-cal-checkbox"
+                      />
+                    </div>
+
+                    {calendarSettings.autoSync && (
+                      <div>
+                        <label className="sp-cal-setting-label sp-cal-setting-label--block">
+                          Sync Interval
+                        </label>
                         <select
-                          value={calendarSettings.selectedCalendarId}
+                          value={calendarSettings.autoSyncInterval}
                           onChange={(e) => {
                             const newSettings = {
                               ...calendarSettings,
-                              selectedCalendarId: e.target.value,
+                              autoSyncInterval: parseInt(e.target.value),
                             };
                             setCalendarSettings(newSettings);
                             localStorage.setItem(
@@ -1267,259 +874,65 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                               JSON.stringify(newSettings)
                             );
                           }}
-                          style={{
-                            padding: 'var(--spacing-xs) var(--spacing-sm)',
-                            borderRadius: 'var(--radius-md)',
-                            border: '1px solid var(--color-border)',
-                            background: 'var(--color-bg-primary)',
-                            fontSize: 'var(--font-size-sm)',
-                            width: '300px',
-                          }}
+                          className="form-select sp-cal-select--sm"
                         >
-                          {calendars.map((cal) => (
-                            <option key={cal.id} value={cal.id}>
-                              {cal.summary} {cal.primary ? '(Primary)' : ''}
-                            </option>
-                          ))}
+                          <option value="15">Every 15 minutes</option>
+                          <option value="30">Every 30 minutes</option>
+                          <option value="60">Every hour</option>
                         </select>
-                      )}
-                    </div>
-
-                    {/* Sync Status */}
-                    {syncStatus.lastSyncedAt && (
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: 'var(--spacing-xs)',
-                          paddingLeft: 'var(--spacing-md)',
-                          padding: 'var(--spacing-sm)',
-                          background: 'var(--color-bg-secondary)',
-                          borderRadius: 'var(--radius-md)',
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
-                          <CheckCircle size={14} style={{ color: 'var(--color-success)' }} />
-                          <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                            Last synced: {new Date(syncStatus.lastSyncedAt).toLocaleString()}
-                          </span>
-                        </div>
-                        <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-secondary)' }}>
-                          Pushed {syncStatus.lastPushed} events, pulled {syncStatus.lastPulled} updates
-                        </span>
                       </div>
                     )}
-
-                    {/* Manual Sync Button */}
-                    <div style={{ paddingLeft: 'var(--spacing-md)' }}>
-                      <button
-                        onClick={handleManualSync}
-                        disabled={syncStatus.syncing}
-                        className="btn btn-secondary btn-sm"
-                        style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-                      >
-                        {syncStatus.syncing ? (
-                          <Loader size={14} className="spin" />
-                        ) : (
-                          <FolderSync size={14} />
-                        )}
-                        {syncStatus.syncing ? 'Syncing...' : 'Sync Now'}
-                      </button>
-                    </div>
-
-                    {/* Auto-Sync Settings */}
-                    <div
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 'var(--spacing-xs)',
-                        paddingLeft: 'var(--spacing-md)',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
-                        <label
-                          style={{
-                            fontSize: 'var(--font-size-sm)',
-                            color: 'var(--color-text-secondary)',
-                          }}
-                        >
-                          Auto-Sync
-                        </label>
-                        <input
-                          type="checkbox"
-                          checked={calendarSettings.autoSync}
-                          onChange={(e) => {
-                            const newSettings = { ...calendarSettings, autoSync: e.target.checked };
-                            setCalendarSettings(newSettings);
-                            localStorage.setItem(
-                              'touchpoint_calendar_settings',
-                              JSON.stringify(newSettings)
-                            );
-                          }}
-                          style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                        />
-                      </div>
-
-                      {calendarSettings.autoSync && (
-                        <div>
-                          <label
-                            style={{
-                              fontSize: 'var(--font-size-sm)',
-                              color: 'var(--color-text-secondary)',
-                              marginBottom: 'var(--spacing-xs)',
-                              display: 'block',
-                            }}
-                          >
-                            Sync Interval
-                          </label>
-                          <select
-                            value={calendarSettings.autoSyncInterval}
-                            onChange={(e) => {
-                              const newSettings = {
-                                ...calendarSettings,
-                                autoSyncInterval: parseInt(e.target.value),
-                              };
-                              setCalendarSettings(newSettings);
-                              localStorage.setItem(
-                                'touchpoint_calendar_settings',
-                                JSON.stringify(newSettings)
-                              );
-                            }}
-                            style={{
-                              padding: 'var(--spacing-xs) var(--spacing-sm)',
-                              borderRadius: 'var(--radius-md)',
-                              border: '1px solid var(--color-border)',
-                              background: 'var(--color-bg-primary)',
-                              fontSize: 'var(--font-size-sm)',
-                              width: '150px',
-                            }}
-                          >
-                            <option value="15">Every 15 minutes</option>
-                            <option value="30">Every 30 minutes</option>
-                            <option value="60">Every hour</option>
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {calendarSettings.enabled && (
-                  <div
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 'var(--spacing-xs)',
-                      paddingLeft: 'var(--spacing-md)',
-                    }}
-                  >
-                    <label
-                      style={{
-                        fontSize: 'var(--font-size-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      Conflict Resolution
-                    </label>
-                    <select
-                      value={calendarSettings.conflictResolution}
-                      onChange={(e) => {
-                        const newSettings = {
-                          ...calendarSettings,
-                          conflictResolution: e.target.value,
-                        };
-                        setCalendarSettings(newSettings);
-                        localStorage.setItem(
-                          'touchpoint_calendar_settings',
-                          JSON.stringify(newSettings)
-                        );
-                      }}
-                      style={{
-                        padding: 'var(--spacing-xs) var(--spacing-sm)',
-                        borderRadius: 'var(--radius-md)',
-                        border: '1px solid var(--color-border)',
-                        background: 'var(--color-bg-primary)',
-                        fontSize: 'var(--font-size-sm)',
-                        width: '200px',
-                      }}
-                    >
-                      <option value="prompt">Always Ask</option>
-                      <option value="crm">Keep CRM Version</option>
-                      <option value="calendar">Keep Calendar Version</option>
-                      <option value="latest">Keep Latest Edit</option>
-                    </select>
-                    <p
-                      style={{
-                        color: 'var(--color-text-secondary)',
-                        fontSize: 'var(--font-size-xs)',
-                      }}
-                    >
-                      How to handle conflicts when the same event is edited in both places
-                    </p>
                   </div>
-                )}
-              </div>
-            )}
-          </div>
-        </section>
+                </>
+              )}
+
+              {calendarSettings.enabled && (
+                <div className="sp-cal-subsection">
+                  <label className="sp-cal-setting-label">Conflict Resolution</label>
+                  <select
+                    value={calendarSettings.conflictResolution}
+                    onChange={(e) => {
+                      const newSettings = {
+                        ...calendarSettings,
+                        conflictResolution: e.target.value,
+                      };
+                      setCalendarSettings(newSettings);
+                      localStorage.setItem(
+                        'touchpoint_calendar_settings',
+                        JSON.stringify(newSettings)
+                      );
+                    }}
+                    className="form-select sp-cal-select--md"
+                  >
+                    <option value="prompt">Always Ask</option>
+                    <option value="crm">Keep CRM Version</option>
+                    <option value="calendar">Keep Calendar Version</option>
+                    <option value="latest">Keep Latest Edit</option>
+                  </select>
+                  <p className="sp-cal-conflict-hint">
+                    How to handle conflicts when the same event is edited in both places
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* About Section */}
-      <section
-        style={{
-          background: 'var(--color-bg-elevated)',
-          borderRadius: 'var(--radius-lg)',
-          border: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-        }}
-      >
-        <h2
-          style={{
-            fontSize: 'var(--font-size-lg)',
-            fontWeight: 'var(--font-weight-semibold)',
-            marginBottom: 'var(--spacing-md)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-sm)',
-          }}
-        >
+      <section className="sp-section sp-section--last">
+        <h2 className="sp-section-heading">
           <Info size={18} />
           About
         </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 'var(--spacing-sm) 0',
-              borderBottom: '1px solid var(--color-border)',
-            }}
-          >
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-              Application
-            </span>
-            <span
-              style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}
-            >
-              Folkbase
-            </span>
+        <div className="sp-field-list">
+          <div className="sp-field-row sp-field-row--bordered">
+            <span className="sp-field-label">Application</span>
+            <span className="sp-field-value">Folkbase</span>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: 'var(--spacing-sm) 0',
-            }}
-          >
-            <span style={{ color: 'var(--color-text-secondary)', fontSize: 'var(--font-size-sm)' }}>
-              Stack
-            </span>
-            <span
-              style={{ fontSize: 'var(--font-size-sm)', fontWeight: 'var(--font-weight-medium)' }}
-            >
-              React + Google Sheets + Google OAuth
-            </span>
+          <div className="sp-field-row">
+            <span className="sp-field-label">Stack</span>
+            <span className="sp-field-value">React + Google Sheets + Google OAuth</span>
           </div>
         </div>
       </section>

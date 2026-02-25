@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import ImportSourceSelector from '../components/import/ImportSourceSelector';
@@ -403,7 +403,7 @@ function ImportPage({ onNavigate }) {
               <p>Please wait while your contacts are being imported...</p>
               {progress && <ProgressTracker progress={progress} />}
               {progress?.canCancel && (
-                <div style={{ marginTop: 'var(--spacing-lg)', textAlign: 'center' }}>
+                <div className="import-cancel-row">
                   <button
                     className="btn btn-secondary"
                     onClick={handleCancelImport}

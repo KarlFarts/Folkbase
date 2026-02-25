@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -154,7 +154,7 @@ function AddEvent({ onNavigate }) {
         </div>
       </div>
 
-      <div className="card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+      <div className="card add-form-card add-form-card--lg">
         <div className="card-body">
           {success && (
             <div className="form-success-message">Event created successfully! Redirecting...</div>
@@ -164,7 +164,7 @@ function AddEvent({ onNavigate }) {
 
           <form onSubmit={handleSubmit}>
             {/* Event Name */}
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <div className="add-form-field">
               <label className="form-label" htmlFor="event-name">
                 Event Name *
               </label>
@@ -182,7 +182,7 @@ function AddEvent({ onNavigate }) {
             </div>
 
             {/* Event Date */}
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <div className="add-form-field">
               <label className="form-label" htmlFor="event-date">
                 Event Date *
               </label>
@@ -199,7 +199,7 @@ function AddEvent({ onNavigate }) {
             </div>
 
             {/* Event Type */}
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <div className="add-form-field">
               <label className="form-label" htmlFor="event-type">
                 Event Type
               </label>
@@ -219,7 +219,7 @@ function AddEvent({ onNavigate }) {
             </div>
 
             {/* Event Location */}
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <div className="add-form-field">
               <label className="form-label" htmlFor="event-location">
                 Location
               </label>
@@ -235,7 +235,7 @@ function AddEvent({ onNavigate }) {
             </div>
 
             {/* Description */}
-            <div style={{ marginBottom: 'var(--spacing-md)' }}>
+            <div className="add-form-field">
               <label className="form-label" htmlFor="event-description">
                 Description
               </label>
@@ -266,7 +266,7 @@ function AddEvent({ onNavigate }) {
             )}
 
             {/* Actions */}
-            <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'flex-end' }}>
+            <div className="add-form-actions">
               <button
                 type="button"
                 className="btn btn-secondary"

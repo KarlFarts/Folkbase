@@ -111,36 +111,18 @@ export default function MeetingMode({ onNavigate }) {
   ]);
 
   if (loading) {
-    return <div style={{ padding: 'var(--spacing-lg)' }}>Loading contacts...</div>;
+    return <div className="focus-mode-loading">Loading contacts...</div>;
   }
 
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        background: 'var(--color-bg-primary)',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="focus-mode">
       {/* Header */}
-      <div
-        style={{
-          background: 'var(--color-bg-secondary)',
-          borderBottom: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <div className="focus-mode-header">
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem' }}>
-            <Calendar size={16} style={{ verticalAlign: 'middle', marginRight: '0.25rem' }} />{' '}
-            Meeting Mode
+          <h1 className="focus-mode-title">
+            <Calendar size={16} className="focus-mode-title-icon" /> Meeting Mode
           </h1>
-          <small style={{ color: 'var(--color-text-secondary)' }}>
+          <small className="focus-mode-subtitle">
             {selectedAttendees.length} attendee{selectedAttendees.length !== 1 ? 's' : ''} selected
           </small>
         </div>
@@ -154,63 +136,34 @@ export default function MeetingMode({ onNavigate }) {
       </div>
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 'var(--spacing-lg)',
-          gap: 'var(--spacing-lg)',
-          overflow: 'auto',
-        }}
-      >
-        {/* Timer */}
-        <div>
-          <Timer onTimeUpdate={setElapsedSeconds} />
-        </div>
+      <div className="focus-mode-body">
+        <Timer onTimeUpdate={setElapsedSeconds} />
 
         {/* Attendees Section */}
         <div className="form-group">
           <label className="form-label">Attendees</label>
           <input
             type="text"
-            className="form-input"
+            className="form-input focus-mode-attendee-search"
             placeholder="Search attendees..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ marginBottom: 'var(--spacing-md)' }}
           />
-          <div
-            style={{
-              border: '1px solid var(--color-border)',
-              borderRadius: 'var(--radius-md)',
-              maxHeight: '200px',
-              overflow: 'auto',
-            }}
-          >
+          <div className="focus-mode-attendee-list">
             {filteredContacts.map((contact) => (
               <label
                 key={contact['Contact ID']}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: 'var(--spacing-md)',
-                  borderBottom: '1px solid var(--color-border)',
-                  cursor: 'pointer',
-                  background: selectedAttendees.includes(contact['Contact ID'])
-                    ? 'var(--color-bg-secondary)'
-                    : 'transparent',
-                }}
+                className={`focus-mode-attendee-row${selectedAttendees.includes(contact['Contact ID']) ? ' selected' : ''}`}
               >
                 <input
                   type="checkbox"
                   checked={selectedAttendees.includes(contact['Contact ID'])}
                   onChange={() => toggleAttendee(contact['Contact ID'])}
-                  style={{ marginRight: 'var(--spacing-md)' }}
+                  className="focus-mode-attendee-check"
                 />
                 <div>
                   <strong>{contact.Name}</strong>
-                  <small style={{ display: 'block', color: 'var(--color-text-secondary)' }}>
+                  <small className="focus-mode-attendee-org">
                     {contact.Organization}
                   </small>
                 </div>
@@ -224,11 +177,10 @@ export default function MeetingMode({ onNavigate }) {
         <div className="form-group">
           <label className="form-label">Notes</label>
           <textarea
-            className="form-textarea"
+            className="form-textarea focus-mode-textarea"
             placeholder="Meeting notes..."
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            style={{ minHeight: '150px' }}
           />
           <small className="text-muted">
             Optional - will be saved with each attendee's touchpoint
@@ -237,16 +189,7 @@ export default function MeetingMode({ onNavigate }) {
       </div>
 
       {/* Footer */}
-      <div
-        style={{
-          background: 'var(--color-bg-secondary)',
-          borderTop: '1px solid var(--color-border)',
-          padding: 'var(--spacing-lg)',
-          display: 'flex',
-          gap: 'var(--spacing-md)',
-          justifyContent: 'flex-end',
-        }}
-      >
+      <div className="focus-mode-footer">
         <button
           className="btn btn-secondary"
           onClick={() => onNavigate('dashboard')}
