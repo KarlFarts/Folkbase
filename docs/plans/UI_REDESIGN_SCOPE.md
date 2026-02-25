@@ -5,22 +5,22 @@
 - [ ] **Login/OAuth flow** (Google sign-in in navbar)
 
 ## Main Layout & Navigation
-- [ ] **Navbar** — `src/components/Navbar.js`
-- [ ] **Breadcrumbs** — `src/components/Breadcrumbs.js`
-- [ ] **WorkspaceSwitcher** — `src/components/WorkspaceSwitcher.js`
+- [x] **Navbar** — `src/components/Navbar.js` — card-surface bar, card-chip nav links, ChevronDown rotation to CSS class
+- [x] **Breadcrumbs** — `src/components/Breadcrumbs.js` — card-chip language, frosted glass, border tokens
+- [x] **WorkspaceSwitcher** — `src/components/WorkspaceSwitcher.js` — ChevronDown inline style → CSS class
 - [ ] **UniversalSearch** — `src/components/UniversalSearch.js`
 - [ ] **BraindumpFAB** (floating action button) — `src/components/BraindumpFAB.js`
 
 ## Dashboard (`/`)
-- [ ] **Dashboard page** — `src/pages/Dashboard.js` + `src/styles/Dashboard.css`
-- [ ] **HeroWelcome** — greeting/welcome section
+- [x] **Dashboard page** — `src/pages/Dashboard.js` + `src/styles/Dashboard.css` — HeroWelcome fix, hero-top scoping
+- [x] **HeroWelcome** — aliased `.dashboard-welcome-row` to hero rules
 - [ ] **QuickActionBar** — quick action buttons
 - [ ] **DashboardSidebar** — sidebar nav
 - [ ] **Widgets** (15 total): UrgentSection, NeedToContact, IncompleteTouchpoints, UpcomingBirthdays, UpcomingEvents, ToDo, ProfileCompletion, Celebrations, RecentActivity, Settings, CustomActions, CollapsibleWidget, SearchBar
 
 ## Contact System
-- [ ] **ContactList** (`/contacts`) — table + card views, filters, bulk actions
-- [ ] **ContactProfile** (`/contacts/:id`) — tabbed profile (Overview, Touchpoints, Notes, Details, Events, Relationships)
+- [x] **ContactList** (`/contacts`) — all 18 inline styles → `cl-*` CSS classes; deleted inline @keyframes spin
+- [x] **ContactProfile** (`/contacts/:id`) — horizontal tab bar replaces dropdown+sidebar; action buttons in header; all 46 inline styles → `cp-*` classes
 - [ ] **AddContact** (`/contacts/add`) — creation form
 - [ ] **ContactCard** — card component
 - [ ] **ContactTable** — table component
@@ -31,8 +31,8 @@
 - [ ] **SocialsManager, EducationManager, EmploymentManager, DistrictsManager** — profile sub-sections
 
 ## Organization System
-- [ ] **OrganizationList** (`/organizations`)
-- [ ] **OrganizationProfile** (`/organizations/:id`)
+- [x] **OrganizationList** (`/organizations`) — reused `cl-*` classes; fixed double-className; removed React import
+- [x] **OrganizationProfile** (`/organizations/:id`) — reused `cp-tab-bar`/`cp-linked-card`; all inline styles → `op-*` classes; corrected accent color token
 - [ ] **AddOrganization** (`/organizations/add`)
 - [ ] **OrganizationCard**
 - [ ] **DepartmentsManager, OrgContactsManager** — profile sub-sections
@@ -44,8 +44,8 @@
 - [ ] **LocationCard**
 
 ## Events System
-- [ ] **EventsList** (`/events`) — list + calendar + timeline views
-- [ ] **EventDetails** (`/events/:id`) — attendees, agenda, resources
+- [x] **EventsList** (`/events`) — all inline styles → `el-*` classes; removed React import; deduped filtered views
+- [x] **EventDetails** (`/events/:id`) — all ~25 inline styles → `ed-*` classes; reused `cp-linked-card`; removed React import
 - [ ] **AddEvent** (`/events/add`)
 - [ ] **EventCard**
 - [ ] **CalendarView** — month calendar
@@ -55,18 +55,18 @@
 - [ ] **SyncConflictModal** — conflict resolution
 
 ## Touchpoints
-- [ ] **TouchpointsList** (`/touchpoints`) — history, filtering
+- [x] **TouchpointsList** (`/touchpoints`) — all inline styles → `tl-*` classes; modal overlays extracted; removed React import
 - [ ] **TouchpointModal** — log/edit/detail
 - [ ] **LogTouchpointMinimal, LogTouchpointQuickModal** — quick logging
 
 ## Tasks
-- [ ] **TasksPage** (`/tasks`)
+- [x] **TasksPage** (`/tasks`) — already clean, no inline styles
 - [ ] **TaskProfile** (`/tasks/:id`) — checklist, time tracking
 - [ ] **ChecklistManager, TimeEntryManager**
 
 ## Notes & Braindump
-- [ ] **NotesInbox** (`/notes`) — `src/pages/NotesInbox.css`
-- [ ] **BraindumpPage** (`/braindump`) — `src/pages/BraindumpPage.css`
+- [x] **NotesInbox** (`/notes`) — 1 inline style → `.notes-status-bar-actions` class in NotesInbox.css; removed React import
+- [x] **BraindumpPage** (`/braindump`) — already clean, no inline styles; removed React import
 - [ ] **NotesDisplaySection** — note list/cards
 - [ ] **LinkedEntitiesDisplay** — entity chips on notes
 - [ ] **CommitNoteModal, BulkCommitModal, LinkEntitiesModal, QuickCommitButton**
@@ -127,10 +127,11 @@
 - [ ] **TimelineItem**
 
 ## Shared Stylesheets
-- [ ] **index.css** — global styles, design tokens (`src/styles/index.css`)
+- [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*` sections added; breadcrumbs updated
+- [x] **Dashboard.css** — HeroWelcome alias, hero-top scoping
 - [ ] **themes.css** — color palette/tokens (`src/styles/themes.css`)
-- [ ] **Dashboard.css** — `src/styles/Dashboard.css`
 
 ## Stats
 - **31 pages** | **116+ components** | **34 CSS files** | **677 inline style occurrences**
-- Heavy inline `style={}` usage across almost all pages — consider migrating to CSS classes
+- **Session progress:** ~12 pages/components done, ~105 remaining
+- Priority order: TouchpointsList → NotesInbox → BraindumpPage → remaining pages

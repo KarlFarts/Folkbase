@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { RefreshCw, Zap, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -627,7 +627,7 @@ function NotesInbox({ onNavigate }) {
           <RefreshCw size={16} />
         </button>
         <span className="sync-status-text">Auto-sync: On • Updates every 60s</span>
-        <div style={{ marginLeft: 'auto', display: 'flex', gap: '10px' }}>
+        <div className="notes-status-bar-actions">
           <button
             className={`btn ${bulkSelectMode ? 'btn-primary' : 'btn-secondary'}`}
             onClick={() => {

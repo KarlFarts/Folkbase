@@ -48,6 +48,21 @@ import EducationManager from '../components/contact/EducationManager';
 import EmploymentManager from '../components/contact/EmploymentManager';
 import DistrictsManager from '../components/contact/DistrictsManager';
 
+const CONTENT_TABS = [
+  { value: 'profile', label: 'Profile' },
+  { value: 'touchpoints', label: 'Touchpoints' },
+  { value: 'notes', label: 'Notes' },
+  { value: 'events', label: 'Events' },
+  { value: 'organizations', label: 'Organizations' },
+  { value: 'tasks', label: 'Tasks' },
+  { value: 'relationships', label: 'Relationships' },
+  { value: 'lists', label: 'Lists' },
+  { value: 'socials', label: 'Socials' },
+  { value: 'education', label: 'Education' },
+  { value: 'employment', label: 'Employment' },
+  { value: 'districts', label: 'Districts' },
+];
+
 function ContactProfile({ onNavigate }) {
   const { id: contactId } = useParams();
   const { user, accessToken } = useAuth();
@@ -55,21 +70,15 @@ function ContactProfile({ onNavigate }) {
   const { mode, userWorkspaces, activeWorkspace } = useWorkspace();
   const { notify } = useNotification();
 
-  // Use custom hook for state management
   const { state, actions } = useContactProfile();
 
-  // Local state for events
   const [contactEvents, setContactEvents] = React.useState([]);
   const [allContacts, setAllContacts] = React.useState([]);
-
-  // Local state for cross-entity links
   const [linkedOrganizations, setLinkedOrganizations] = React.useState([]);
   const [linkedTasks, setLinkedTasks] = React.useState([]);
 
-  // Ref for details card height calculation
   const detailsCardRef = useRef(null);
 
-  // Calculate touchpoint history height to match details card
   useEffect(() => {
     if (detailsCardRef.current && !state.loading) {
       const updateHeight = () => {
@@ -121,17 +130,14 @@ function ContactProfile({ onNavigate }) {
         return;
       }
 
-      // Filter events that include this contact as an attendee
       const filteredEvents = eventsResult.data.filter((event) => {
         const attendees = event['Attendees'] || '';
         return attendees.split(',').some((id) => id.trim() === contactId);
       });
 
-      // Get linked organizations from employment history
       const orgIds = employmentResult.map((emp) => emp['Organization ID']).filter(Boolean);
       const linkedOrgs = orgsResult.data.filter((org) => orgIds.includes(org['Organization ID']));
 
-      // Filter tasks assigned to this contact
       const filteredTasks = tasksResult.data.filter(
         (task) => task['Contact ID'] === contactId || task['Assigned To'] === contactId
       );
@@ -196,7 +202,6 @@ function ContactProfile({ onNavigate }) {
         user.email
       );
 
-      // Log activity for this touchpoint
       await logActivity(
         contactId,
         ACTIVITY_TYPES.TOUCHPOINT_LOGGED,
@@ -209,7 +214,6 @@ function ContactProfile({ onNavigate }) {
         }
       );
 
-      // Reload touchpoints and activities
       const [newTouchpoints, newActivities] = await Promise.all([
         getContactTouchpoints(accessToken, sheetId, contactId),
         getContactActivities(contactId),
@@ -221,8 +225,6 @@ function ContactProfile({ onNavigate }) {
 
       actions.toggleLogModal(false);
       actions.resetTouchpointData();
-
-      // Reload contact to get updated Last Contact Date
       loadContact();
     } catch {
       notify.error('Failed to log touchpoint');
@@ -245,12 +247,10 @@ function ContactProfile({ onNavigate }) {
         Status: state.noteFormData.Status,
       });
 
-      // Link note to this contact
       if (result && result.noteId) {
         await linkNoteToContact(accessToken, sheetId, result.noteId, contactId);
       }
 
-      // Log activity for this note
       await logActivity(
         contactId,
         ACTIVITY_TYPES.NOTE_ADDED,
@@ -262,7 +262,6 @@ function ContactProfile({ onNavigate }) {
         }
       );
 
-      // Reload notes and activities
       const [newNotes, newActivities] = await Promise.all([
         getContactNotes(accessToken, sheetId, contactId, user?.email),
         getContactActivities(contactId),
@@ -272,7 +271,6 @@ function ContactProfile({ onNavigate }) {
 
       actions.toggleNoteModal(false);
       actions.resetNoteFormData();
-
       notify.success('Note added successfully!');
     } catch {
       notify.error('Failed to add note');
@@ -293,7 +291,7 @@ function ContactProfile({ onNavigate }) {
       'Duration (min)': touchpoint['Duration (min)'] || '',
     });
     actions.toggleEditModal(true);
-    actions.setSelectedTouchpoint(null); // Close detail modal
+    actions.setSelectedTouchpoint(null);
   };
 
   const handleEditTouchpoint = async () => {
@@ -319,7 +317,6 @@ function ContactProfile({ onNavigate }) {
         user.email
       );
 
-      // Reload touchpoints and contact (for Last Contact Date update)
       const [newTouchpoints] = await Promise.all([
         getContactTouchpoints(accessToken, sheetId, contactId),
         loadContact(),
@@ -329,7 +326,6 @@ function ContactProfile({ onNavigate }) {
         newTouchpoints.sort((a, b) => (b['Date'] || '').localeCompare(a['Date'] || ''))
       );
 
-      // Log activity
       await logActivity(
         contactId,
         ACTIVITY_TYPES.CONTACT_UPDATED,
@@ -342,7 +338,6 @@ function ContactProfile({ onNavigate }) {
         }
       );
 
-      // Close modal and reset
       actions.toggleEditModal(false);
       actions.setEditingTouchpoint(null);
       actions.setEditFormData({
@@ -370,7 +365,6 @@ function ContactProfile({ onNavigate }) {
       actions.setSaving(true);
       await deleteTouchpoint(accessToken, sheetId, touchpointToDelete['Touchpoint ID']);
 
-      // Reload touchpoints
       const newTouchpoints = await getContactTouchpoints(accessToken, sheetId, contactId);
       actions.setTouchpoints(
         newTouchpoints.sort((a, b) => (b['Date'] || '').localeCompare(a['Date'] || ''))
@@ -428,12 +422,10 @@ function ContactProfile({ onNavigate }) {
         linkConfig
       );
 
-      // Update linkConfig with the new target contact ID
       if (linkConfig && result && result.contactId && linkConfig.targetWorkspace) {
         linkConfig.targetWorkspace.contactId = result.contactId;
       }
 
-      // Log activity for copying to workspace
       await logActivity(
         contactId,
         ACTIVITY_TYPES.ADDED_TO_WORKSPACE,
@@ -445,11 +437,9 @@ function ContactProfile({ onNavigate }) {
         }
       );
 
-      // Refresh activities
       const newActivities = await getContactActivities(contactId);
       actions.setActivities(newActivities);
 
-      // Show success and close modal
       notify.success(`Contact "${state.contact.Name}" copied to ${targetWorkspace.name}`);
       actions.toggleCopyModal(false);
     } catch {
@@ -492,591 +482,297 @@ function ContactProfile({ onNavigate }) {
   }
 
   return (
-    <div
-      className="dashboard-container dashboard-redesigned"
-      style={{ minHeight: '100vh', padding: 'var(--spacing-lg)', paddingTop: 'var(--spacing-lg)' }}
-    >
-      {/* Header with back button */}
-      <div style={{ marginBottom: '0' }}>
-        <button className="btn btn-ghost btn-sm" onClick={() => onNavigate('contacts')}>
-          ← Back to Contacts
-        </button>
-      </div>
+    <div className="cp-page">
+      {/* Back button */}
+      <button className="btn btn-ghost btn-sm cp-back-btn" onClick={() => onNavigate('contacts')}>
+        ← Back to Contacts
+      </button>
 
-      {/* TOP ROW: Identity Card + Action Buttons */}
-      <div className="contact-profile-layout" style={{ marginTop: 'var(--spacing-sm)' }}>
-        {/* Left: Identity Card */}
-        <ProfileHeader
-          contact={state.contact}
-          isEditing={state.isEditing}
-          editData={state.editData}
-          onChange={actions.setEditData}
-          getPriorityClass={getPriorityClass}
-          getStatusClass={getStatusClass}
-        />
+      {/* Header card: ProfileHeader + action buttons */}
+      <div className="card cp-header-card">
+        <div className="cp-header-inner">
+          <div className="cp-header-identity">
+            <ProfileHeader
+              contact={state.contact}
+              isEditing={state.isEditing}
+              editData={state.editData}
+              onChange={actions.setEditData}
+              getPriorityClass={getPriorityClass}
+              getStatusClass={getStatusClass}
+            />
+          </div>
 
-        {/* Right: Action Buttons */}
-        <div
-          style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}
-          className="profile-sticky-button"
-        >
-          <button
-            className="btn btn-primary"
-            onClick={() => actions.toggleLogModal(true)}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-            }}
-          >
-            Log Touchpoint
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => actions.toggleNoteModal(true)}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-            }}
-          >
-            Write Note
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => actions.toggleCollectionsModal(true)}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-            }}
-          >
-            Lists
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => actions.toggleLogModal(true)}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-            }}
-          >
-            Quick Add
-          </button>
-
-          <button
-            className="btn btn-secondary"
-            onClick={() => {
-              if (state.isEditing) {
-                actions.cancelEdit();
-              } else {
-                actions.setIsEditing(true);
-              }
-            }}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-            }}
-          >
-            {state.isEditing ? 'Cancel Edit' : 'Edit Contact'}
-          </button>
-
-          {state.isEditing && (
-            <button
-              className="btn btn-primary"
-              onClick={handleSaveEdit}
-              disabled={state.saving}
-              style={{
-                width: '100%',
-                padding: 'var(--spacing-md)',
-                fontSize: 'var(--font-size-base)',
-              }}
-            >
-              {state.saving ? 'Saving...' : 'Save Changes'}
+          <div className="cp-header-actions">
+            <button className="btn btn-primary cp-action-btn" onClick={() => actions.toggleLogModal(true)}>
+              Log Touchpoint
             </button>
-          )}
-
-          <button
-            className="btn btn-ghost"
-            onClick={() => setShowDeleteContactConfirm(true)}
-            style={{
-              width: '100%',
-              padding: 'var(--spacing-md)',
-              fontSize: 'var(--font-size-base)',
-              color: 'var(--color-danger)',
-            }}
-          >
-            Delete Contact
-          </button>
-        </div>
-      </div>
-
-      {/* Workspace Badges */}
-      <ContactWorkspaceBadges
-        workspaceType={mode === 'personal' ? 'personal' : 'workspace'}
-        workspaceId={mode === 'personal' ? user.email : activeWorkspace?.id}
-        contactId={contactId}
-        onWorkspaceChange={() => {
-          // Reload contact after workspace change
-          loadContact();
-        }}
-        onConflictClick={(linkId) => {
-          actions.setSelectedLinkId(linkId);
-          actions.toggleConflictModal(true);
-        }}
-      />
-
-      {/* DIVIDER between top and bottom sections */}
-      <hr
-        style={{
-          margin: 'var(--spacing-lg) 0',
-          border: 'none',
-          borderTop: '1px solid var(--border-color-default)',
-        }}
-      />
-
-      {/* BOTTOM SECTION: Full-width card with Sidebar + Tabs + Content */}
-      <div
-        ref={detailsCardRef}
-        className="card"
-        style={{
-          boxShadow: 'var(--shadow-card-resting)',
-          overflow: 'visible',
-        }}
-      >
-        {/* Two-column layout: Category Sidebar + (Tabs + Content) */}
-        <div style={{ display: 'flex', minHeight: '400px' }}>
-          {/* Left: Category Sidebar with dropdown */}
-          <div
-            style={{
-              width: '200px',
-              flexShrink: 0,
-              borderRight: '1px solid var(--border-color-default)',
-              padding: 'var(--spacing-md)',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 'var(--spacing-sm)',
-            }}
-          >
-            {/* Dropdown selector for main view */}
-            <select
-              className="form-select"
-              value={state.contentView}
-              onChange={(e) => actions.setContentView(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 'var(--spacing-xs) var(--spacing-sm)',
-                fontSize: 'var(--font-size-sm)',
-                fontWeight: '500',
-                background: 'var(--color-bg-elevated)',
-                border: '1px solid var(--border-color-default)',
-                borderRadius: 'var(--radius-sm)',
-                marginBottom: 'var(--spacing-sm)',
+            <button className="btn btn-secondary cp-action-btn" onClick={() => actions.toggleNoteModal(true)}>
+              Write Note
+            </button>
+            <button className="btn btn-secondary cp-action-btn" onClick={() => actions.toggleCollectionsModal(true)}>
+              Lists
+            </button>
+            <button
+              className="btn btn-secondary cp-action-btn"
+              onClick={() => {
+                if (state.isEditing) {
+                  actions.cancelEdit();
+                } else {
+                  actions.setIsEditing(true);
+                }
               }}
             >
-              <option value="profile">Contact Profile</option>
-              <option value="touchpoints">Touchpoints</option>
-              <option value="events">Events</option>
-              <option value="organizations">Organizations</option>
-              <option value="tasks">Tasks</option>
-              <option value="socials">Social Media</option>
-              <option value="education">Education</option>
-              <option value="employment">Employment</option>
-              <option value="districts">Districts</option>
-              <option value="lists">Lists</option>
-              <option value="notes">Notes</option>
-              <option value="relationships">Relationships</option>
-            </select>
+              {state.isEditing ? 'Cancel Edit' : 'Edit Contact'}
+            </button>
+            {state.isEditing && (
+              <button
+                className="btn btn-primary cp-action-btn"
+                onClick={handleSaveEdit}
+                disabled={state.saving}
+              >
+                {state.saving ? 'Saving...' : 'Save Changes'}
+              </button>
+            )}
+            <button
+              className="btn btn-ghost cp-action-btn cp-action-btn--danger"
+              onClick={() => setShowDeleteContactConfirm(true)}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
 
-            {/* Category list below dropdown */}
-            {state.contentView === 'profile' ? (
-              TAB_CONFIG.map((tab) => {
-                const isActive = state.activeTab === tab.id;
-                return (
+        <ContactWorkspaceBadges
+          workspaceType={mode === 'personal' ? 'personal' : 'workspace'}
+          workspaceId={mode === 'personal' ? user.email : activeWorkspace?.id}
+          contactId={contactId}
+          onWorkspaceChange={loadContact}
+          onConflictClick={(linkId) => {
+            actions.setSelectedLinkId(linkId);
+            actions.toggleConflictModal(true);
+          }}
+        />
+      </div>
+
+      {/* Horizontal tab bar */}
+      <div className="cp-tab-bar">
+        {CONTENT_TABS.map((tab) => (
+          <button
+            key={tab.value}
+            className={`cp-tab${state.contentView === tab.value ? ' cp-tab--active' : ''}`}
+            onClick={() => actions.setContentView(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Content card */}
+      <div ref={detailsCardRef} className="card cp-content-card">
+        {state.contentView === 'profile' && (
+          <>
+            {/* Profile sub-nav (field category sidebar) */}
+            <div className="cp-profile-layout">
+              <div className="cp-profile-sidebar">
+                {TAB_CONFIG.map((tab) => (
                   <button
                     key={tab.id}
+                    className={`cp-sidebar-item${state.activeTab === tab.id ? ' cp-sidebar-item--active' : ''}`}
                     onClick={() => actions.setActiveTab(tab.id)}
-                    style={{
-                      display: 'block',
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: 'var(--spacing-sm) var(--spacing-md)',
-                      border: 'none',
-                      borderRadius: 'var(--radius-sm)',
-                      background: isActive ? 'var(--color-accent-primary)' : 'transparent',
-                      color: isActive ? 'white' : 'var(--color-text-primary)',
-                      fontWeight: isActive ? '600' : '400',
-                      fontSize: 'var(--font-size-sm)',
-                      cursor: 'pointer',
-                      transition: 'all 0.15s ease',
-                    }}
                   >
                     {tab.label}
                   </button>
-                );
-              })
-            ) : (
-              <div
-                style={{
-                  color: 'var(--color-text-muted)',
-                  fontSize: 'var(--font-size-sm)',
-                  padding: 'var(--spacing-sm)',
-                }}
-              >
-                {state.contentView === 'touchpoints' && 'All touchpoints'}
-                {state.contentView === 'events' && 'Upcoming events'}
-                {state.contentView === 'organizations' && 'Linked organizations'}
-                {state.contentView === 'tasks' && 'Assigned tasks'}
-                {state.contentView === 'lists' && 'List membership'}
-                {state.contentView === 'notes' && 'All notes'}
+                ))}
               </div>
-            )}
-          </div>
-
-          {/* Right: Tabs at top + Content below */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-            {/* Sub-tabs within each category - placeholder for now */}
-            {state.contentView === 'profile' && (
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '2px',
-                  padding: '0 var(--spacing-md)',
-                  overflowX: 'auto',
-                  WebkitOverflowScrolling: 'touch',
-                  borderBottom: '2px solid var(--border-color-default)',
-                }}
-                className="tab-navigation-top"
-              >
-                {['All Fields', 'Primary', 'Secondary'].map((subTab, idx) => {
-                  const isActive = idx === 0;
-                  return (
-                    <button
-                      key={subTab}
-                      style={{
-                        padding: 'var(--spacing-sm) var(--spacing-md)',
-                        border: 'none',
-                        borderBottom: isActive
-                          ? '3px solid var(--color-accent-primary)'
-                          : '3px solid transparent',
-                        borderRadius: '0',
-                        background: 'transparent',
-                        color: isActive ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
-                        fontWeight: isActive ? '600' : '400',
-                        fontSize: 'var(--font-size-sm)',
-                        cursor: 'pointer',
-                        whiteSpace: 'nowrap',
-                        transition: 'all 0.15s ease',
-                      }}
-                    >
-                      {subTab}
-                    </button>
-                  );
-                })}
+              <div className="cp-profile-content card-body">
+                <ProfileTabs
+                  activeTab={state.activeTab}
+                  contact={state.contact}
+                  isEditing={state.isEditing}
+                  editData={state.editData}
+                  onChange={actions.setEditData}
+                />
               </div>
-            )}
-
-            {/* Content Area */}
-            <div style={{ flex: 1, overflow: 'auto' }}>
-              {state.contentView === 'profile' && (
-                <div className="card-body" style={{ paddingTop: 'var(--spacing-lg)' }}>
-                  <ProfileTabs
-                    activeTab={state.activeTab}
-                    contact={state.contact}
-                    isEditing={state.isEditing}
-                    editData={state.editData}
-                    onChange={actions.setEditData}
-                  />
-                </div>
-              )}
-
-              {state.contentView === 'touchpoints' && (
-                <div className="card-body">
-                  <TouchpointHistoryCard
-                    touchpoints={state.touchpoints}
-                    onLogTouchpoint={() => actions.toggleLogModal(true)}
-                    onTouchpointClick={actions.setSelectedTouchpoint}
-                    maxHeight="600px"
-                  />
-                </div>
-              )}
-
-              {state.contentView === 'events' && (
-                <div className="card-body">
-                  {contactEvents.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: 'center',
-                        padding: 'var(--spacing-xl)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-                      >
-                        <rect x="3" y="4" width="18" height="18" rx="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Events Yet</h3>
-                      <p>This contact hasn't been added to any events yet.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-                      {contactEvents.map((event) => (
-                        <EventCard
-                          key={event['Event ID']}
-                          event={event}
-                          contacts={allContacts}
-                          onClick={() => onNavigate('event-details', { id: event['Event ID'] })}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {state.contentView === 'organizations' && (
-                <div className="card-body">
-                  {linkedOrganizations.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: 'center',
-                        padding: 'var(--spacing-xl)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-                      >
-                        <path d="M3 21h18M3 7v1a3 3 0 0 0 3 3h1m0-4v4m0-4h6m-6 4h6m6-4v1a3 3 0 0 1-3 3h-1m0-4v4m0 0H9m12-4h-6M3 10v11m18-11v11M9 21v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v8" />
-                      </svg>
-                      <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Organizations</h3>
-                      <p>
-                        This contact has no employment history. Add employment to see linked
-                        organizations.
-                      </p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-                      {linkedOrganizations.map((org) => (
-                        <div
-                          key={org['Organization ID']}
-                          className="card"
-                          style={{
-                            padding: 'var(--spacing-md)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
-                          onClick={() => onNavigate('organization-profile', org['Organization ID'])}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                            }}
-                          >
-                            <div>
-                              <strong>{org['Display Name'] || org.Name}</strong>
-                              <div
-                                className="text-muted"
-                                style={{
-                                  fontSize: 'var(--font-size-sm)',
-                                  marginTop: 'var(--spacing-xs)',
-                                }}
-                              >
-                                {org.Type && <span>{org.Type}</span>}
-                                {org.Type && org.Industry && <span> · </span>}
-                                {org.Industry && <span>{org.Industry}</span>}
-                              </div>
-                            </div>
-                            <span
-                              className="badge badge-status-inactive"
-                              style={{ fontSize: 'var(--font-size-xs)' }}
-                            >
-                              {org['Organization ID']}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {state.contentView === 'tasks' && (
-                <div className="card-body">
-                  {linkedTasks.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: 'center',
-                        padding: 'var(--spacing-xl)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
-                      <svg
-                        width="48"
-                        height="48"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-                      >
-                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                        <path d="M9 11h6M9 15h3" />
-                      </svg>
-                      <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Tasks</h3>
-                      <p>This contact has no assigned tasks.</p>
-                    </div>
-                  ) : (
-                    <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
-                      {linkedTasks.map((task) => (
-                        <div
-                          key={task['Task ID']}
-                          className="card"
-                          style={{
-                            padding: 'var(--spacing-md)',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s',
-                          }}
-                          onClick={() => onNavigate('task-profile', task['Task ID'])}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: 'flex',
-                              justifyContent: 'space-between',
-                              alignItems: 'flex-start',
-                            }}
-                          >
-                            <div>
-                              <strong>{task.Title}</strong>
-                              <div
-                                className="text-muted"
-                                style={{
-                                  fontSize: 'var(--font-size-sm)',
-                                  marginTop: 'var(--spacing-xs)',
-                                }}
-                              >
-                                {task.Status && (
-                                  <span
-                                    className="badge badge-status-inactive"
-                                    style={{
-                                      fontSize: 'var(--font-size-xs)',
-                                      marginRight: 'var(--spacing-xs)',
-                                    }}
-                                  >
-                                    {task.Status}
-                                  </span>
-                                )}
-                                {task['Due Date'] && <span>Due: {task['Due Date']}</span>}
-                              </div>
-                            </div>
-                            <span
-                              className="badge badge-status-inactive"
-                              style={{ fontSize: 'var(--font-size-xs)' }}
-                            >
-                              {task['Task ID']}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {state.contentView === 'socials' && (
-                <div className="card-body">
-                  <SocialsManager contactId={contactId} />
-                </div>
-              )}
-
-              {state.contentView === 'education' && (
-                <div className="card-body">
-                  <EducationManager contactId={contactId} />
-                </div>
-              )}
-
-              {state.contentView === 'employment' && (
-                <div className="card-body">
-                  <EmploymentManager contactId={contactId} />
-                </div>
-              )}
-
-              {state.contentView === 'districts' && (
-                <div className="card-body">
-                  <DistrictsManager contactId={contactId} />
-                </div>
-              )}
-
-              {state.contentView === 'lists' && (
-                <div className="card-body">
-                  <ListManager
-                    contactId={contactId}
-                    onClose={() => {}}
-                    accessToken={accessToken}
-                    sheetId={sheetId}
-                    embedded={true}
-                  />
-                </div>
-              )}
-
-              {state.contentView === 'notes' && (
-                <div className="card-body">
-                  <NotesCard notes={state.notes} contactId={contactId} onNavigate={onNavigate} />
-                </div>
-              )}
-
-              {state.contentView === 'relationships' && (
-                <div className="card-body">
-                  <RelationshipManager
-                    entityType="Contact"
-                    entityId={contactId}
-                    accessToken={accessToken}
-                    sheetId={sheetId}
-                    userEmail={user?.email}
-                    isMultiEntity={true}
-                  />
-                </div>
-              )}
             </div>
+          </>
+        )}
+
+        {state.contentView === 'touchpoints' && (
+          <div className="card-body">
+            <TouchpointHistoryCard
+              touchpoints={state.touchpoints}
+              onLogTouchpoint={() => actions.toggleLogModal(true)}
+              onTouchpointClick={actions.setSelectedTouchpoint}
+              maxHeight="600px"
+            />
           </div>
-        </div>
+        )}
+
+        {state.contentView === 'events' && (
+          <div className="card-body">
+            {contactEvents.length === 0 ? (
+              <div className="cp-empty-state">
+                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+                <h3 className="cp-empty-title">No Events Yet</h3>
+                <p>This contact hasn&apos;t been added to any events yet.</p>
+              </div>
+            ) : (
+              <div className="cp-card-grid">
+                {contactEvents.map((event) => (
+                  <EventCard
+                    key={event['Event ID']}
+                    event={event}
+                    contacts={allContacts}
+                    onClick={() => onNavigate('event-details', { id: event['Event ID'] })}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {state.contentView === 'organizations' && (
+          <div className="card-body">
+            {linkedOrganizations.length === 0 ? (
+              <div className="cp-empty-state">
+                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M3 21h18M3 7v1a3 3 0 0 0 3 3h1m0-4v4m0-4h6m-6 4h6m6-4v1a3 3 0 0 1-3 3h-1m0-4v4m0 0H9m12-4h-6M3 10v11m18-11v11M9 21v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v8" />
+                </svg>
+                <h3 className="cp-empty-title">No Organizations</h3>
+                <p>This contact has no employment history. Add employment to see linked organizations.</p>
+              </div>
+            ) : (
+              <div className="cp-card-grid">
+                {linkedOrganizations.map((org) => (
+                  <div
+                    key={org['Organization ID']}
+                    className="card cp-linked-card"
+                    onClick={() => onNavigate('organization-profile', org['Organization ID'])}
+                  >
+                    <div className="cp-linked-card-inner">
+                      <div>
+                        <strong>{org['Display Name'] || org.Name}</strong>
+                        <div className="cp-linked-card-meta">
+                          {org.Type && <span>{org.Type}</span>}
+                          {org.Type && org.Industry && <span> · </span>}
+                          {org.Industry && <span>{org.Industry}</span>}
+                        </div>
+                      </div>
+                      <span className="badge badge-status-inactive cp-linked-card-id">
+                        {org['Organization ID']}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {state.contentView === 'tasks' && (
+          <div className="card-body">
+            {linkedTasks.length === 0 ? (
+              <div className="cp-empty-state">
+                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <rect x="3" y="5" width="18" height="14" rx="2" />
+                  <path d="M9 11h6M9 15h3" />
+                </svg>
+                <h3 className="cp-empty-title">No Tasks</h3>
+                <p>This contact has no assigned tasks.</p>
+              </div>
+            ) : (
+              <div className="cp-card-grid">
+                {linkedTasks.map((task) => (
+                  <div
+                    key={task['Task ID']}
+                    className="card cp-linked-card"
+                    onClick={() => onNavigate('task-profile', task['Task ID'])}
+                  >
+                    <div className="cp-linked-card-inner">
+                      <div>
+                        <strong>{task.Title}</strong>
+                        <div className="cp-linked-card-meta">
+                          {task.Status && (
+                            <span className="badge badge-status-inactive cp-task-status-badge">
+                              {task.Status}
+                            </span>
+                          )}
+                          {task['Due Date'] && <span>Due: {task['Due Date']}</span>}
+                        </div>
+                      </div>
+                      <span className="badge badge-status-inactive cp-linked-card-id">
+                        {task['Task ID']}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {state.contentView === 'socials' && (
+          <div className="card-body">
+            <SocialsManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'education' && (
+          <div className="card-body">
+            <EducationManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'employment' && (
+          <div className="card-body">
+            <EmploymentManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'districts' && (
+          <div className="card-body">
+            <DistrictsManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'lists' && (
+          <div className="card-body">
+            <ListManager
+              contactId={contactId}
+              onClose={() => {}}
+              accessToken={accessToken}
+              sheetId={sheetId}
+              embedded={true}
+            />
+          </div>
+        )}
+
+        {state.contentView === 'notes' && (
+          <div className="card-body">
+            <NotesCard notes={state.notes} contactId={contactId} onNavigate={onNavigate} />
+          </div>
+        )}
+
+        {state.contentView === 'relationships' && (
+          <div className="card-body">
+            <RelationshipManager
+              entityType="Contact"
+              entityId={contactId}
+              accessToken={accessToken}
+              sheetId={sheetId}
+              userEmail={user?.email}
+              isMultiEntity={true}
+            />
+          </div>
+        )}
       </div>
 
-      {/* Touchpoint Detail Modal */}
+      {/* Modals */}
       {state.selectedTouchpoint && (
         <TouchpointDetailModal
           touchpoint={state.selectedTouchpoint}
@@ -1086,7 +782,6 @@ function ContactProfile({ onNavigate }) {
         />
       )}
 
-      {/* Touchpoint Delete Confirm */}
       <ConfirmDialog
         isOpen={!!touchpointToDelete}
         onConfirm={handleDeleteTouchpoint}
@@ -1097,7 +792,6 @@ function ContactProfile({ onNavigate }) {
         variant="danger"
       />
 
-      {/* Log Touchpoint Modal */}
       {state.showLogModal && (
         <LogTouchpointModal
           touchpointData={state.touchpointData}
@@ -1108,7 +802,6 @@ function ContactProfile({ onNavigate }) {
         />
       )}
 
-      {/* Edit Touchpoint Modal */}
       {state.showEditModal && state.editingTouchpoint && (
         <EditTouchpointModal
           touchpoint={state.editingTouchpoint}
@@ -1139,13 +832,9 @@ function ContactProfile({ onNavigate }) {
           actions.toggleConflictModal(false);
           actions.setSelectedLinkId(null);
         }}
-        onResolved={() => {
-          // Reload contact after conflicts are resolved
-          loadContact();
-        }}
+        onResolved={loadContact}
       />
 
-      {/* Collections Manager Modal */}
       {state.showCollectionsModal && (
         <WindowTemplate
           isOpen={state.showCollectionsModal}
@@ -1162,7 +851,6 @@ function ContactProfile({ onNavigate }) {
         </WindowTemplate>
       )}
 
-      {/* Contact Delete Confirm */}
       <ConfirmDialog
         isOpen={showDeleteContactConfirm}
         onConfirm={handleDeleteContact}
@@ -1173,7 +861,6 @@ function ContactProfile({ onNavigate }) {
         variant="danger"
       />
 
-      {/* Write Note Modal */}
       {state.showNoteModal && (
         <WindowTemplate
           isOpen={state.showNoteModal}
@@ -1199,7 +886,7 @@ function ContactProfile({ onNavigate }) {
             </>
           }
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="cp-note-form">
             <div>
               <label className="form-label">Note Type</label>
               <select
@@ -1223,14 +910,13 @@ function ContactProfile({ onNavigate }) {
             <div>
               <label className="form-label">Content</label>
               <textarea
-                className="form-input"
+                className="form-input cp-note-textarea"
                 value={state.noteFormData.Content}
                 onChange={(e) =>
                   actions.setNoteFormData({ ...state.noteFormData, Content: e.target.value })
                 }
                 placeholder="Enter your note..."
                 rows="8"
-                style={{ resize: 'vertical' }}
               />
             </div>
 
