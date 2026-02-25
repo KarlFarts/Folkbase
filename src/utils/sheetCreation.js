@@ -203,7 +203,9 @@ export const createNewSheet = async (accessToken, userName) => {
     });
 
     if (!createResponse.ok) {
-      throw new Error('Failed to create new sheet');
+      const errorData = await createResponse.json().catch(() => ({}));
+      const detail = errorData.error?.message || `HTTP ${createResponse.status}`;
+      throw new Error(`Failed to create new sheet: ${detail}`);
     }
 
     const createdSheet = await createResponse.json();
@@ -467,3 +469,27 @@ function columnToLetter(index) {
   }
   return letter;
 }
+
+/**
+ * Lightweight probe: verify token can read the user's sheet.
+ * Used after sign-in to catch invalid tokens or revoked access before
+ * the user reaches the dashboard.
+ * @param {string} accessToken - Google OAuth access token
+ * @param {string} sheetId - Google Sheet ID to probe
+ * @returns {Promise<{ok: boolean, error?: string}>}
+ */
+export const probeSheetAccess = async (accessToken, sheetId) => {
+  try {
+    const response = await fetch(
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=properties.title`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    if (response.ok) return { ok: true };
+    if (response.status === 401) return { ok: false, error: 'Your session has expired. Please sign in again.' };
+    if (response.status === 403) return { ok: false, error: 'Access denied. Make sure you granted permission to Google Sheets.' };
+    if (response.status === 404) return { ok: false, error: 'Sheet not found. It may have been deleted.' };
+    return { ok: false, error: `Unexpected error (HTTP ${response.status}). Please try again.` };
+  } catch {
+    return { ok: false, error: 'Network error. Please check your connection.' };
+  }
+};

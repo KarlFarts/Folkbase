@@ -59,12 +59,14 @@ import { useActiveSheetId } from './utils/sheetResolver';
 
 // Lazy load setup wizard (only loaded when needed)
 const SetupWizard = lazy(() => import('./components/SetupWizard/SetupWizard'));
+const SignInPage = lazy(() => import('./pages/SignInPage'));
 
 function AppContent() {
   const { user, accessToken, loading } = useAuth();
   const { config } = useConfig();
   const navigate = useNavigate();
   const [showSetup, setShowSetup] = useState(false);
+  const [signInError, setSignInError] = useState(null);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const activeSheetId = useActiveSheetId();
@@ -104,38 +106,35 @@ function AppContent() {
     );
   }
 
-  // Determine if we need to show setup
-  // DEV MODE: Skip setup wizard entirely (using mock auth and local data)
-  // PRODUCTION: Need Google OAuth user, Google Sheets access token, AND sheet ID configured
-  const needsSetup =
-    import.meta.env.VITE_DEV_MODE === 'true'
-      ? false
-      : !user || !accessToken || !config.personalSheetId;
+  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
 
-  // If setup is needed or explicitly shown, display the unified setup wizard
+  // Step 1: Not signed in → show sign-in page
+  // (DEV MODE skips this entirely — mock auth is always present)
+  if (!isDevMode && (!user || !accessToken)) {
+    return (
+      <Suspense fallback={<div className="loading-container"><div className="loading-spinner"></div></div>}>
+        <SignInPage
+          initialError={signInError}
+          onSignedIn={() => {
+            // App.js re-renders automatically when AuthContext updates user/accessToken.
+            // Nothing to do here — the routing logic below will take over.
+            setSignInError(null);
+          }}
+        />
+      </Suspense>
+    );
+  }
+
+  // Step 2: Signed in but no sheet configured → show setup wizard (new users)
+  const needsSetup = !isDevMode && !config.personalSheetId;
+
   if (needsSetup || showSetup) {
     return (
-      <Suspense
-        fallback={
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignItems: 'center',
-              height: '100vh',
-              fontSize: '1.2rem',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
-            Loading setup wizard...
-          </div>
-        }
-      >
+      <Suspense fallback={<div className="loading-container"><div className="loading-spinner"></div></div>}>
         <SetupWizard
           isInitialSetup={needsSetup}
           onComplete={() => {
             setShowSetup(false);
-            // Config and auth are already updated; just close the wizard
           }}
         />
       </Suspense>
