@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
@@ -109,11 +109,10 @@ function AddOrganization({ onNavigate }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+      <div className="add-form-header">
         <button
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost btn-sm add-form-back"
           onClick={() => onNavigate('organizations')}
-          style={{ marginBottom: 'var(--spacing-md)' }}
         >
           ← Back to Organizations
         </button>
@@ -122,21 +121,12 @@ function AddOrganization({ onNavigate }) {
       </div>
 
       {error && (
-        <div
-          style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid var(--color-danger)',
-            borderRadius: 'var(--radius-md)',
-            padding: 'var(--spacing-md)',
-            marginBottom: 'var(--spacing-lg)',
-            color: 'var(--color-danger)',
-          }}
-        >
+        <div className="add-form-error">
           {error}
         </div>
       )}
 
-      <div className="card" style={{ maxWidth: '700px' }}>
+      <div className="card add-form-card">
         <div className="card-body">
           {/* Identity Section */}
           <div className="form-group">
@@ -151,7 +141,7 @@ function AddOrganization({ onNavigate }) {
           </div>
 
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label">Type</label>
@@ -186,7 +176,7 @@ function AddOrganization({ onNavigate }) {
 
           {/* Contact Information */}
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label">Phone</label>
@@ -246,7 +236,7 @@ function AddOrganization({ onNavigate }) {
 
           {/* Priority and Status */}
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label">Priority</label>
@@ -312,9 +302,7 @@ function AddOrganization({ onNavigate }) {
             />
           </div>
 
-          <div
-            style={{ display: 'flex', gap: 'var(--spacing-md)', marginTop: 'var(--spacing-lg)' }}
-          >
+          <div className="add-form-actions add-form-actions--left">
             <button
               className="btn btn-primary"
               onClick={() => handleSubmit(false)}
@@ -335,60 +323,34 @@ function AddOrganization({ onNavigate }) {
 
       {/* Duplicate Warning Modal */}
       {showDuplicateWarning && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0, 0, 0, 0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 'var(--spacing-md)',
-          }}
-        >
-          <div className="card" style={{ maxWidth: '500px', width: '100%' }}>
+        <div className="tl-modal-overlay">
+          <div className="card tl-modal-card tl-modal-card--sm">
             <div className="card-header">
               <h3>Potential Duplicate Detected</h3>
             </div>
             <div className="card-body">
               <p>This organization might already exist:</p>
               {duplicates.map((dup, index) => (
-                <div
-                  key={index}
-                  style={{
-                    padding: 'var(--spacing-sm)',
-                    background: 'var(--color-background-secondary)',
-                    borderRadius: 'var(--radius-md)',
-                    marginTop: 'var(--spacing-sm)',
-                  }}
-                >
-                  <div style={{ fontWeight: '600' }}>{dup.organization.Name}</div>
-                  <div className="text-muted" style={{ fontSize: '0.9em' }}>
+                <div key={index} className="add-form-dup-item">
+                  <div className="add-form-dup-name">{dup.organization.Name}</div>
+                  <div className="text-muted add-form-dup-sub">
                     {dup.organization.Address}
                   </div>
-                  <div className="text-muted" style={{ fontSize: '0.85em', marginTop: '4px' }}>
+                  <div className="text-muted add-form-dup-reasons">
                     Match reasons: {dup.reasons.join(', ')}
                   </div>
                   <button
-                    className="btn btn-sm btn-ghost"
+                    className="btn btn-sm btn-ghost add-form-dup-link"
                     onClick={() =>
                       onNavigate('organization-profile', dup.organization['Organization ID'])
                     }
-                    style={{ marginTop: 'var(--spacing-xs)' }}
                   >
                     View existing organization
                   </button>
                 </div>
               ))}
             </div>
-            <div
-              className="card-footer"
-              style={{ display: 'flex', gap: 'var(--spacing-sm)', justifyContent: 'flex-end' }}
-            >
+            <div className="card-footer tl-modal-footer">
               <button className="btn btn-ghost" onClick={() => setShowDuplicateWarning(false)}>
                 Cancel
               </button>

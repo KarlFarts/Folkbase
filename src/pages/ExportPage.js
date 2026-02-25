@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
@@ -166,12 +166,8 @@ function ExportPage({ onNavigate }) {
   return (
     <div>
       {/* Header */}
-      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-        <button
-          className="btn btn-text"
-          onClick={() => onNavigate('contacts')}
-          style={{ marginBottom: 'var(--spacing-md)', padding: 0 }}
-        >
+      <div className="export-header">
+        <button className="btn btn-text export-back-btn" onClick={() => onNavigate('contacts')}>
           ← Back to Contacts
         </button>
         <h1>Export Contacts</h1>
@@ -179,7 +175,7 @@ function ExportPage({ onNavigate }) {
       </div>
 
       {/* Filters Section */}
-      <div className="card export-section" style={{ marginBottom: 'var(--spacing-lg)' }}>
+      <div className="card export-section">
         <div className="form-section">
           <h3>Filters</h3>
           <ExportFilters
@@ -189,15 +185,8 @@ function ExportPage({ onNavigate }) {
             statusOptions={statusOptions}
           />
         </div>
-        <div
-          style={{
-            padding: 'var(--spacing-sm) var(--spacing-md)',
-            backgroundColor: 'var(--color-bg-tertiary)',
-            borderRadius: 'var(--radius-md)',
-            marginTop: 'var(--spacing-md)',
-          }}
-        >
-          <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>
+        <div className="export-count-bar">
+          <p className="text-muted export-count-text">
             <strong>{filteredContacts.length}</strong> of {contacts.length} contacts match current
             filters
           </p>
@@ -205,54 +194,38 @@ function ExportPage({ onNavigate }) {
       </div>
 
       {/* Format Selection */}
-      <div className="card export-section" style={{ marginBottom: 'var(--spacing-lg)' }}>
+      <div className="card export-section">
         <div className="form-section">
           <h3>Export Format</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 'var(--spacing-md)',
-                cursor: 'pointer',
-              }}
-            >
+          <div className="export-format-list">
+            <label className="export-format-option">
               <input
                 type="radio"
                 name="format"
                 value="csv"
                 checked={format === 'csv'}
                 onChange={(e) => setFormat(e.target.value)}
-                style={{ marginTop: '2px', cursor: 'pointer' }}
+                className="export-format-radio"
               />
-              <div style={{ flex: 1 }}>
-                <span style={{ fontWeight: 600, display: 'block', marginBottom: '2px' }}>CSV</span>
-                <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>
+              <div className="export-format-body">
+                <span className="export-format-name">CSV</span>
+                <p className="text-muted export-format-desc">
                   Spreadsheet format compatible with Excel, Google Sheets, and databases
                 </p>
               </div>
             </label>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: 'var(--spacing-md)',
-                cursor: 'pointer',
-              }}
-            >
+            <label className="export-format-option">
               <input
                 type="radio"
                 name="format"
                 value="vcard"
                 checked={format === 'vcard'}
                 onChange={(e) => setFormat(e.target.value)}
-                style={{ marginTop: '2px', cursor: 'pointer' }}
+                className="export-format-radio"
               />
-              <div style={{ flex: 1 }}>
-                <span style={{ fontWeight: 600, display: 'block', marginBottom: '2px' }}>
-                  vCard
-                </span>
-                <p className="text-muted" style={{ margin: 0, fontSize: '0.875rem' }}>
+              <div className="export-format-body">
+                <span className="export-format-name">vCard</span>
+                <p className="text-muted export-format-desc">
                   Contact file format for phones, email clients, and Google Contacts
                 </p>
               </div>
@@ -263,7 +236,7 @@ function ExportPage({ onNavigate }) {
 
       {/* Field Selection (CSV only) */}
       {format === 'csv' && (
-        <div className="card export-section" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="card export-section">
           <div className="form-section">
             <h3>Fields to Export</h3>
             <FieldSelector
@@ -279,7 +252,7 @@ function ExportPage({ onNavigate }) {
 
       {/* vCard info */}
       {format === 'vcard' && (
-        <div className="card export-section" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="card export-section">
           <div className="form-section">
             <h3>Export Fields</h3>
             <p className="text-muted">
@@ -291,14 +264,7 @@ function ExportPage({ onNavigate }) {
       )}
 
       {/* Action Buttons */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          paddingTop: 'var(--spacing-lg)',
-          borderTop: '1px solid var(--color-border)',
-        }}
-      >
+      <div className="export-actions">
         <button className="btn btn-secondary" onClick={() => onNavigate('contacts')}>
           Cancel
         </button>

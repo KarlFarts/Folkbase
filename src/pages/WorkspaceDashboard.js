@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -243,16 +243,15 @@ const WorkspaceDashboard = () => {
                     )}
                   </div>
 
-                  <div className="workspace-folder-section" style={{ marginTop: '1.5rem' }}>
+                  <div className="workspace-folder-section">
                     <h2>Collaborate with Google Drive</h2>
-                    <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
+                    <p className="text-muted ws-folder-desc">
                       Share the Folkbase folder with workspace members to give them access to
                       the shared sheet and files.
                     </p>
                     <button
                       onClick={handleShareFolder}
-                      className="btn btn-secondary"
-                      style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                      className="btn btn-secondary ws-folder-btn"
                     >
                       <svg
                         width="16"

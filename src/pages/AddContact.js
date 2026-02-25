@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -161,11 +161,10 @@ function AddContact({ onNavigate }) {
 
   return (
     <div>
-      <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+      <div className="add-form-header">
         <button
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost btn-sm add-form-back"
           onClick={() => onNavigate('contacts')}
-          style={{ marginBottom: 'var(--spacing-md)' }}
         >
           ← Back to Contacts
         </button>
@@ -174,24 +173,15 @@ function AddContact({ onNavigate }) {
       </div>
 
       {error && (
-        <div
-          style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid var(--color-danger)',
-            borderRadius: 'var(--radius-md)',
-            padding: 'var(--spacing-md)',
-            marginBottom: 'var(--spacing-lg)',
-            color: 'var(--color-danger)',
-          }}
-        >
+        <div className="add-form-error">
           {error}
         </div>
       )}
 
-      <div className="card" style={{ maxWidth: '700px' }}>
+      <div className="card add-form-card">
         <div className="card-body">
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label" htmlFor="contact-first-name">
@@ -244,7 +234,7 @@ function AddContact({ onNavigate }) {
           </div>
 
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label" htmlFor="contact-phone-mobile">
@@ -278,7 +268,7 @@ function AddContact({ onNavigate }) {
           </div>
 
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label" htmlFor="contact-organization">
@@ -310,7 +300,7 @@ function AddContact({ onNavigate }) {
           </div>
 
           <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
+            className="add-form-row"
           >
             <div className="form-group">
               <label className="form-label" htmlFor="contact-priority">
@@ -392,14 +382,7 @@ function AddContact({ onNavigate }) {
             />
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: 'var(--spacing-sm)',
-              marginTop: 'var(--spacing-lg)',
-            }}
-          >
+          <div className="add-form-actions">
             <button className="btn btn-secondary" onClick={() => onNavigate('contacts')}>
               Cancel
             </button>
@@ -416,22 +399,8 @@ function AddContact({ onNavigate }) {
 
       {/* Duplicate Warning Modal */}
       {showDuplicateWarning && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 'var(--spacing-md)',
-          }}
-        >
-          <div className="card" style={{ maxWidth: '500px', width: '100%' }}>
+        <div className="tl-modal-overlay">
+          <div className="card tl-modal-card tl-modal-card--sm">
             <div className="card-header">
               <h3>Possible Duplicates Found</h3>
               <button
@@ -442,21 +411,16 @@ function AddContact({ onNavigate }) {
               </button>
             </div>
             <div className="card-body">
-              <p style={{ marginBottom: 'var(--spacing-md)' }}>
+              <p className="add-form-dup-msg">
                 We found {duplicates.length} existing contact(s) that might be duplicates:
               </p>
 
               {duplicates.map((dup, i) => (
                 <div
                   key={i}
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    background: 'var(--color-bg-tertiary)',
-                    borderRadius: 'var(--radius-md)',
-                    marginBottom: 'var(--spacing-sm)',
-                  }}
+                  className="add-form-dup-item"
                 >
-                  <div style={{ fontWeight: '600' }}>{dup.existing['Name']}</div>
+                  <div className="add-form-dup-name">{dup.existing['Name']}</div>
                   <div className="text-sm text-muted">
                     {dup.existing['Organization']}
                     {dup.existing['Organization'] && ' · '}
@@ -474,10 +438,7 @@ function AddContact({ onNavigate }) {
                 </div>
               ))}
             </div>
-            <div
-              className="card-footer"
-              style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}
-            >
+            <div className="card-footer tl-modal-footer">
               <button className="btn btn-secondary" onClick={() => setShowDuplicateWarning(false)}>
                 Cancel
               </button>

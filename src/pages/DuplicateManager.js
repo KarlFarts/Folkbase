@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -153,7 +153,7 @@ function DuplicateManager() {
   if (loading) {
     return (
       <div className="page-container">
-        <div className="text-center" style={{ marginTop: '2rem' }}>
+        <div className="text-center dm-loading">
           <p>Loading contacts...</p>
         </div>
       </div>
@@ -173,7 +173,7 @@ function DuplicateManager() {
       </div>
 
       {error && (
-        <div className="alert alert-danger" style={{ marginBottom: '1rem' }}>
+        <div className="alert alert-danger dm-error">
           {error}
         </div>
       )}
@@ -194,7 +194,7 @@ function DuplicateManager() {
           <p className="text-sm">
             This will compare all contacts and find potential duplicates based on:
           </p>
-          <ul className="text-sm" style={{ marginLeft: '1.5rem' }}>
+          <ul className="text-sm dm-criteria-list">
             <li>Exact or similar names (80%+ match)</li>
             <li>Matching phone numbers</li>
             <li>Matching email addresses</li>
@@ -204,7 +204,7 @@ function DuplicateManager() {
 
       {/* Duplicates found section */}
       {duplicates.length > 0 && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
+        <div className="card dm-results-card">
           <div className="card-header">
             <h2>Found {duplicates.length} Potential Duplicate(s)</h2>
           </div>
@@ -267,7 +267,7 @@ function DuplicateManager() {
 
       {/* Linked pairs section */}
       {linkedPairs.length > 0 && (
-        <div className="card" style={{ marginTop: '1.5rem' }}>
+        <div className="card dm-results-card">
           <div className="card-header">
             <h2>Linked Duplicates ({linkedPairs.length})</h2>
           </div>
@@ -304,223 +304,6 @@ function DuplicateManager() {
         />
       )}
 
-      {/* eslint-disable-next-line react/no-unknown-property */}
-      <style jsx="true">{`
-        .duplicates-list {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .duplicate-pair {
-          border: 1px solid var(--color-border);
-          border-radius: 0.5rem;
-          padding: 1rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .duplicate-info {
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          gap: 1rem;
-          align-items: center;
-        }
-
-        .contact-info {
-          display: flex;
-          flex-direction: column;
-          gap: 0.25rem;
-        }
-
-        .contact-info h4 {
-          margin: 0;
-          font-weight: 600;
-        }
-
-        .duplicate-vs {
-          text-align: center;
-          color: var(--color-text-muted);
-          font-weight: 600;
-          min-width: 2rem;
-        }
-
-        .duplicate-confidence {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .duplicate-actions {
-          display: flex;
-          gap: 0.5rem;
-          justify-content: flex-end;
-        }
-
-        .linked-pairs-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.75rem;
-        }
-
-        .linked-pair {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.75rem;
-          background-color: var(--color-bg-secondary);
-          border-radius: 0.375rem;
-        }
-
-        .pair-info {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-        }
-
-        .merge-confidence {
-          margin-bottom: 1.5rem;
-          padding: 1rem;
-          background-color: var(--color-bg-secondary);
-          border-radius: 0.5rem;
-        }
-
-        .merge-confidence h3 {
-          margin: 0 0 0.5rem 0;
-          font-size: 0.875rem;
-          font-weight: 600;
-          text-transform: uppercase;
-          color: var(--color-text-secondary);
-        }
-
-        .badge {
-          display: inline-block;
-          padding: 0.25rem 0.75rem;
-          border-radius: 0.25rem;
-          font-size: 0.75rem;
-          font-weight: 600;
-          margin-right: 0.5rem;
-        }
-
-        .badge-success {
-          background-color: rgba(5, 150, 105, 0.1);
-          color: #059669;
-        }
-
-        .badge-info {
-          background-color: rgba(124, 104, 83, 0.1);
-          color: #7c6853;
-        }
-
-        .merge-contact-headers {
-          display: grid;
-          grid-template-columns: 1fr auto 1fr;
-          gap: 1rem;
-          margin: 1.5rem 0;
-          align-items: center;
-          padding: 1rem;
-          background-color: var(--color-bg-secondary);
-          border-radius: 0.5rem;
-        }
-
-        .contact-header h4 {
-          margin: 0 0 0.25rem 0;
-        }
-
-        .merge-spacer {
-          text-align: center;
-          color: var(--color-text-muted);
-          font-weight: 600;
-        }
-
-        .merge-fields {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          margin: 1.5rem 0;
-        }
-
-        .merge-field {
-          border: 1px solid var(--color-border);
-          border-radius: 0.5rem;
-          padding: 1rem;
-        }
-
-        .merge-field.has-conflict {
-          border-color: rgba(217, 119, 6, 0.3);
-          background-color: rgba(217, 119, 6, 0.05);
-        }
-
-        .merge-field-label {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 0.75rem;
-        }
-
-        .merge-field-label label {
-          font-weight: 600;
-          margin: 0;
-        }
-
-        .conflict-badge {
-          background-color: rgba(217, 119, 6, 0.3);
-          color: #111827;
-          padding: 0.25rem 0.5rem;
-          border-radius: 0.25rem;
-          font-size: 0.75rem;
-          font-weight: 600;
-        }
-
-        .merge-field-values {
-          display: grid;
-          grid-template-columns: 1fr 1fr auto;
-          gap: 1rem;
-        }
-
-        .field-option {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .field-option input[type='radio'] {
-          cursor: pointer;
-        }
-
-        .field-option label {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          cursor: pointer;
-          margin: 0;
-        }
-
-        .field-option input[type='radio']:disabled + label {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .field-value {
-          padding: 0.5rem;
-          background-color: var(--color-bg-secondary);
-          border-radius: 0.375rem;
-          font-size: 0.875rem;
-          word-break: break-word;
-        }
-
-        .field-skip {
-          grid-column: 3;
-        }
-
-        .merge-info-box {
-          margin-top: 1.5rem;
-          padding: 1rem;
-          background-color: rgba(194, 112, 62, 0.1);
-          border-left: 4px solid #c2703e;
-          border-radius: 0.375rem;
-        }
-      `}</style>
     </div>
   );
 }

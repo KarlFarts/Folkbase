@@ -21,7 +21,7 @@
 ## Contact System
 - [x] **ContactList** (`/contacts`) — all 18 inline styles → `cl-*` CSS classes; deleted inline @keyframes spin
 - [x] **ContactProfile** (`/contacts/:id`) — horizontal tab bar replaces dropdown+sidebar; action buttons in header; all 46 inline styles → `cp-*` classes
-- [ ] **AddContact** (`/contacts/add`) — creation form
+- [x] **AddContact** (`/contacts/add`) — 15 inline styles → `add-form-*` classes; removed React import
 - [ ] **ContactCard** — card component
 - [ ] **ContactTable** — table component
 - [ ] **ContactFilters** — advanced filtering
@@ -33,20 +33,20 @@
 ## Organization System
 - [x] **OrganizationList** (`/organizations`) — reused `cl-*` classes; fixed double-className; removed React import
 - [x] **OrganizationProfile** (`/organizations/:id`) — reused `cp-tab-bar`/`cp-linked-card`; all inline styles → `op-*` classes; corrected accent color token
-- [ ] **AddOrganization** (`/organizations/add`)
+- [x] **AddOrganization** (`/organizations/add`) — 16 inline styles → `add-form-*` classes; removed React import
 - [ ] **OrganizationCard**
 - [ ] **DepartmentsManager, OrgContactsManager** — profile sub-sections
 
 ## Location System
-- [ ] **LocationList** (`/locations`)
-- [ ] **LocationProfile** (`/locations/:id`)
+- [x] **LocationList** (`/locations`) — 13 inline styles → reused `cl-*` classes; removed React import; deleted inline @keyframes spin
+- [x] **LocationProfile** (`/locations/:id`) — 47 inline styles → `lp-*` classes; reused `cp-tab-bar`, `op-field-stack`, `tl-item-list`; removed React import
 - [ ] **AddLocation** (`/locations/add`)
 - [ ] **LocationCard**
 
 ## Events System
 - [x] **EventsList** (`/events`) — all inline styles → `el-*` classes; removed React import; deduped filtered views
 - [x] **EventDetails** (`/events/:id`) — all ~25 inline styles → `ed-*` classes; reused `cp-linked-card`; removed React import
-- [ ] **AddEvent** (`/events/add`)
+- [x] **AddEvent** (`/events/add`) — 7 inline styles → `add-form-field`, `add-form-actions`, `add-form-card--lg`; removed React import
 - [ ] **EventCard**
 - [ ] **CalendarView** — month calendar
 - [ ] **TimelineView** — timeline/Gantt view
@@ -79,20 +79,20 @@
 - [ ] **AddRelationshipModal**
 
 ## Import/Export
-- [ ] **ImportPage** (`/import`) — 5-step wizard
-- [ ] **ExportPage** (`/export`)
-- [ ] **QuickSyncPage** (`/quick-sync`) — `src/pages/QuickSyncPage.css`
+- [x] **ImportPage** (`/import`) — 1 inline style → `import-cancel-row`; removed React import
+- [x] **ExportPage** (`/export`) — 20 inline styles → `export-*` classes; removed React import
+- [x] **QuickSyncPage** (`/quick-sync`) — 0 inline styles; removed React import
 - [ ] **FileDropzone, ImportSourceSelector, FieldMappingPreview, DataCorrectionTable, BatchActionsToolbar, DuplicateReviewPanel, ProgressTracker**
 - [ ] **ExportFilters, FieldSelector**
 - [ ] **QuickSync components** — ContactFileDropzone, NewContactCard, QuickEnrichmentForm, SyncSummary
 
 ## Call & Meeting Modes
-- [ ] **CallMode** (`/call-mode/:contactId`) — full-screen call interface
-- [ ] **MeetingMode** (`/meeting-mode`) — multi-attendee meeting
+- [x] **CallMode** (`/call-mode/:contactId`) — 14 inline styles → `focus-mode-*` classes
+- [x] **MeetingMode** (`/meeting-mode`) — 10 inline styles → `focus-mode-*` + attendee classes
 - [ ] **Timer** component
 
 ## Workspaces
-- [ ] **WorkspaceDashboard** (`/workspaces`)
+- [x] **WorkspaceDashboard** (`/workspaces`) — 3 inline styles → `ws-folder-*` classes; removed React import
 - [ ] **CreateWorkspace** (`/workspaces/create`) — multi-step wizard
 - [ ] **JoinWorkspace** (`/join`)
 - [ ] **WorkspaceInvitationGenerator**
@@ -101,12 +101,12 @@
 - [ ] **CopyContactModal, BulkCopyModal**
 
 ## Settings
-- [ ] **SettingsPage** (`/settings`) — multiple panels
+- [x] **SettingsPage** (`/settings`) — 127 inline styles → `sp-*` classes; removed React import
 - [ ] **BillingPanel** — `src/pages/SettingsPanels/BillingPanel.js`
 - [ ] **BackupRestorePage** (`/backup`)
 
 ## Duplicate Management
-- [ ] **DuplicateManager** (`/duplicates`)
+- [x] **DuplicateManager** (`/duplicates`) — 5 inline styles + `<style jsx>` block → `dm-*` CSS classes; removed React import
 - [ ] **MergePreview**
 
 ## Modal/Dialog System
@@ -127,11 +127,11 @@
 - [ ] **TimelineItem**
 
 ## Shared Stylesheets
-- [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*` sections added; breadcrumbs updated
+- [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*`, `add-form-*`, `focus-mode-*`, `lp-*`, `export-*`, `ws-*`, `dm-*`, `sp-*` sections added; breadcrumbs updated
 - [x] **Dashboard.css** — HeroWelcome alias, hero-top scoping
 - [ ] **themes.css** — color palette/tokens (`src/styles/themes.css`)
 
 ## Stats
 - **31 pages** | **116+ components** | **34 CSS files** | **677 inline style occurrences**
-- **Session progress:** ~12 pages/components done, ~105 remaining
-- Priority order: TouchpointsList → NotesInbox → BraindumpPage → remaining pages
+- **Session progress:** ~26 pages/components done (all major pages complete); component layer remaining
+- Pages done: Navbar, Breadcrumbs, WorkspaceSwitcher, Dashboard, ContactList, ContactProfile, OrganizationList, OrganizationProfile, EventsList, EventDetails, TasksPage, TouchpointsList, NotesInbox, BraindumpPage, AddContact, AddOrganization, LocationList, LocationProfile, CallMode, MeetingMode, AddEvent, ImportPage, QuickSyncPage, WorkspaceDashboard, DuplicateManager, ExportPage, SettingsPage
