@@ -18,6 +18,11 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
     relationships: FIELD_GROUPS.RELATIONSHIPS,
     mailing: FIELD_GROUPS.MAILING,
     assets: FIELD_GROUPS.ASSETS,
+    demographics: FIELD_GROUPS.DEMOGRAPHICS,
+    contact_prefs: FIELD_GROUPS.CONTACT_PREFS,
+    community: FIELD_GROUPS.COMMUNITY,
+    donor: FIELD_GROUPS.DONOR,
+    privacy: FIELD_GROUPS.PRIVACY,
   };
 
   const group = tabToGroup[activeTab];
@@ -109,6 +114,27 @@ function EditableField({ field, value, onChange }) {
           ))}
         </select>
       );
+
+    case 'combobox': {
+      const inputId = `combobox-${field.key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+      return (
+        <div>
+          <input
+            type="text"
+            className="form-input"
+            list={inputId}
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+          />
+          <datalist id={inputId}>
+            {(field.options || []).map((opt) => (
+              <option key={opt} value={opt} />
+            ))}
+          </datalist>
+        </div>
+      );
+    }
 
     case 'tags': {
       // Extract all tags from all contacts for autocomplete
