@@ -101,6 +101,8 @@ export const SHEET_NAMES = {
   CONTACT_EDUCATION: 'Contact Education', // Contact education history
   CONTACT_EMPLOYMENT: 'Contact Employment', // Contact employment history
   CONTACT_DISTRICTS: 'Contact Districts', // Contact electoral districts
+  CONTACT_ATTRIBUTES: 'Contact Attributes',
+  CONTACT_METHODS: 'Contact Methods',
   EVENT_ATTENDEES: 'Event Attendees', // Event attendee tracking (RSVP, check-in, roles)
   EVENT_RESOURCES: 'Event Resources', // Event materials, equipment, costs
   EVENT_AGENDA: 'Event Agenda', // Event agenda items (timeline, speakers, duration)
@@ -156,6 +158,8 @@ export const AUTO_FIELDS = {
   'Education ID': 'auto-generate',
   'Employment ID': 'auto-generate',
   'District ID': 'auto-generate',
+  'Attribute ID': 'auto-generate',
+  'Contact Method ID': 'auto-generate',
   // Event junction tab IDs
   'Attendee ID': 'auto-generate',
   'Resource ID': 'auto-generate',
@@ -182,7 +186,7 @@ export const AUTO_FIELDS = {
 };
 
 // Schema Version Tracking
-export const SCHEMA_VERSION = 2; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory)
+export const SCHEMA_VERSION = 3; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory, v3 = expanded contact profile)
 export const SCHEMA_STORAGE_KEY = '_touchpoint_schema_version'; // localStorage key for dev mode
 
 // Business Logic Thresholds
@@ -260,6 +264,30 @@ export const SHEET_HEADERS = {
     // Avatar (2)
     'Avatar Color',
     'Avatar Icon',
+    // Demographics (12)
+    'Race / Ethnicity',
+    'Race / Ethnicity Notes',
+    'Cultural / Ethnic Subgroup',
+    'LGBTQ+ Identity',
+    'LGBTQ+ Identity Notes',
+    'Disability / Accessibility Needs',
+    'Disability / Accessibility Notes',
+    'Immigration / Refugee Background',
+    'Veteran Status',
+    'Religious / Spiritual Affiliation',
+    'Student Status',
+    'Parent / Caregiver Status',
+    // Contact Preferences (2)
+    'Best Time to Contact',
+    'Opt-In Status',
+    // Community (2)
+    'Neighborhood / Ward / District',
+    'Local Business Owner / Worker',
+    // Donor (1)
+    'Donor Status',
+    // Privacy (2)
+    'Privacy Preferences',
+    'Media Consent',
     // Internal (3)
     'Created By',
     'Duplicate Linked To',
@@ -419,6 +447,23 @@ export const SHEET_HEADERS = {
     'District Number',
     'Representative',
     'Representative Contact',
+    'Notes',
+  ],
+  [SHEET_NAMES.CONTACT_ATTRIBUTES]: [
+    'Attribute ID',
+    'Contact ID',
+    'Category',
+    'Value',
+    'Notes',
+    'Date Added',
+  ],
+  [SHEET_NAMES.CONTACT_METHODS]: [
+    'Contact Method ID',
+    'Contact ID',
+    'Type',
+    'Label',
+    'Value',
+    'Is Primary',
     'Notes',
   ],
   [SHEET_NAMES.EVENT_ATTENDEES]: [
