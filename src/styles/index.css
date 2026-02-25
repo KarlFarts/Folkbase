@@ -695,6 +695,40 @@ a:hover {
   color: var(--color-text-primary);
 }
 
+.field-with-clear {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.field-with-clear .form-input,
+.field-with-clear .form-select,
+.field-with-clear .form-textarea {
+  flex: 1;
+}
+
+.field-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: var(--color-bg-elevated);
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  transition: background 0.15s, color 0.15s;
+}
+
+.field-clear-btn:hover {
+  background: var(--color-danger-subtle-bg, #fde8e8);
+  color: var(--color-danger, #dc3545);
+}
+
 /* ========================================
    COMPONENTS - Cards
    ======================================== */

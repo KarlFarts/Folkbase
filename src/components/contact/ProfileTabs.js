@@ -1,4 +1,5 @@
 import React from 'react';
+import { X } from 'lucide-react';
 import { getFieldsByGroup, FIELD_GROUPS } from '../../utils/fieldDefinitions';
 import { sanitizeUrl, buildTelUrl, buildSmsUrl, buildMailtoUrl } from '../../utils/sanitize';
 
@@ -79,46 +80,82 @@ function EditableField({ field, value, onChange }) {
     case 'text':
     case 'multi-text':
       return (
-        <input
-          type="text"
-          className="form-input"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder}
-        />
+        <div className="field-with-clear">
+          <input
+            type="text"
+            className="form-input"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+          />
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       );
 
     case 'textarea':
       return (
-        <textarea
-          className="form-textarea"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder}
-          rows={3}
-        />
+        <div className="field-with-clear">
+          <textarea
+            className="form-textarea"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+            rows={3}
+          />
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       );
 
     case 'select':
       return (
-        <select
-          className="form-select"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-        >
-          <option value="">Select...</option>
-          {(field.options || []).map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
+        <div className="field-with-clear">
+          <select
+            className="form-select"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+          >
+            <option value="">Select...</option>
+            {(field.options || []).map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       );
 
     case 'combobox': {
       const inputId = `combobox-${field.key.replace(/[^a-zA-Z0-9]/g, '-')}`;
       return (
-        <div>
+        <div className="field-with-clear">
           <input
             type="text"
             className="form-input"
@@ -132,6 +169,16 @@ function EditableField({ field, value, onChange }) {
               <option key={opt} value={opt} />
             ))}
           </datalist>
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
         </div>
       );
     }
@@ -177,23 +224,47 @@ function EditableField({ field, value, onChange }) {
 
     case 'date':
       return (
-        <input
-          type="date"
-          className="form-input"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-        />
+        <div className="field-with-clear">
+          <input
+            type="date"
+            className="form-input"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+          />
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       );
 
     case 'url':
       return (
-        <input
-          type="url"
-          className="form-input"
-          value={value || ''}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={field.placeholder}
-        />
+        <div className="field-with-clear">
+          <input
+            type="url"
+            className="form-input"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={field.placeholder}
+          />
+          {value && (
+            <button
+              type="button"
+              className="field-clear-btn"
+              onClick={() => onChange('')}
+              title="Clear field"
+            >
+              <X size={12} />
+            </button>
+          )}
+        </div>
       );
 
     default:
