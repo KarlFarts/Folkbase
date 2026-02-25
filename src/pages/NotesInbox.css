@@ -40,6 +40,12 @@
   color: var(--color-text-secondary);
 }
 
+.notes-status-bar-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
 .btn-icon {
   background: none;
   border: none;

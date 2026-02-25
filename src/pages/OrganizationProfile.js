@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -29,7 +29,6 @@ function OrganizationProfile({ onNavigate }) {
   const [activeTab, setActiveTab] = useState('details');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Cross-entity links
   const [keyContacts, setKeyContacts] = useState([]);
   const [linkedEvents, setLinkedEvents] = useState([]);
 
@@ -63,14 +62,11 @@ function OrganizationProfile({ onNavigate }) {
         return;
       }
 
-      // Map org contacts to full contact data
       const contactIds = orgContactsResult.map((oc) => oc['Contact ID']).filter(Boolean);
       const contacts = contactsResult.data.filter((contact) =>
         contactIds.includes(contact['Contact ID'])
       );
 
-      // Filter events related to this organization (from Entity Relationships or similar)
-      // For now, we'll filter events where the organization is mentioned
       const events = eventsResult.data.filter((event) => {
         const orgField = event['Organization'] || '';
         return orgField.includes(organizationId) || orgField.includes(found.Name);
@@ -79,9 +75,10 @@ function OrganizationProfile({ onNavigate }) {
       setOrganization(found);
       setEditData(found);
       setKeyContacts(contacts);
-      setLinkedEvents(events.sort((a, b) => (b['Event Date'] || '').localeCompare(a['Event Date'] || '')));
+      setLinkedEvents(
+        events.sort((a, b) => (b['Event Date'] || '').localeCompare(a['Event Date'] || ''))
+      );
     } catch {
-      // Error handled
       setError('Failed to load organization');
     } finally {
       setLoading(false);
@@ -113,7 +110,6 @@ function OrganizationProfile({ onNavigate }) {
       setIsEditing(false);
       notify.success('Organization updated successfully');
     } catch {
-      // Error handled
       notify.error('Failed to save changes');
     } finally {
       setSaving(false);
@@ -181,57 +177,35 @@ function OrganizationProfile({ onNavigate }) {
     return 'badge-status-inactive';
   };
 
+  const ORG_TABS = [
+    { id: 'details', label: 'Details' },
+    { id: 'contacts', label: `Key Contacts (${keyContacts.length})` },
+    { id: 'events', label: `Events (${linkedEvents.length})` },
+    { id: 'notes', label: 'Notes' },
+  ];
+
   return (
-    <div style={{ maxWidth: '1400px', margin: '0 auto' }}>
+    <div className="op-page">
       {/* Back button */}
-      <button
-        className="btn btn-ghost btn-sm"
-        onClick={() => onNavigate('organizations')}
-        style={{ marginBottom: 'var(--spacing-md)' }}
-      >
+      <button className="btn btn-ghost btn-sm cp-back-btn" onClick={() => onNavigate('organizations')}>
         ← Back to Organizations
       </button>
 
-      {/* Profile Header */}
-      <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+      {/* Profile Header card */}
+      <div className="card op-header-card">
         <div className="card-body">
-          <div style={{ display: 'flex', gap: 'var(--spacing-lg)', alignItems: 'flex-start' }}>
+          <div className="op-header-inner">
             {/* Icon */}
-            <div
-              style={{
-                width: '80px',
-                height: '80px',
-                borderRadius: 'var(--radius-md)',
-                background: 'rgba(194, 112, 62, 0.1)',
-                border: '3px solid var(--color-accent-secondary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-              }}
-            >
+            <div className="op-icon">
               <Building2 size={40} color="var(--color-accent-secondary)" />
             </div>
 
             {/* Name and Info */}
-            <div style={{ flex: 1 }}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
+            <div className="op-header-body">
+              <div className="op-header-top">
                 <div>
-                  <h1 style={{ marginBottom: 'var(--spacing-xs)' }}>{displayData['Name']}</h1>
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 'var(--spacing-md)',
-                      flexWrap: 'wrap',
-                      marginBottom: 'var(--spacing-sm)',
-                    }}
-                  >
+                  <h1 className="op-name">{displayData['Name']}</h1>
+                  <div className="op-meta-row">
                     <span className="text-muted">{displayData['Type']}</span>
                     {displayData['Industry'] && (
                       <>
@@ -246,7 +220,7 @@ function OrganizationProfile({ onNavigate }) {
                       </>
                     )}
                   </div>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+                  <div className="op-badges">
                     {displayData['Priority'] && (
                       <span className={`badge ${getPriorityClass(displayData['Priority'])}`}>
                         {displayData['Priority']}
@@ -266,22 +240,17 @@ function OrganizationProfile({ onNavigate }) {
                   </div>
                 </div>
 
-                {/* Action buttons */}
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                {/* Edit / Save / Cancel actions */}
+                <div className="op-header-actions">
                   {!isEditing ? (
                     <>
-                      <button
-                        className="btn btn-ghost btn-sm"
-                        onClick={handleEdit}
-                        title="Edit organization"
-                      >
+                      <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit organization">
                         <Edit size={16} />
                       </button>
                       <button
-                        className="btn btn-ghost btn-sm"
+                        className="btn btn-ghost btn-sm op-delete-btn"
                         onClick={() => setShowDeleteConfirm(true)}
                         title="Delete organization"
-                        style={{ color: 'var(--color-danger)' }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -310,34 +279,19 @@ function OrganizationProfile({ onNavigate }) {
               </div>
 
               {/* Quick actions */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-sm)',
-                  marginTop: 'var(--spacing-md)',
-                }}
-              >
+              <div className="op-quick-actions">
                 {displayData['Phone'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('call')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('call')}>
                     <Phone size={16} /> Call
                   </button>
                 )}
                 {displayData['Email'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('email')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('email')}>
                     <Mail size={16} /> Email
                   </button>
                 )}
                 {displayData['Website'] && (
-                  <button
-                    className="btn btn-secondary btn-sm"
-                    onClick={() => handleQuickAction('website')}
-                  >
+                  <button className="btn btn-secondary btn-sm" onClick={() => handleQuickAction('website')}>
                     <Globe size={16} /> Website
                   </button>
                 )}
@@ -347,100 +301,34 @@ function OrganizationProfile({ onNavigate }) {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div style={{ marginBottom: 'var(--spacing-md)' }}>
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--spacing-sm)',
-            borderBottom: '1px solid var(--border-color-default)',
-          }}
-        >
+      {/* Tab bar */}
+      <div className="cp-tab-bar">
+        {ORG_TABS.map((tab) => (
           <button
-            className={`tab-button ${activeTab === 'details' ? 'active' : ''}`}
-            onClick={() => setActiveTab('details')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom:
-                activeTab === 'details' ? '2px solid var(--color-accent-primary)' : 'none',
-            }}
+            key={tab.id}
+            className={`cp-tab${activeTab === tab.id ? ' cp-tab--active' : ''}`}
+            onClick={() => setActiveTab(tab.id)}
           >
-            Details
+            {tab.label}
           </button>
-          <button
-            className={`tab-button ${activeTab === 'contacts' ? 'active' : ''}`}
-            onClick={() => setActiveTab('contacts')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom:
-                activeTab === 'contacts' ? '2px solid var(--color-accent-primary)' : 'none',
-            }}
-          >
-            Key Contacts ({keyContacts.length})
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'events' ? 'active' : ''}`}
-            onClick={() => setActiveTab('events')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom:
-                activeTab === 'events' ? '2px solid var(--color-accent-primary)' : 'none',
-            }}
-          >
-            Events ({linkedEvents.length})
-          </button>
-          <button
-            className={`tab-button ${activeTab === 'notes' ? 'active' : ''}`}
-            onClick={() => setActiveTab('notes')}
-            style={{
-              padding: 'var(--spacing-sm) var(--spacing-md)',
-              border: 'none',
-              background: 'none',
-              cursor: 'pointer',
-              borderBottom:
-                activeTab === 'notes' ? '2px solid var(--color-accent-primary)' : 'none',
-            }}
-          >
-            Notes
-          </button>
-        </div>
+        ))}
       </div>
 
       {/* Tab Content */}
       {activeTab === 'details' && (
         <div className="card">
           <div className="card-body">
-            <h3 style={{ marginBottom: 'var(--spacing-md)' }}>Organization Details</h3>
+            <h3 className="op-section-title">Organization Details</h3>
 
-            <div
-              style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-lg)' }}
-            >
+            <div className="op-details-grid">
               {/* Contact Information */}
               <div>
-                <h4
-                  style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}
-                >
-                  Contact Information
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                <h4 className="op-subsection-title">Contact Information</h4>
+                <div className="op-field-stack">
                   <div>
                     <label className="form-label">Phone</label>
                     {isEditing ? (
-                      <input
-                        type="tel"
-                        className="form-input"
-                        value={editData['Phone'] || ''}
-                        onChange={(e) => handleChange('Phone', e.target.value)}
-                      />
+                      <input type="tel" className="form-input" value={editData['Phone'] || ''} onChange={(e) => handleChange('Phone', e.target.value)} />
                     ) : (
                       <p className="text-muted">{displayData['Phone'] || 'Not provided'}</p>
                     )}
@@ -448,12 +336,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Email</label>
                     {isEditing ? (
-                      <input
-                        type="email"
-                        className="form-input"
-                        value={editData['Email'] || ''}
-                        onChange={(e) => handleChange('Email', e.target.value)}
-                      />
+                      <input type="email" className="form-input" value={editData['Email'] || ''} onChange={(e) => handleChange('Email', e.target.value)} />
                     ) : (
                       <p className="text-muted">{displayData['Email'] || 'Not provided'}</p>
                     )}
@@ -461,20 +344,11 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Website</label>
                     {isEditing ? (
-                      <input
-                        type="url"
-                        className="form-input"
-                        value={editData['Website'] || ''}
-                        onChange={(e) => handleChange('Website', e.target.value)}
-                      />
+                      <input type="url" className="form-input" value={editData['Website'] || ''} onChange={(e) => handleChange('Website', e.target.value)} />
                     ) : (
                       <p className="text-muted">
                         {displayData['Website'] ? (
-                          <a
-                            href={displayData['Website']}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
+                          <a href={displayData['Website']} target="_blank" rel="noopener noreferrer">
                             {displayData['Website']}
                           </a>
                         ) : (
@@ -486,16 +360,9 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Address</label>
                     {isEditing ? (
-                      <textarea
-                        className="form-textarea"
-                        value={editData['Address'] || ''}
-                        onChange={(e) => handleChange('Address', e.target.value)}
-                        rows={3}
-                      />
+                      <textarea className="form-textarea" value={editData['Address'] || ''} onChange={(e) => handleChange('Address', e.target.value)} rows={3} />
                     ) : (
-                      <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                        {displayData['Address'] || 'Not provided'}
-                      </p>
+                      <p className="text-muted op-pre-line">{displayData['Address'] || 'Not provided'}</p>
                     )}
                   </div>
                 </div>
@@ -503,20 +370,12 @@ function OrganizationProfile({ onNavigate }) {
 
               {/* Organization Details */}
               <div>
-                <h4
-                  style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}
-                >
-                  Details
-                </h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+                <h4 className="op-subsection-title">Details</h4>
+                <div className="op-field-stack">
                   <div>
                     <label className="form-label">Type</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Type'] || ''}
-                        onChange={(e) => handleChange('Type', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Type'] || ''} onChange={(e) => handleChange('Type', e.target.value)}>
                         <option value="Corporate">Corporate</option>
                         <option value="Non-Profit">Non-Profit</option>
                         <option value="Government">Government</option>
@@ -533,12 +392,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Industry</label>
                     {isEditing ? (
-                      <input
-                        type="text"
-                        className="form-input"
-                        value={editData['Industry'] || ''}
-                        onChange={(e) => handleChange('Industry', e.target.value)}
-                      />
+                      <input type="text" className="form-input" value={editData['Industry'] || ''} onChange={(e) => handleChange('Industry', e.target.value)} />
                     ) : (
                       <p className="text-muted">{displayData['Industry'] || 'Not specified'}</p>
                     )}
@@ -546,11 +400,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Size</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Size'] || ''}
-                        onChange={(e) => handleChange('Size', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Size'] || ''} onChange={(e) => handleChange('Size', e.target.value)}>
                         <option value="1-10">1-10</option>
                         <option value="11-50">11-50</option>
                         <option value="51-200">51-200</option>
@@ -566,12 +416,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Founded Date</label>
                     {isEditing ? (
-                      <input
-                        type="date"
-                        className="form-input"
-                        value={editData['Founded Date'] || ''}
-                        onChange={(e) => handleChange('Founded Date', e.target.value)}
-                      />
+                      <input type="date" className="form-input" value={editData['Founded Date'] || ''} onChange={(e) => handleChange('Founded Date', e.target.value)} />
                     ) : (
                       <p className="text-muted">{displayData['Founded Date'] || 'Not specified'}</p>
                     )}
@@ -579,11 +424,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Priority</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Priority'] || ''}
-                        onChange={(e) => handleChange('Priority', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Priority'] || ''} onChange={(e) => handleChange('Priority', e.target.value)}>
                         <option value="Urgent">Urgent</option>
                         <option value="High">High</option>
                         <option value="Medium">Medium</option>
@@ -597,11 +438,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div>
                     <label className="form-label">Status</label>
                     {isEditing ? (
-                      <select
-                        className="form-select"
-                        value={editData['Status'] || ''}
-                        onChange={(e) => handleChange('Status', e.target.value)}
-                      >
+                      <select className="form-select" value={editData['Status'] || ''} onChange={(e) => handleChange('Status', e.target.value)}>
                         <option value="Active">Active</option>
                         <option value="Inactive">Inactive</option>
                         <option value="Do Not Contact">Do Not Contact</option>
@@ -615,21 +452,13 @@ function OrganizationProfile({ onNavigate }) {
             </div>
 
             {/* Notes and Tags */}
-            <div style={{ marginTop: 'var(--spacing-lg)' }}>
-              <h4 style={{ marginBottom: 'var(--spacing-sm)', fontSize: 'var(--font-size-base)' }}>
-                Additional Information
-              </h4>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="op-additional-info">
+              <h4 className="op-subsection-title">Additional Information</h4>
+              <div className="op-field-stack">
                 <div>
                   <label className="form-label">Tags</label>
                   {isEditing ? (
-                    <input
-                      type="text"
-                      className="form-input"
-                      value={editData['Tags'] || ''}
-                      onChange={(e) => handleChange('Tags', e.target.value)}
-                      placeholder="partner, non-profit, community"
-                    />
+                    <input type="text" className="form-input" value={editData['Tags'] || ''} onChange={(e) => handleChange('Tags', e.target.value)} placeholder="partner, non-profit, community" />
                   ) : (
                     <p className="text-muted">{displayData['Tags'] || 'No tags'}</p>
                   )}
@@ -637,16 +466,9 @@ function OrganizationProfile({ onNavigate }) {
                 <div>
                   <label className="form-label">Notes</label>
                   {isEditing ? (
-                    <textarea
-                      className="form-textarea"
-                      value={editData['Notes'] || ''}
-                      onChange={(e) => handleChange('Notes', e.target.value)}
-                      rows={6}
-                    />
+                    <textarea className="form-textarea" value={editData['Notes'] || ''} onChange={(e) => handleChange('Notes', e.target.value)} rows={6} />
                   ) : (
-                    <p className="text-muted" style={{ whiteSpace: 'pre-line' }}>
-                      {displayData['Notes'] || 'No notes'}
-                    </p>
+                    <p className="text-muted op-pre-line">{displayData['Notes'] || 'No notes'}</p>
                   )}
                 </div>
               </div>
@@ -658,73 +480,36 @@ function OrganizationProfile({ onNavigate }) {
       {activeTab === 'contacts' && (
         <div className="card">
           <div className="card-body">
-            <h3 style={{ marginBottom: 'var(--spacing-md)' }}>Key Contacts</h3>
+            <h3 className="op-section-title">Key Contacts</h3>
             {keyContacts.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: 'var(--spacing-xl)',
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-                >
+              <div className="cp-empty-state">
+                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                   <circle cx="9" cy="7" r="4" />
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                   <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                 </svg>
-                <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Key Contacts</h3>
+                <h3 className="cp-empty-title">No Key Contacts</h3>
                 <p>This organization has no key contacts assigned yet.</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+              <div className="cp-card-grid">
                 {keyContacts.map((contact) => (
                   <div
                     key={contact['Contact ID']}
-                    className="card"
-                    style={{
-                      padding: 'var(--spacing-md)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
+                    className="card cp-linked-card"
                     onClick={() => onNavigate('contact-profile', contact['Contact ID'])}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                    }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                      }}
-                    >
+                    <div className="cp-linked-card-inner">
                       <div>
                         <strong>{contact['Display Name'] || contact.Name}</strong>
-                        <div
-                          className="text-muted"
-                          style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-xs)' }}
-                        >
+                        <div className="cp-linked-card-meta">
                           {contact.Role && <span>{contact.Role}</span>}
                           {contact.Role && contact['Email Personal'] && <span> · </span>}
                           {contact['Email Personal'] && <span>{contact['Email Personal']}</span>}
                         </div>
                       </div>
-                      <span
-                        className="badge badge-status-inactive"
-                        style={{ fontSize: 'var(--font-size-xs)' }}
-                      >
+                      <span className="badge badge-status-inactive cp-linked-card-id">
                         {contact['Contact ID']}
                       </span>
                     </div>
@@ -739,73 +524,36 @@ function OrganizationProfile({ onNavigate }) {
       {activeTab === 'events' && (
         <div className="card">
           <div className="card-body">
-            <h3 style={{ marginBottom: 'var(--spacing-md)' }}>Related Events</h3>
+            <h3 className="op-section-title">Related Events</h3>
             {linkedEvents.length === 0 ? (
-              <div
-                style={{
-                  textAlign: 'center',
-                  padding: 'var(--spacing-xl)',
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
-                <svg
-                  width="48"
-                  height="48"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-                >
+              <div className="cp-empty-state">
+                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                   <rect x="3" y="4" width="18" height="18" rx="2" />
                   <line x1="16" y1="2" x2="16" y2="6" />
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>No Events</h3>
+                <h3 className="cp-empty-title">No Events</h3>
                 <p>This organization has no related events.</p>
               </div>
             ) : (
-              <div style={{ display: 'grid', gap: 'var(--spacing-md)' }}>
+              <div className="cp-card-grid">
                 {linkedEvents.map((event) => (
                   <div
                     key={event['Event ID']}
-                    className="card"
-                    style={{
-                      padding: 'var(--spacing-md)',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s',
-                    }}
+                    className="card cp-linked-card"
                     onClick={() => onNavigate('event-details', { id: event['Event ID'] })}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                    }}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                      }}
-                    >
+                    <div className="cp-linked-card-inner">
                       <div>
                         <strong>{event['Event Name']}</strong>
-                        <div
-                          className="text-muted"
-                          style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-xs)' }}
-                        >
+                        <div className="cp-linked-card-meta">
                           {event['Event Date'] && <span>{event['Event Date']}</span>}
                           {event['Event Date'] && event['Event Type'] && <span> · </span>}
                           {event['Event Type'] && <span>{event['Event Type']}</span>}
                         </div>
                       </div>
-                      <span
-                        className="badge badge-status-inactive"
-                        style={{ fontSize: 'var(--font-size-xs)' }}
-                      >
+                      <span className="badge badge-status-inactive cp-linked-card-id">
                         {event['Event ID']}
                       </span>
                     </div>
@@ -820,42 +568,27 @@ function OrganizationProfile({ onNavigate }) {
       {activeTab === 'notes' && (
         <div className="card">
           <div className="card-body">
-            <div
-              style={{
-                textAlign: 'center',
-                padding: 'var(--spacing-xl)',
-                color: 'var(--color-text-secondary)',
-              }}
-            >
-              <svg
-                width="48"
-                height="48"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }}
-              >
+            <div className="cp-empty-state">
+              <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="16" y1="13" x2="8" y2="13" />
                 <line x1="16" y1="17" x2="8" y2="17" />
                 <polyline points="10 9 9 9 8 9" />
               </svg>
-              <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>
-                Organization Notes Not Yet Available
-              </h3>
+              <h3 className="cp-empty-title">Organization Notes Not Yet Available</h3>
               <p>
                 Notes are currently only supported for contacts. Organization notes functionality
                 will be added in a future update.
               </p>
-              <p style={{ marginTop: 'var(--spacing-md)', fontSize: 'var(--font-size-sm)' }}>
+              <p className="op-notes-hint">
                 For now, you can add notes to individual contacts within this organization.
               </p>
             </div>
           </div>
         </div>
       )}
+
       <ConfirmDialog
         isOpen={showDeleteConfirm}
         onConfirm={handleDelete}

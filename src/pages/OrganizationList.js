@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
@@ -204,7 +204,7 @@ function OrganizationList({ onNavigate }) {
             {filteredOrganizations.length} of {organizations.length} organizations
           </p>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+        <div className="cl-header-actions">
           <button
             className="btn btn-secondary"
             onClick={handleQuickExport}
@@ -214,47 +214,23 @@ function OrganizationList({ onNavigate }) {
             Export
           </button>
           <button
-            className="btn btn-ghost"
+            className={`btn btn-ghost btn-icon-compact${refreshing ? ' spinning' : ''}`}
             onClick={handleManualRefresh}
             disabled={refreshing}
             title="Refresh from Google Sheets"
-            style={{ padding: 'var(--spacing-sm) var(--spacing-md)' }}
           >
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              width="20"
-              height="20"
-              style={{
-                animation: refreshing ? 'spin 1s linear infinite' : 'none',
-              }}
-            >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="20" height="20">
               <polyline points="23 4 23 10 17 10" />
               <polyline points="1 20 1 14 7 14" />
               <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
             </svg>
           </button>
 
-          {/* View toggle buttons */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '2px',
-              borderRadius: 'var(--radius-md)',
-              backgroundColor: 'var(--color-bg-tertiary)',
-              padding: '2px',
-            }}
-          >
+          <div className="cl-view-toggle">
             <button
               className={`btn ${viewMode === 'grid' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setViewMode('grid')}
               title="Grid view"
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                fontSize: 'var(--font-size-sm)',
-              }}
             >
               ⊞
             </button>
@@ -262,10 +238,6 @@ function OrganizationList({ onNavigate }) {
               className={`btn ${viewMode === 'table' ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setViewMode('table')}
               title="Table view"
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                fontSize: 'var(--font-size-sm)',
-              }}
             >
               ≡
             </button>
@@ -277,24 +249,9 @@ function OrganizationList({ onNavigate }) {
         </div>
       </div>
 
-      <style>{`
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
-
       {/* Search and Filters */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--spacing-md)',
-          marginBottom: 'var(--spacing-lg)',
-          flexWrap: 'wrap',
-          alignItems: 'flex-start',
-        }}
-      >
-        <div className="search-container" style={{ flex: '1', minWidth: '250px' }}>
+      <div className="cl-filters-row">
+        <div className="search-container">
           <svg
             className="search-icon"
             viewBox="0 0 24 24"
@@ -315,8 +272,7 @@ function OrganizationList({ onNavigate }) {
         </div>
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
         >
@@ -330,8 +286,7 @@ function OrganizationList({ onNavigate }) {
 
         {availableIndustries.length > 0 && (
           <select
-            className="form-select"
-            style={{ width: 'auto', minWidth: '150px' }}
+            className="form-select cl-filter-select"
             value={industryFilter}
             onChange={(e) => setIndustryFilter(e.target.value)}
           >
@@ -345,8 +300,7 @@ function OrganizationList({ onNavigate }) {
         )}
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={priorityFilter}
           onChange={(e) => setPriorityFilter(e.target.value)}
         >
@@ -359,8 +313,7 @@ function OrganizationList({ onNavigate }) {
         </select>
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -373,8 +326,7 @@ function OrganizationList({ onNavigate }) {
         </select>
 
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cl-filter-select"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
@@ -424,7 +376,7 @@ function OrganizationList({ onNavigate }) {
               <div
                 key={organization['Organization ID']}
                 onClick={() => onNavigate('organization-profile', organization['Organization ID'])}
-                style={{ cursor: 'pointer' }}
+                className="cl-grid-item"
               >
                 <OrganizationCard organization={organization} />
               </div>

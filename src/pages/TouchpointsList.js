@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Pencil, Trash2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -441,18 +441,11 @@ function TouchpointsList({ onNavigate }) {
 
       {/* Filter Bar */}
       {touchpoints.length > 0 && (
-        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
+        <div className="card tl-filter-card">
           <div className="card-body">
-            <div
-              style={{
-                display: 'flex',
-                gap: 'var(--spacing-md)',
-                flexWrap: 'wrap',
-                alignItems: 'flex-end',
-              }}
-            >
-              <div style={{ flex: '1 1 300px' }}>
-                <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+            <div className="tl-filter-row">
+              <div className="tl-filter-search">
+                <label className="form-label tl-filter-label">
                   Search
                 </label>
                 <input
@@ -461,18 +454,16 @@ function TouchpointsList({ onNavigate }) {
                   placeholder="Search notes, contacts, type, outcome..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  style={{ width: '100%' }}
                 />
               </div>
-              <div style={{ flex: '0 1 150px' }}>
-                <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+              <div className="tl-filter-col">
+                <label className="form-label tl-filter-label">
                   Type
                 </label>
                 <select
                   className="form-select"
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
-                  style={{ width: '100%' }}
                 >
                   <option value="all">All Types</option>
                   <option value="Call">Call</option>
@@ -483,15 +474,14 @@ function TouchpointsList({ onNavigate }) {
                   <option value="Other">Other</option>
                 </select>
               </div>
-              <div style={{ flex: '0 1 180px' }}>
-                <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+              <div className="tl-filter-col">
+                <label className="form-label tl-filter-label">
                   Outcome
                 </label>
                 <select
                   className="form-select"
                   value={outcomeFilter}
                   onChange={(e) => setOutcomeFilter(e.target.value)}
-                  style={{ width: '100%' }}
                 >
                   <option value="all">All Outcomes</option>
                   <option value="Successful">Successful</option>
@@ -503,8 +493,8 @@ function TouchpointsList({ onNavigate }) {
                   <option value="Not Interested">Not Interested</option>
                 </select>
               </div>
-              <div style={{ flex: '0 1 150px' }}>
-                <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+              <div className="tl-filter-col">
+                <label className="form-label tl-filter-label">
                   Start Date
                 </label>
                 <input
@@ -512,11 +502,10 @@ function TouchpointsList({ onNavigate }) {
                   className="form-input"
                   value={dateRange.start}
                   onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-                  style={{ width: '100%' }}
                 />
               </div>
-              <div style={{ flex: '0 1 150px' }}>
-                <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+              <div className="tl-filter-col">
+                <label className="form-label tl-filter-label">
                   End Date
                 </label>
                 <input
@@ -524,20 +513,18 @@ function TouchpointsList({ onNavigate }) {
                   className="form-input"
                   value={dateRange.end}
                   onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-                  style={{ width: '100%' }}
                 />
               </div>
-              <div style={{ flex: '0 1 auto' }}>
+              <div className="tl-filter-clear">
                 <button
                   className="btn btn-secondary"
                   onClick={clearFilters}
-                  style={{ height: '38px' }}
                 >
                   Clear Filters
                 </button>
               </div>
             </div>
-            <p className="text-muted" style={{ marginTop: 'var(--spacing-md)', marginBottom: 0 }}>
+            <p className="text-muted tl-filter-count">
               Showing {filteredTouchpoints.length} of {touchpoints.length} touchpoints
             </p>
           </div>
@@ -546,16 +533,13 @@ function TouchpointsList({ onNavigate }) {
 
       {/* Follow-Up Section */}
       {followUpTouchpoints.length > 0 && (
-        <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
-          <div
-            className="card-header"
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <h3 style={{ margin: 0 }}>Needs Follow-Up</h3>
+        <div className="card tl-section-card">
+          <div className="card-header tl-section-header">
+            <h3 className="tl-section-title">Needs Follow-Up</h3>
             <span className="badge badge-priority-high">{followUpTouchpoints.length}</span>
           </div>
           <div className="card-body">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="tl-item-list">
               {followUpTouchpoints.map((touchpoint) => {
                 const urgency = getFollowUpUrgency(touchpoint['Follow-up Date']);
                 const urgencyText = getUrgencyText(urgency, touchpoint['Follow-up Date']);
@@ -563,40 +547,14 @@ function TouchpointsList({ onNavigate }) {
                 return (
                   <div
                     key={touchpoint['Touchpoint ID']}
-                    className="hoverable"
-                    style={{
-                      padding: 'var(--spacing-md)',
-                      border: '1px solid var(--color-border-default)',
-                      borderRadius: 'var(--radius-md)',
-                      cursor: 'pointer',
-                    }}
+                    className="tl-item hoverable"
                     onClick={() => onNavigate('contact-profile', touchpoint['Contact ID'])}
                   >
-                    <div
-                      style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 'var(--spacing-xs)',
-                            marginBottom: 'var(--spacing-xs)',
-                            flexWrap: 'wrap',
-                          }}
-                        >
+                    <div className="tl-item-row">
+                      <div className="tl-item-body">
+                        <div className="tl-item-chips">
                           <span className="badge">{touchpoint.Type}</span>
-                          <h4
-                            style={{
-                              margin: 0,
-                              fontSize: 'var(--font-size-base)',
-                              fontWeight: 600,
-                            }}
-                          >
+                          <h4 className="tl-item-name">
                             {getContactName(touchpoint['Contact ID'])}
                           </h4>
                           {urgencyText && (
@@ -606,23 +564,11 @@ function TouchpointsList({ onNavigate }) {
                           )}
                         </div>
                         {touchpoint.Notes && (
-                          <p
-                            style={{
-                              margin: 'var(--spacing-xs) 0 0 0',
-                              color: 'var(--color-text-secondary)',
-                              fontStyle: 'italic',
-                            }}
-                          >
+                          <p className="tl-item-quote">
                             "{touchpoint.Notes}"
                           </p>
                         )}
-                        <p
-                          className="text-muted"
-                          style={{
-                            margin: 'var(--spacing-xs) 0 0 0',
-                            fontSize: 'var(--font-size-sm)',
-                          }}
-                        >
+                        <p className="text-muted tl-item-meta">
                           Follow-up due: {formatDate(touchpoint['Follow-up Date'])}
                           {touchpoint.Outcome && ` • Outcome: ${touchpoint.Outcome}`}
                         </p>
@@ -675,51 +621,26 @@ function TouchpointsList({ onNavigate }) {
         </div>
       ) : (
         <div className="card">
-          <div
-            className="card-header"
-            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-          >
-            <h3 style={{ margin: 0 }}>All Touchpoints</h3>
+          <div className="card-header tl-section-header">
+            <h3 className="tl-section-title">All Touchpoints</h3>
             <span className="badge">{filteredTouchpoints.length}</span>
           </div>
           <div className="card-body">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="tl-item-list">
               {filteredTouchpoints.map((touchpoint) => (
                 <div
                   key={touchpoint['Touchpoint ID']}
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    borderRadius: 'var(--radius-md)',
-                    border: '1px solid var(--color-border-default)',
-                    cursor: 'pointer',
-                  }}
-                  className="hoverable"
+                  className="tl-item hoverable"
                   onClick={() => onNavigate('contact-profile', touchpoint['Contact ID'])}
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'start',
-                      marginBottom: 'var(--spacing-xs)',
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <h4 style={{ margin: 0, fontSize: 'var(--font-size-base)', fontWeight: 600 }}>
+                  <div className="tl-item-top">
+                    <div className="tl-item-body">
+                      <h4 className="tl-item-name">
                         {getContactName(touchpoint['Contact ID'])}
                       </h4>
-                      <div
-                        style={{
-                          fontSize: 'var(--font-size-sm)',
-                          color: 'var(--color-text-secondary)',
-                          marginTop: 'var(--spacing-xs)',
-                        }}
-                      >
+                      <div className="tl-item-sub">
                         {touchpoint['Type'] && (
-                          <span
-                            className="badge badge-status-active"
-                            style={{ marginRight: 'var(--spacing-xs)' }}
-                          >
+                          <span className="badge badge-status-active tl-type-badge">
                             {touchpoint['Type']}
                           </span>
                         )}
@@ -727,7 +648,7 @@ function TouchpointsList({ onNavigate }) {
                         {touchpoint['Outcome'] && ` • ${touchpoint['Outcome']}`}
                       </div>
                     </div>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                    <div className="tl-item-actions">
                       <button
                         className="btn btn-ghost btn-sm"
                         onClick={(e) => {
@@ -751,13 +672,7 @@ function TouchpointsList({ onNavigate }) {
                     </div>
                   </div>
                   {touchpoint['Notes'] && (
-                    <p
-                      style={{
-                        margin: 0,
-                        marginTop: 'var(--spacing-sm)',
-                        color: 'var(--color-text-secondary)',
-                      }}
-                    >
+                    <p className="tl-item-notes">
                       {touchpoint['Notes']}
                     </p>
                   )}
@@ -815,25 +730,8 @@ function AddTouchpointModal({
   saving,
 }) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: 'var(--spacing-md)',
-      }}
-    >
-      <div
-        className="card"
-        style={{ maxWidth: '500px', width: '100%', maxHeight: '90vh', overflow: 'auto' }}
-      >
+    <div className="tl-modal-overlay">
+      <div className="card tl-modal-card">
         <div className="card-header">
           <h3>Add Touchpoint</h3>
           <button className="btn btn-ghost btn-sm" onClick={onClose}>
@@ -909,9 +807,7 @@ function AddTouchpointModal({
             </select>
           </div>
 
-          <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
-          >
+          <div className="tl-form-row">
             <div className="form-group">
               <label className="form-label">Follow-up Needed</label>
               <select
@@ -954,10 +850,7 @@ function AddTouchpointModal({
             </div>
           )}
         </div>
-        <div
-          className="card-footer"
-          style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}
-        >
+        <div className="card-footer tl-modal-footer">
           <button className="btn btn-secondary" onClick={onClose} disabled={saving}>
             Cancel
           </button>
@@ -979,25 +872,8 @@ function EditTouchpointModal({
   saving,
 }) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: 'var(--spacing-md)',
-      }}
-    >
-      <div
-        className="card"
-        style={{ maxWidth: '500px', width: '100%', maxHeight: '90vh', overflow: 'auto' }}
-      >
+    <div className="tl-modal-overlay">
+      <div className="card tl-modal-card">
         <div className="card-header">
           <h3>Edit Touchpoint</h3>
           <button className="btn btn-ghost btn-sm" onClick={onClose}>
@@ -1009,10 +885,9 @@ function EditTouchpointModal({
             <label className="form-label">Contact</label>
             <input
               type="text"
-              className="form-input"
+              className="form-input tl-disabled-input"
               value={contactName}
               disabled
-              style={{ backgroundColor: 'var(--color-bg-secondary)', cursor: 'not-allowed' }}
             />
           </div>
 
@@ -1071,9 +946,7 @@ function EditTouchpointModal({
             </select>
           </div>
 
-          <div
-            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}
-          >
+          <div className="tl-form-row">
             <div className="form-group">
               <label className="form-label">Follow-up Needed</label>
               <select
@@ -1116,10 +989,7 @@ function EditTouchpointModal({
             </div>
           )}
         </div>
-        <div
-          className="card-footer"
-          style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}
-        >
+        <div className="card-footer tl-modal-footer">
           <button className="btn btn-secondary" onClick={onClose} disabled={saving}>
             Cancel
           </button>
@@ -1134,22 +1004,8 @@ function EditTouchpointModal({
 
 function DeleteConfirmModal({ touchpoint, contactName, onClose, onConfirm, deleting }) {
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0,0,0,0.7)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: 'var(--spacing-md)',
-      }}
-    >
-      <div className="card" style={{ maxWidth: '500px', width: '100%' }}>
+    <div className="tl-modal-overlay">
+      <div className="card tl-modal-card tl-modal-card--sm">
         <div className="card-header">
           <h3>Delete Touchpoint</h3>
           <button className="btn btn-ghost btn-sm" onClick={onClose}>
@@ -1157,20 +1013,14 @@ function DeleteConfirmModal({ touchpoint, contactName, onClose, onConfirm, delet
           </button>
         </div>
         <div className="card-body">
-          <p style={{ marginBottom: 'var(--spacing-md)' }}>
+          <p className="tl-delete-msg">
             Are you sure you want to delete this touchpoint with <strong>{contactName}</strong>?
           </p>
-          <div
-            style={{
-              padding: 'var(--spacing-md)',
-              backgroundColor: 'var(--color-bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-            }}
-          >
-            <div style={{ marginBottom: 'var(--spacing-xs)' }}>
+          <div className="tl-delete-preview">
+            <div className="tl-delete-row">
               <strong>Type:</strong> {touchpoint.Type}
             </div>
-            <div style={{ marginBottom: 'var(--spacing-xs)' }}>
+            <div className="tl-delete-row">
               <strong>Date:</strong> {new Date(touchpoint.Date).toLocaleDateString()}
             </div>
             {touchpoint.Notes && (
@@ -1179,28 +1029,18 @@ function DeleteConfirmModal({ touchpoint, contactName, onClose, onConfirm, delet
               </div>
             )}
           </div>
-          <p
-            style={{
-              marginTop: 'var(--spacing-md)',
-              color: 'var(--color-text-secondary)',
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
+          <p className="tl-delete-warning">
             This action cannot be undone.
           </p>
         </div>
-        <div
-          className="card-footer"
-          style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}
-        >
+        <div className="card-footer tl-modal-footer">
           <button className="btn btn-secondary" onClick={onClose} disabled={deleting}>
             Cancel
           </button>
           <button
-            className="btn btn-primary"
+            className="btn btn-danger"
             onClick={onConfirm}
             disabled={deleting}
-            style={{ backgroundColor: 'var(--color-danger)', borderColor: 'var(--color-danger)' }}
           >
             {deleting ? 'Deleting...' : 'Delete'}
           </button>
