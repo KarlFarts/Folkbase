@@ -729,6 +729,64 @@ a:hover {
   color: var(--color-danger, #dc3545);
 }
 
+.tag-removable {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  background: var(--color-bg-elevated);
+  color: var(--color-text-secondary);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-color-default);
+}
+
+.tag-remove-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-full);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 10px;
+  line-height: 1;
+  padding: 0;
+}
+
+.tag-remove-btn:hover {
+  background: var(--color-danger-subtle-bg, #fde8e8);
+  color: var(--color-danger, #dc3545);
+}
+
+.tags-edit-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  align-items: center;
+  padding: var(--spacing-xs);
+  border: 1px solid var(--border-color-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  min-height: 40px;
+}
+
+.tags-edit-container .form-input {
+  border: none;
+  background: transparent;
+  flex: 1;
+  min-width: 120px;
+  padding: var(--spacing-xs);
+}
+
+.tags-edit-container .form-input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
 /* ========================================
    COMPONENTS - Cards
    ======================================== */

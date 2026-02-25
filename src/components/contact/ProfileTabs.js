@@ -184,17 +184,40 @@ function EditableField({ field, value, onChange }) {
     }
 
     case 'tags': {
-      // Extract all tags from all contacts for autocomplete
+      const tagArray = value
+        ? value
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean)
+        : [];
+
+      const removeTag = (indexToRemove) => {
+        const newTags = tagArray.filter((_, i) => i !== indexToRemove);
+        onChange(newTags.join(', '));
+      };
+
+      const addTag = (newTag) => {
+        const trimmed = newTag.trim();
+        if (trimmed && !tagArray.includes(trimmed)) {
+          onChange([...tagArray, trimmed].join(', '));
+        }
+      };
+
+      const handleKeyDown = (e) => {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          addTag(e.target.value);
+          e.target.value = '';
+        }
+      };
+
       const allTags = (() => {
         try {
           const tagSet = new Set();
-          // Try to get all contacts from contacts data
-          const contacts = JSON.parse(localStorage.getItem('contacts') || '[]');
-          contacts.forEach((contact) => {
-            if (contact.Tags) {
-              contact.Tags.split(',').forEach((tag) => {
-                tagSet.add(tag.trim());
-              });
+          const contacts = JSON.parse(localStorage.getItem('dev_contacts') || '[]');
+          contacts.forEach((c) => {
+            if (c.Tags) {
+              c.Tags.split(',').forEach((tag) => tagSet.add(tag.trim()));
             }
           });
           return Array.from(tagSet).sort();
@@ -203,20 +226,44 @@ function EditableField({ field, value, onChange }) {
         }
       })();
 
+      const inputId = `tag-suggestions-${field.key.replace(/[^a-zA-Z0-9]/g, '-')}`;
+
       return (
         <div>
-          <input
-            type="text"
-            className="form-input"
-            list="tag-suggestions"
-            value={value || ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={field.placeholder}
-          />
-          <datalist id="tag-suggestions">
-            {allTags.map((tag) => (
-              <option key={tag} value={tag} />
+          <div className="tags-edit-container">
+            {tagArray.map((tag, i) => (
+              <span key={`${tag}-${i}`} className="tag-removable">
+                {tag}
+                <button
+                  type="button"
+                  className="tag-remove-btn"
+                  onClick={() => removeTag(i)}
+                  title={`Remove ${tag}`}
+                >
+                  <X size={10} />
+                </button>
+              </span>
             ))}
+            <input
+              type="text"
+              className="form-input"
+              list={inputId}
+              placeholder={tagArray.length === 0 ? field.placeholder : 'Add tag...'}
+              onKeyDown={handleKeyDown}
+              onBlur={(e) => {
+                if (e.target.value.trim()) {
+                  addTag(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+            />
+          </div>
+          <datalist id={inputId}>
+            {allTags
+              .filter((t) => !tagArray.includes(t))
+              .map((tag) => (
+                <option key={tag} value={tag} />
+              ))}
           </datalist>
         </div>
       );
