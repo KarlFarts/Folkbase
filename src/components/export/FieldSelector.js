@@ -51,10 +51,9 @@ function FieldSelector({
           </label>
           <select
             id="preset-select"
-            className="form-select"
+            className="form-select fs-preset-select"
             value={currentPreset}
             onChange={handlePresetChange}
-            className="fs-preset-select"
           >
             <option value="basic">Basic Info</option>
             <option value="full">Full Contact</option>

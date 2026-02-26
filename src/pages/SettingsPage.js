@@ -13,6 +13,8 @@ import {
   Loader,
   Calendar,
   FolderSync,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
@@ -26,12 +28,14 @@ import { PREMIUM_FEATURES } from '../config/constants';
 import { findExistingSheets } from '../utils/sheetDiscovery';
 import { getOrCreateTouchpointFolder, moveFileToFolder } from '../utils/driveFolder';
 import axios from 'axios';
+import { useTheme } from '../hooks/useTheme';
 
 function SettingsPage({ onShowSetup, onNavigate }) {
   const { user, accessToken, signInWithGoogle, signOut, hasCalendarAccess, requestCalendarAccess } =
     useAuth();
   const { config } = useConfig();
   const { notify } = useNotification();
+  const { isDark, toggleTheme } = useTheme();
   const [sheetsStatus, setSheetsStatus] = useState({
     loading: true,
     connected: false,
@@ -387,6 +391,23 @@ function SettingsPage({ onShowSetup, onNavigate }) {
             </button>
           </div>
         )}
+      </section>
+
+      {/* Appearance Section */}
+      <section className="sp-section">
+        <h2 className="sp-section-heading">
+          {isDark ? <Moon size={18} /> : <Sun size={18} />}
+          Appearance
+        </h2>
+        <div className="sp-field-list">
+          <div className="sp-field-row">
+            <span className="sp-field-label">Theme</span>
+            <button className="btn btn-secondary btn-sm" onClick={toggleTheme}>
+              {isDark ? <Sun size={16} /> : <Moon size={16} />}
+              {isDark ? 'Switch to Light' : 'Switch to Dark'}
+            </button>
+          </div>
+        </div>
       </section>
 
       {/* Connection Section */}
