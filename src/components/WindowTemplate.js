@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 function WindowTemplate({
   isOpen,
@@ -13,6 +13,19 @@ function WindowTemplate({
   overlayClassName = '',
   ...props
 }) {
+  useEffect(() => {
+    if (!isOpen || !onClose) return;
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const handleOverlayClick = (e) => {

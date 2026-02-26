@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useConfig } from './ConfigContext';
 // Import Sheets-based services instead of Firestore
@@ -67,25 +67,22 @@ export const WorkspaceProvider = ({ children }) => {
     loadUserWorkspaces();
   }, [user, accessToken, config.personalSheetId]);
 
-  // Switch to a workspace
-  const switchToWorkspace = (workspace) => {
+  const switchToWorkspace = useCallback((workspace) => {
     setActiveWorkspace(workspace);
     setMode('workspace');
     if (workspace) {
       const workspaceId = workspace['Workspace ID'] || workspace.id;
       localStorage.setItem('activeWorkspaceId', workspaceId);
     }
-  };
+  }, []);
 
-  // Switch to personal mode
-  const switchToPersonal = () => {
+  const switchToPersonal = useCallback(() => {
     setActiveWorkspace(null);
     setMode('personal');
     localStorage.removeItem('activeWorkspaceId');
-  };
+  }, []);
 
-  // Reload workspaces (after creating or joining a new one)
-  const reloadWorkspaces = async () => {
+  const reloadWorkspaces = useCallback(async () => {
     if (!user || !accessToken || !config.personalSheetId) return;
 
     try {
@@ -97,151 +94,170 @@ export const WorkspaceProvider = ({ children }) => {
       localStorage.setItem('workspace_count', workspaces.length.toString());
     } catch (error) {
       console.error('Failed to reload workspaces:', error);
-      // Don't throw - workspace reload is a background operation
     }
-  };
+  }, [user, accessToken, config.personalSheetId]);
 
-  // Get current sheet ID based on mode
-  const getCurrentSheetId = () => {
+  const getCurrentSheetId = useCallback(() => {
     if (mode === 'workspace' && activeWorkspace) {
-      const sheetId = activeWorkspace['Sheet ID'] || activeWorkspace.sheet_id;
-      return sheetId;
+      return activeWorkspace['Sheet ID'] || activeWorkspace.sheet_id;
     }
-    // Return personal sheet ID in personal mode
     return config.personalSheetId;
-  };
+  }, [mode, activeWorkspace, config.personalSheetId]);
 
-  // Hierarchy Helper: Get breadcrumb navigation for a workspace
-  const getWorkspaceBreadcrumbs = async (workspaceId) => {
-    if (!accessToken || !config.personalSheetId) return [];
+  const getWorkspaceBreadcrumbs = useCallback(
+    async (workspaceId) => {
+      if (!accessToken || !config.personalSheetId) return [];
 
-    try {
-      const ancestors = await getWorkspaceAncestors(
-        accessToken,
-        config.personalSheetId,
-        workspaceId
-      );
-      const current = await getWorkspaceById(accessToken, config.personalSheetId, workspaceId);
+      try {
+        const ancestors = await getWorkspaceAncestors(
+          accessToken,
+          config.personalSheetId,
+          workspaceId
+        );
+        const current = await getWorkspaceById(accessToken, config.personalSheetId, workspaceId);
 
-      if (!current) return [];
+        if (!current) return [];
 
-      // Sort ancestors by depth (root first)
-      const sortedAncestors = ancestors.sort((a, b) => (a['Depth'] || 0) - (b['Depth'] || 0));
+        const sortedAncestors = ancestors.sort((a, b) => (a['Depth'] || 0) - (b['Depth'] || 0));
 
-      // Build breadcrumb array: ancestors + current
-      return [...sortedAncestors, current].map((camp) => ({
-        id: camp['Workspace ID'] || camp.id,
-        name: camp['Workspace Name'] || camp.name,
-        depth: camp['Depth'] || camp.depth || 0,
-      }));
-    } catch {
-      return [];
-    }
-  };
-
-  // Hierarchy Helper: Check if a workspace is a descendant of another
-  const isWorkspaceDescendant = (potentialParentId, potentialChildId) => {
-    const child = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === potentialChildId);
-    if (!child) return false;
-
-    const path = child['Path'] || child.path;
-    if (!path) return false;
-
-    // Check if parent ID is in the child's path
-    return path.includes(`/${potentialParentId}/`) || path.startsWith(`/${potentialParentId}`);
-  };
-
-  // Hierarchy Helper: Get direct children of a workspace
-  const getWorkspaceChildrenInContext = async (workspaceId) => {
-    if (!accessToken || !config.personalSheetId) return [];
-
-    try {
-      const children = await getWorkspaceChildren(accessToken, config.personalSheetId, workspaceId);
-      // Filter to only workspaces the user is a member of
-      return children.filter((child) =>
-        userWorkspaces.some(
-          (uc) => (uc['Workspace ID'] || uc.id) === (child['Workspace ID'] || child.id)
-        )
-      );
-    } catch {
-      return [];
-    }
-  };
-
-  // Hierarchy Helper: Get all sub-workspaces (recursive)
-  const getAllSubWorkspaces = (workspaceId) => {
-    const subWorkspaces = [];
-    const workspace = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === workspaceId);
-
-    if (!workspace) return subWorkspaces;
-
-    const workspacePath = workspace['Path'] || workspace.path;
-    if (!workspacePath) return subWorkspaces;
-
-    // Find all workspaces that are descendants
-    userWorkspaces.forEach((c) => {
-      const cPath = c['Path'] || c.path;
-      if (cPath && cPath.startsWith(`${workspacePath}/`)) {
-        subWorkspaces.push(c);
+        return [...sortedAncestors, current].map((camp) => ({
+          id: camp['Workspace ID'] || camp.id,
+          name: camp['Workspace Name'] || camp.name,
+          depth: camp['Depth'] || camp.depth || 0,
+        }));
+      } catch {
+        return [];
       }
-    });
+    },
+    [accessToken, config.personalSheetId]
+  );
 
-    // Sort by depth for hierarchical display
-    return subWorkspaces.sort(
-      (a, b) => (a['Depth'] || a.depth || 0) - (b['Depth'] || b.depth || 0)
-    );
-  };
+  const isWorkspaceDescendant = useCallback(
+    (potentialParentId, potentialChildId) => {
+      const child = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === potentialChildId);
+      if (!child) return false;
 
-  // Hierarchy Helper: Get root workspaces (workspaces with no parent)
-  const getRootWorkspaces = () => {
+      const path = child['Path'] || child.path;
+      if (!path) return false;
+
+      return path.includes(`/${potentialParentId}/`) || path.startsWith(`/${potentialParentId}`);
+    },
+    [userWorkspaces]
+  );
+
+  const getWorkspaceChildrenInContext = useCallback(
+    async (workspaceId) => {
+      if (!accessToken || !config.personalSheetId) return [];
+
+      try {
+        const children = await getWorkspaceChildren(
+          accessToken,
+          config.personalSheetId,
+          workspaceId
+        );
+        return children.filter((child) =>
+          userWorkspaces.some(
+            (uc) => (uc['Workspace ID'] || uc.id) === (child['Workspace ID'] || child.id)
+          )
+        );
+      } catch {
+        return [];
+      }
+    },
+    [accessToken, config.personalSheetId, userWorkspaces]
+  );
+
+  const getAllSubWorkspaces = useCallback(
+    (workspaceId) => {
+      const subWorkspaces = [];
+      const workspace = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === workspaceId);
+
+      if (!workspace) return subWorkspaces;
+
+      const workspacePath = workspace['Path'] || workspace.path;
+      if (!workspacePath) return subWorkspaces;
+
+      userWorkspaces.forEach((c) => {
+        const cPath = c['Path'] || c.path;
+        if (cPath && cPath.startsWith(`${workspacePath}/`)) {
+          subWorkspaces.push(c);
+        }
+      });
+
+      return subWorkspaces.sort(
+        (a, b) => (a['Depth'] || a.depth || 0) - (b['Depth'] || b.depth || 0)
+      );
+    },
+    [userWorkspaces]
+  );
+
+  const getRootWorkspaces = useCallback(() => {
     return userWorkspaces.filter((c) => {
       const parentId = c['Parent Workspace ID'] || c.parent_workspace_id;
       const depth = c['Depth'] || c.depth;
       return !parentId || depth === 0;
     });
-  };
+  }, [userWorkspaces]);
 
-  // Hierarchy Helper: Get workspace display path (e.g., "Root > Sub > Current")
-  const getWorkspaceDisplayPath = (workspaceId) => {
-    const workspace = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === workspaceId);
-    if (!workspace) return '';
+  const getWorkspaceDisplayPath = useCallback(
+    (workspaceId) => {
+      const workspace = userWorkspaces.find((c) => (c['Workspace ID'] || c.id) === workspaceId);
+      if (!workspace) return '';
 
-    const path = workspace['Path'] || workspace.path;
-    if (!path) return '';
+      const path = workspace['Path'] || workspace.path;
+      if (!path) return '';
 
-    // Parse path segments and build display string
-    const segments = path.split('/').filter(Boolean);
-    const names = segments.map((segmentId) => {
-      const segmentWorkspace = userWorkspaces.find(
-        (c) => (c['Workspace ID'] || c.id) === segmentId
-      );
-      return segmentWorkspace
-        ? segmentWorkspace['Workspace Name'] || segmentWorkspace.name
-        : segmentId;
-    });
+      const segments = path.split('/').filter(Boolean);
+      const names = segments.map((segmentId) => {
+        const segmentWorkspace = userWorkspaces.find(
+          (c) => (c['Workspace ID'] || c.id) === segmentId
+        );
+        return segmentWorkspace
+          ? segmentWorkspace['Workspace Name'] || segmentWorkspace.name
+          : segmentId;
+      });
 
-    return names.join(' > ');
-  };
+      return names.join(' > ');
+    },
+    [userWorkspaces]
+  );
 
-  const value = {
-    activeWorkspace,
-    userWorkspaces,
-    loading,
-    mode,
-    switchToWorkspace,
-    switchToPersonal,
-    reloadWorkspaces,
-    getCurrentSheetId,
-    isPersonalMode: mode === 'personal',
-    isWorkspaceMode: mode === 'workspace',
-    // Hierarchy helpers
-    getWorkspaceBreadcrumbs,
-    isWorkspaceDescendant,
-    getWorkspaceChildrenInContext,
-    getAllSubWorkspaces,
-    getRootWorkspaces,
-    getWorkspaceDisplayPath,
-  };
+  const value = useMemo(
+    () => ({
+      activeWorkspace,
+      userWorkspaces,
+      loading,
+      mode,
+      switchToWorkspace,
+      switchToPersonal,
+      reloadWorkspaces,
+      getCurrentSheetId,
+      isPersonalMode: mode === 'personal',
+      isWorkspaceMode: mode === 'workspace',
+      getWorkspaceBreadcrumbs,
+      isWorkspaceDescendant,
+      getWorkspaceChildrenInContext,
+      getAllSubWorkspaces,
+      getRootWorkspaces,
+      getWorkspaceDisplayPath,
+    }),
+    [
+      activeWorkspace,
+      userWorkspaces,
+      loading,
+      mode,
+      switchToWorkspace,
+      switchToPersonal,
+      reloadWorkspaces,
+      getCurrentSheetId,
+      getWorkspaceBreadcrumbs,
+      isWorkspaceDescendant,
+      getWorkspaceChildrenInContext,
+      getAllSubWorkspaces,
+      getRootWorkspaces,
+      getWorkspaceDisplayPath,
+    ]
+  );
 
   return <WorkspaceContext.Provider value={value}>{children}</WorkspaceContext.Provider>;
 };

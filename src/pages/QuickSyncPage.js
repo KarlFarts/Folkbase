@@ -3,7 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { parseFile } from '../utils/importParsers';
-import { readSheetData, addContact } from '../utils/devModeWrapper';
+import { readSheetData, addContact, SHEETS } from '../utils/devModeWrapper';
 import { isDuplicate, CONFIDENCE } from '../services/duplicateDetector';
 import { isAlreadySynced, markAsSynced } from '../services/syncHashService';
 import ContactFileDropzone from '../components/quicksync/ContactFileDropzone';
@@ -56,7 +56,7 @@ function QuickSyncPage({ onNavigate }) {
         const { data: existingContacts } = await readSheetData(
           accessToken,
           config.personalSheetId,
-          'Contacts'
+          SHEETS.CONTACTS
         );
 
         // Extract existing tags for autocomplete

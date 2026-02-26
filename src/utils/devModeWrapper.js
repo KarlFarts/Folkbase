@@ -858,14 +858,14 @@ export async function deleteTouchpoint(accessToken, sheetId, touchpointId) {
 
   // Production mode: Delete from Google Sheets
   const startTime = Date.now();
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Touchpoints');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TOUCHPOINTS);
 
   const touchpoint = data.find((t) => t['Touchpoint ID'] === touchpointId);
   if (!touchpoint) throw new Error(`Touchpoint ${touchpointId} not found`);
 
   const rowIndex = touchpoint._rowIndex;
 
-  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, 'Touchpoints');
+  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.TOUCHPOINTS);
 
   const axios = (await import('axios')).default;
   const { API_CONFIG } = await import('../config/constants');
@@ -1028,7 +1028,7 @@ export async function generateNoteID(accessToken, sheetId) {
   }
 
   // Production mode: Generate from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Notes');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
 
   if (data.length === 0) return 'N001';
 
@@ -1103,8 +1103,8 @@ export async function updateEvent(accessToken, sheetId, eventId, eventData) {
   }
 
   // Production mode: Update in Google Sheets
-  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, 'Events');
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Events');
+  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.EVENTS);
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.EVENTS);
 
   const event = data.find((e) => e['Event ID'] === eventId);
   if (!event) throw new Error(`Event ${eventId} not found`);
@@ -1148,14 +1148,14 @@ export async function deleteEvent(accessToken, sheetId, eventId) {
 
   // Production mode: Delete from Google Sheets
   const startTime = Date.now();
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Events');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.EVENTS);
 
   const event = data.find((e) => e['Event ID'] === eventId);
   if (!event) throw new Error(`Event ${eventId} not found`);
 
   const rowIndex = event._rowIndex;
 
-  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, 'Events');
+  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.EVENTS);
 
   const axios = (await import('axios')).default;
   const { API_CONFIG } = await import('../config/constants');
@@ -1692,7 +1692,7 @@ export async function addNote(accessToken, sheetId, noteData, userEmail = null) 
   }
 
   // Production mode: Add to Google Sheets
-  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, 'Notes');
+  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.NOTES);
   const noteId = await generateNoteID(accessToken, sheetId);
   const createdDate = new Date().toISOString().split('T')[0];
 
@@ -1712,7 +1712,7 @@ export async function addNote(accessToken, sheetId, noteData, userEmail = null) 
   });
 
   const startTime = Date.now();
-  await sheetsModule.appendRow(accessToken, sheetId, 'Notes', values);
+  await sheetsModule.appendRow(accessToken, sheetId, SHEET_NAMES.NOTES, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.NOTES, duration);
   await invalidateCache(SHEET_NAMES.NOTES);
@@ -1746,8 +1746,8 @@ export async function updateNote(accessToken, sheetId, noteId, noteData) {
   }
 
   // Production mode: Update in Google Sheets
-  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, 'Notes');
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Notes');
+  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.NOTES);
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
 
   // Find the note
   const note = data.find((n) => n['Note ID'] === noteId);
@@ -1798,7 +1798,7 @@ export async function deleteNote(accessToken, sheetId, noteId) {
 
   // Production mode: Delete from Google Sheets
   const startTime = Date.now();
-  const { data: notes } = await sheetsModule.readSheetData(accessToken, sheetId, 'Notes');
+  const { data: notes } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
   const { data: contactNotes } = await sheetsModule.readSheetData(
     accessToken,
     sheetId,
@@ -1812,7 +1812,7 @@ export async function deleteNote(accessToken, sheetId, noteId) {
   const rowIndex = note._rowIndex;
 
   // Get internal sheet IDs dynamically
-  const notesSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, 'Notes');
+  const notesSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.NOTES);
   const contactNotesSheetId = await sheetsModule.getSheetIdByName(
     accessToken,
     sheetId,
@@ -2550,7 +2550,7 @@ export async function getNotes(accessToken, sheetId, status = null) {
   }
 
   // Production mode: Read from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Notes');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
   let notes = data;
 
   if (status) {
@@ -2638,7 +2638,7 @@ export async function generateTaskID(accessToken, sheetId) {
   }
 
   // Production mode: Generate from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Tasks');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TASKS);
 
   if (data.length === 0) return 'TSK001';
 
@@ -2679,7 +2679,7 @@ export async function getTasks(accessToken, sheetId, filters = {}) {
   }
 
   // Production mode: Read from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Tasks');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TASKS);
   let tasks = data;
 
   // Apply filters
@@ -2726,7 +2726,7 @@ export async function addTask(accessToken, sheetId, taskData) {
   }
 
   // Production mode: Add to Google Sheets
-  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, 'Tasks');
+  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.TASKS);
   const taskId = await generateTaskID(accessToken, sheetId);
   const createdDate = new Date().toISOString().split('T')[0];
 
@@ -2745,7 +2745,7 @@ export async function addTask(accessToken, sheetId, taskData) {
   });
 
   const startTime = Date.now();
-  await sheetsModule.appendRow(accessToken, sheetId, 'Tasks', values);
+  await sheetsModule.appendRow(accessToken, sheetId, SHEET_NAMES.TASKS, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.TASKS, duration);
   await invalidateCache(SHEET_NAMES.TASKS);
@@ -2785,8 +2785,8 @@ export async function updateTask(accessToken, sheetId, taskId, taskData) {
   }
 
   // Production mode: Update in Google Sheets
-  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, 'Tasks');
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Tasks');
+  const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.TASKS);
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TASKS);
 
   // Find the task
   const task = data.find((t) => t['Task ID'] === taskId);
@@ -2839,7 +2839,7 @@ export async function deleteTask(accessToken, sheetId, taskId) {
 
   // Production mode: Delete from Google Sheets
   const startTime = Date.now();
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, 'Tasks');
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TASKS);
 
   // Find the task
   const task = data.find((t) => t['Task ID'] === taskId);
@@ -2848,7 +2848,7 @@ export async function deleteTask(accessToken, sheetId, taskId) {
   const rowIndex = task._rowIndex;
 
   // Get the internal sheet ID for the Tasks tab
-  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, 'Tasks');
+  const internalSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.TASKS);
 
   // Delete the row using Sheets API batchUpdate
   const axios = (await import('axios')).default;

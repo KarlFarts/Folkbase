@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
-import { readSheetData, addLocation } from '../utils/devModeWrapper';
+import { readSheetData, addLocation, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateLocations } from '../services/locationService';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 
@@ -43,7 +43,7 @@ function AddLocation({ onNavigate }) {
     }
 
     try {
-      const { data: existingLocs } = await readSheetData(accessToken, sheetId, 'Locations');
+      const { data: existingLocs } = await readSheetData(accessToken, sheetId, SHEETS.LOCATIONS);
       const dups = detectDuplicateLocations(existingLocs, formData);
 
       if (dups.length > 0) {

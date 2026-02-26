@@ -51,7 +51,7 @@ import BraindumpFAB from './components/BraindumpFAB';
 import InstallPrompt from './components/InstallPrompt';
 import { DevToolsPanel } from './components/DevToolsPanel';
 import { NotificationProvider } from './contexts/NotificationContext';
-import { MonitoringProvider } from './context/MonitoringContext';
+import { MonitoringProvider } from './contexts/MonitoringContext';
 import { MonitoringPanel } from './components/MonitoringPanel';
 import { seedTestData } from './__tests__/fixtures/seedTestData';
 import { needsMigration } from './services/migrationService';
@@ -243,20 +243,7 @@ function AppContent() {
           )}
           <main className="main-content">
             <Suspense
-              fallback={
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    height: '70vh',
-                    fontSize: '1rem',
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
-                  Loading...
-                </div>
-              }
+              fallback={<div className="loading-container--page">Loading...</div>}
             >
               <Routes>
                 <Route path="/" element={<Dashboard onNavigate={navigateTo} />} />
@@ -382,15 +369,20 @@ function AppContent() {
 }
 
 function App() {
+  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+  const content = (
+    <>
+      <AppContent />
+      <NotificationContainer />
+    </>
+  );
+
   return (
     <AuthProvider>
       <NotificationProvider>
         <SubscriptionProvider>
           <WorkspaceProvider>
-            <MonitoringProvider>
-              <AppContent />
-              <NotificationContainer />
-            </MonitoringProvider>
+            {isDevMode ? <MonitoringProvider>{content}</MonitoringProvider> : content}
           </WorkspaceProvider>
         </SubscriptionProvider>
       </NotificationProvider>

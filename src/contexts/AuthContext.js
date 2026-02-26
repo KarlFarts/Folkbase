@@ -43,111 +43,110 @@ export function AuthProvider({ children }) {
   // Ref to track pending login callback
   const loginCallbackRef = useRef(null);
 
-  // Google OAuth login hook - only used in production mode
-  // In dev mode, we skip this hook entirely since GoogleOAuthProvider is not mounted
-  const googleLogin = isDevMode()
-    ? () => {} // No-op in dev mode
-    : // eslint-disable-next-line react-hooks/rules-of-hooks
-      useGoogleLogin({
-        onSuccess: async (tokenResponse) => {
-          if (tokenResponse.state && !validateOAuthState(tokenResponse.state)) {
-            warn('OAuth state mismatch - possible CSRF attack');
-            if (loginCallbackRef.current) {
-              loginCallbackRef.current.reject(new Error('OAuth state validation failed'));
-              loginCallbackRef.current = null;
-            }
-            return;
-          }
+  // Google OAuth login hook
+  // Called unconditionally to satisfy Rules of Hooks. In dev mode the result is
+  // ignored -- signInWithGoogle() uses mock auth instead.
+  const googleLoginHook = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      if (tokenResponse.state && !validateOAuthState(tokenResponse.state)) {
+        warn('OAuth state mismatch - possible CSRF attack');
+        if (loginCallbackRef.current) {
+          loginCallbackRef.current.reject(new Error('OAuth state validation failed'));
+          loginCallbackRef.current = null;
+        }
+        return;
+      }
 
-          const startTime = Date.now();
-          try {
-            const token = tokenResponse.access_token;
-            setAccessToken(token);
+      const startTime = Date.now();
+      try {
+        const token = tokenResponse.access_token;
+        setAccessToken(token);
 
-            // Fetch user info from Google
-            const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-              headers: { Authorization: `Bearer ${token}` },
-            });
+        // Fetch user info from Google
+        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-            if (!userInfoResponse.ok) {
-              throw new Error('Failed to fetch user info');
-            }
+        if (!userInfoResponse.ok) {
+          throw new Error('Failed to fetch user info');
+        }
 
-            const userInfo = await userInfoResponse.json();
+        const userInfo = await userInfoResponse.json();
 
-            const newUser = {
-              uid: userInfo.sub,
-              email: userInfo.email,
-              displayName: userInfo.name,
-              photoURL: userInfo.picture,
-            };
+        const newUser = {
+          uid: userInfo.sub,
+          email: userInfo.email,
+          displayName: userInfo.name,
+          photoURL: userInfo.picture,
+        };
 
-            setUser(newUser);
+        setUser(newUser);
 
-            // Store token with expiration metadata
-            // Google OAuth tokens typically expire in 1 hour (3600 seconds)
-            const expiresAt = Date.now() + tokenResponse.expires_in * 1000;
-            localStorage.setItem('googleAccessToken', token);
-            localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
-            // Store user info for session restoration
-            localStorage.setItem('googleUserInfo', JSON.stringify(newUser));
+        // Store token with expiration metadata
+        // Google OAuth tokens typically expire in 1 hour (3600 seconds)
+        const expiresAt = Date.now() + tokenResponse.expires_in * 1000;
+        localStorage.setItem('googleAccessToken', token);
+        localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+        // Store user info for session restoration
+        localStorage.setItem('googleUserInfo', JSON.stringify(newUser));
 
-            // Log successful auth
-            logApiCall('google-oauth', 'signInWithGoogle', {
-              success: true,
-              statusCode: 200,
-              duration: Date.now() - startTime,
-            });
+        // Log successful auth
+        logApiCall('google-oauth', 'signInWithGoogle', {
+          success: true,
+          statusCode: 200,
+          duration: Date.now() - startTime,
+        });
 
-            // Resolve the promise if there's a pending callback
-            if (loginCallbackRef.current) {
-              loginCallbackRef.current.resolve(newUser);
-              loginCallbackRef.current = null;
-            }
-          } catch (error) {
-            // Log failed auth
-            logApiCall('google-oauth', 'signInWithGoogle', {
-              success: false,
-              statusCode: null,
-              duration: Date.now() - startTime,
-              error: error.message,
-            });
+        // Resolve the promise if there's a pending callback
+        if (loginCallbackRef.current) {
+          loginCallbackRef.current.resolve(newUser);
+          loginCallbackRef.current = null;
+        }
+      } catch (error) {
+        // Log failed auth
+        logApiCall('google-oauth', 'signInWithGoogle', {
+          success: false,
+          statusCode: null,
+          duration: Date.now() - startTime,
+          error: error.message,
+        });
 
-            // Reject the promise if there's a pending callback
-            if (loginCallbackRef.current) {
-              loginCallbackRef.current.reject(error);
-              loginCallbackRef.current = null;
-            }
-          }
-        },
-        onError: (error) => {
-          warn('Google login failed:', error);
+        // Reject the promise if there's a pending callback
+        if (loginCallbackRef.current) {
+          loginCallbackRef.current.reject(error);
+          loginCallbackRef.current = null;
+        }
+      }
+    },
+    onError: (error) => {
+      warn('Google login failed:', error);
 
-          // Log failed auth
-          logApiCall('google-oauth', 'signInWithGoogle', {
-            success: false,
-            statusCode: null,
-            duration: 0,
-            error: error.error_description || error.error || 'Unknown error',
-          });
-
-          // Reject the promise if there's a pending callback
-          if (loginCallbackRef.current) {
-            loginCallbackRef.current.reject(
-              new Error(error.error_description || error.error || 'Login failed')
-            );
-            loginCallbackRef.current = null;
-          }
-        },
-        scope: GOOGLE_SCOPES,
-        flow: 'implicit',
-        // NOTE: Implicit flow is deprecated for apps with backends, but is the correct
-        // choice for client-only apps like Folkbase. Auth code flow requires a
-        // backend to securely exchange the code for tokens using client_secret.
-        // Mitigations: Short-lived tokens (1hr), CSRF protection via state validation,
-        // CSP headers, HTTPS-only, and no XSS vulnerabilities.
-        state: generateOAuthState(),
+      // Log failed auth
+      logApiCall('google-oauth', 'signInWithGoogle', {
+        success: false,
+        statusCode: null,
+        duration: 0,
+        error: error.error_description || error.error || 'Unknown error',
       });
+
+      // Reject the promise if there's a pending callback
+      if (loginCallbackRef.current) {
+        loginCallbackRef.current.reject(
+          new Error(error.error_description || error.error || 'Login failed')
+        );
+        loginCallbackRef.current = null;
+      }
+    },
+    scope: GOOGLE_SCOPES,
+    flow: 'implicit',
+    // NOTE: Implicit flow is deprecated for apps with backends, but is the correct
+    // choice for client-only apps like Folkbase. Auth code flow requires a
+    // backend to securely exchange the code for tokens using client_secret.
+    // Mitigations: Short-lived tokens (1hr), CSRF protection via state validation,
+    // CSP headers, HTTPS-only, and no XSS vulnerabilities.
+    state: generateOAuthState(),
+  });
+  const googleLogin = isDevMode() ? () => {} : googleLoginHook;
 
   const signInWithGoogle = useCallback(
     async (forceReauth = false) => {
@@ -461,15 +460,14 @@ export function AuthProvider({ children }) {
     requestCalendarAccess,
     // Dev mode utilities
     isDevMode: isDevMode(),
-    setMockUserRole: (role) => {
+    setMockUserRole: useCallback((role) => {
       if (isDevMode()) {
         setMockUserRole(role);
-        // Refresh user state
         const mockUser = getCurrentMockUser();
         setUser(mockUser);
         log('[DEV MODE] Switched to:', mockUser.displayName, `(${mockUser.role})`);
       }
-    },
+    }, []),
   };
 
   return <AuthContext.Provider value={value}>{!loading && children}</AuthContext.Provider>;
