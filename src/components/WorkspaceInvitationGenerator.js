@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -115,7 +115,7 @@ This link will give you access to the workspace's contact list and allow you to 
           {sendingEmails ? 'Sending...' : 'Send Invitations'}
         </button>
 
-        <div className="info-box" style={{ marginTop: '1rem' }}>
+        <div className="info-box">
           <strong>Note:</strong> Email functionality requires backend setup. For now, share the link
           directly with team members.
         </div>

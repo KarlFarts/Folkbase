@@ -1,4 +1,3 @@
-import React from 'react';
 import { CreditCard, Zap, Users, FolderOpen, CheckCircle } from 'lucide-react';
 import { useSubscription } from '../../contexts/SubscriptionContext';
 import { SUBSCRIPTION_STATUS, PREMIUM_FEATURES } from '../../config/constants';
@@ -104,7 +103,7 @@ export default function BillingPanel() {
             <li>Community support</li>
           </ul>
 
-          <h3 style={{ marginTop: '1.5rem' }}>Upgrade for</h3>
+          <h3 className="billing-free-info-upgrade-heading">Upgrade for</h3>
           <ul>
             <li>Shared workspaces with teams</li>
             <li>Google Calendar sync</li>

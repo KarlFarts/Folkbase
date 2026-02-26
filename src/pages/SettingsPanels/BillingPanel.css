@@ -145,6 +145,10 @@
   margin: 0 0 0.75rem 0;
 }
 
+.billing-free-info-upgrade-heading {
+  margin-top: 1.5rem;
+}
+
 .billing-free-info ul {
   margin: 0;
   padding-left: 1.5rem;

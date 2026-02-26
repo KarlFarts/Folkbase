@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 import { FIELD_DEFINITIONS } from '../utils/fieldDefinitions';
 import WindowTemplate from './WindowTemplate';
@@ -142,50 +142,26 @@ function BatchEditModal({ isOpen, selectedCount, onApply, onCancel, isLoading })
         </>
       }
     >
-      <div
-        style={{
-          fontSize: '14px',
-          color: 'var(--color-text-muted)',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
-        Select fields to update:
-      </div>
+      <div className="bem-hint">Select fields to update:</div>
 
       {editableFields.map((field) => (
         <div
           key={field.key}
-          style={{
-            marginBottom: 'var(--spacing-md)',
-            padding: 'var(--spacing-sm)',
-            borderRadius: 'var(--radius-md)',
-            border: '1px solid var(--color-border)',
-            backgroundColor: selectedFields.has(field.key)
-              ? 'rgba(var(--color-accent-primary-rgb), 0.05)'
-              : 'transparent',
-          }}
+          className={`bem-field-wrapper${selectedFields.has(field.key) ? ' bem-field-wrapper--selected' : ''}`}
         >
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              marginBottom: 'var(--spacing-xs)',
-              gap: 'var(--spacing-xs)',
-            }}
-          >
+          <label className="bem-field-label">
             <input
               type="checkbox"
               checked={selectedFields.has(field.key)}
               onChange={() => handleToggleField(field.key)}
               disabled={isLoading}
-              style={{ cursor: 'pointer' }}
+              className="bem-checkbox"
             />
-            <span style={{ fontWeight: 500, fontSize: '14px' }}>{field.label}</span>
+            <span className="bem-field-name">{field.label}</span>
           </label>
 
           {selectedFields.has(field.key) && (
-            <div style={{ marginTop: 'var(--spacing-xs)' }}>{renderFieldInput(field)}</div>
+            <div className="bem-field-input">{renderFieldInput(field)}</div>
           )}
         </div>
       ))}

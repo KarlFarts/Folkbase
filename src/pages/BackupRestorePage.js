@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Database, Download, Upload, AlertTriangle, CheckCircle, Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -177,7 +177,7 @@ function BackupRestorePage() {
       <div className="page-header">
         <div>
           <h1>
-            <Database size={32} style={{ marginRight: 'var(--spacing-md)' }} />
+            <Database size={32} className="br-title-icon" />
             Backup & Restore
           </h1>
           <p className="page-description">
@@ -186,17 +186,17 @@ function BackupRestorePage() {
         </div>
       </div>
 
-      <div className="page-content" style={{ maxWidth: '800px' }}>
+      <div className="page-content br-content">
         {/* Create Backup Section */}
-        <div className="card" style={{ marginBottom: 'var(--spacing-xl)' }}>
+        <div className="card br-backup-card">
           <div className="card-header">
             <h2>
-              <Download size={20} style={{ marginRight: 'var(--spacing-sm)' }} />
+              <Download size={20} className="br-section-icon" />
               Create Backup
             </h2>
           </div>
           <div className="card-body">
-            <p style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <p className="br-card-intro">
               Download a complete backup of all your data (contacts, organizations, locations,
               touchpoints, events, tasks, notes, lists, and all relationships). The backup file can
               be used to restore your data later.
@@ -216,7 +216,7 @@ function BackupRestorePage() {
             )}
 
             {!accessToken && (
-              <p className="text-muted" style={{ marginTop: 'var(--spacing-md)' }}>
+              <p className="text-muted br-auth-note">
                 Please sign in with Google to create backups
               </p>
             )}
@@ -227,23 +227,12 @@ function BackupRestorePage() {
         <div className="card">
           <div className="card-header">
             <h2>
-              <Upload size={20} style={{ marginRight: 'var(--spacing-sm)' }} />
+              <Upload size={20} className="br-section-icon" />
               Restore from Backup
             </h2>
           </div>
           <div className="card-body">
-            <div
-              className="alert alert-warning"
-              style={{
-                marginBottom: 'var(--spacing-lg)',
-                padding: 'var(--spacing-md)',
-                backgroundColor: 'var(--color-warning-bg)',
-                border: '1px solid var(--color-warning)',
-                borderRadius: 'var(--border-radius)',
-                display: 'flex',
-                gap: 'var(--spacing-sm)',
-              }}
-            >
+            <div className="br-warning-alert">
               <AlertTriangle size={20} color="var(--color-warning)" />
               <div>
                 <strong>Warning:</strong> Restoring a backup in overwrite mode will replace all
@@ -253,12 +242,8 @@ function BackupRestorePage() {
             </div>
 
             {/* File Input */}
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-              <label
-                htmlFor="backup-file"
-                className="btn btn-secondary"
-                style={{ cursor: 'pointer' }}
-              >
+            <div className="br-file-input-row">
+              <label htmlFor="backup-file" className="btn btn-secondary">
                 <Upload size={18} />
                 Select Backup File (.json)
               </label>
@@ -267,30 +252,24 @@ function BackupRestorePage() {
                 type="file"
                 accept=".json"
                 onChange={handleFileSelect}
-                style={{ display: 'none' }}
+                className="br-file-hidden"
               />
               {selectedFile && (
-                <p style={{ marginTop: 'var(--spacing-sm)' }}>Selected: {selectedFile.name}</p>
+                <p className="br-selected-file">Selected: {selectedFile.name}</p>
               )}
             </div>
 
             {/* Backup Info */}
             {stats && validationResult?.valid && (
-              <div
-                className="card"
-                style={{
-                  marginBottom: 'var(--spacing-lg)',
-                  backgroundColor: 'var(--color-bg-elevated)',
-                }}
-              >
+              <div className="card br-info-card">
                 <div className="card-header">
-                  <h3 style={{ fontSize: 'var(--font-size-base)' }}>
+                  <h3 className="br-info-heading">
                     <Info size={18} />
                     Backup Information
                   </h3>
                 </div>
                 <div className="card-body">
-                  <div style={{ display: 'grid', gap: 'var(--spacing-sm)' }}>
+                  <div className="br-info-grid">
                     <div>
                       <strong>Created:</strong> {new Date(stats.createdAt).toLocaleString()}
                     </div>
@@ -315,19 +294,10 @@ function BackupRestorePage() {
 
             {/* Validation Warnings */}
             {validationResult?.warnings && validationResult.warnings.length > 0 && (
-              <div
-                className="alert alert-info"
-                style={{
-                  marginBottom: 'var(--spacing-lg)',
-                  padding: 'var(--spacing-md)',
-                  backgroundColor: 'var(--color-info-bg)',
-                  border: '1px solid var(--color-info)',
-                  borderRadius: 'var(--border-radius)',
-                }}
-              >
+              <div className="br-validation-alert">
                 <div>
                   <strong>Validation Warnings:</strong>
-                  <ul style={{ marginTop: 'var(--spacing-sm)', paddingLeft: 'var(--spacing-lg)' }}>
+                  <ul className="br-warnings-list">
                     {validationResult.warnings.map((warning, index) => (
                       <li key={index}>{warning}</li>
                     ))}
@@ -338,24 +308,20 @@ function BackupRestorePage() {
 
             {/* Restore Mode */}
             {validationResult?.valid && (
-              <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-                <label
-                  htmlFor="restore-mode"
-                  style={{ display: 'block', marginBottom: 'var(--spacing-sm)' }}
-                >
+              <div className="br-restore-mode">
+                <label htmlFor="restore-mode" className="br-restore-mode-label">
                   <strong>Restore Mode:</strong>
                 </label>
                 <select
                   id="restore-mode"
                   value={restoreMode}
                   onChange={(e) => setRestoreMode(e.target.value)}
-                  className="input"
-                  style={{ width: '100%', maxWidth: '300px' }}
+                  className="input br-restore-mode-select"
                 >
                   <option value="overwrite">Overwrite (clear existing data)</option>
                   <option value="merge">Merge (keep existing data)</option>
                 </select>
-                <p className="text-muted" style={{ marginTop: 'var(--spacing-sm)' }}>
+                <p className="text-muted br-restore-hint">
                   {restoreMode === 'overwrite'
                     ? 'All existing data will be deleted before restoring'
                     : 'Backup data will be added to existing data (may create duplicates)'}
@@ -387,18 +353,8 @@ function BackupRestorePage() {
         title="Confirm Restore"
         size="md"
       >
-        <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-md)',
-              marginBottom: 'var(--spacing-lg)',
-              padding: 'var(--spacing-md)',
-              backgroundColor: 'var(--color-warning-bg)',
-              borderRadius: 'var(--border-radius)',
-            }}
-          >
+        <div className="br-confirm-body">
+          <div className="br-confirm-warning">
             <AlertTriangle size={24} color="var(--color-warning)" />
             <div>
               <strong>Are you sure you want to restore this backup?</strong>
@@ -406,9 +362,9 @@ function BackupRestorePage() {
           </div>
 
           {stats && (
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
+            <div className="br-confirm-list">
               <p>This will restore:</p>
-              <ul style={{ marginTop: 'var(--spacing-sm)', paddingLeft: 'var(--spacing-lg)' }}>
+              <ul className="br-confirm-list-items">
                 <li>{stats.totalTabs} sheet tabs</li>
                 <li>{stats.totalRecords.toLocaleString()} records</li>
                 <li>Backup created: {new Date(stats.createdAt).toLocaleString()}</li>
@@ -417,13 +373,11 @@ function BackupRestorePage() {
           )}
 
           {restoreMode === 'overwrite' && (
-            <p style={{ color: 'var(--color-danger)', fontWeight: 'bold' }}>
-              All existing data will be permanently deleted!
-            </p>
+            <p className="br-danger-text">All existing data will be permanently deleted!</p>
           )}
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'flex-end' }}>
+        <div className="br-confirm-actions">
           <button className="btn btn-secondary" onClick={() => setShowRestoreConfirm(false)}>
             Cancel
           </button>

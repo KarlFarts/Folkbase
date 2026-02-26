@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import {
   addList,
@@ -38,7 +38,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
   // State for delete confirmation
   const [listToDelete, setListToDelete] = useState(null);
 
-  const loadData = React.useCallback(async () => {
+  const loadData = async () => {
     try {
       setLoading(true);
 
@@ -60,11 +60,12 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
     } finally {
       setLoading(false);
     }
-  }, [contactId, accessToken, sheetId]);
+  };
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contactId, accessToken, sheetId]);
 
   const handleToggleList = (listId) => {
     const newSelected = selectedListIds.includes(listId)
@@ -188,27 +189,14 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       {error && <div className="error-message">{error}</div>}
 
       {/* Create New List Section */}
-      <div
-        style={{
-          marginBottom: '20px',
-          padding: '15px',
-          backgroundColor: 'var(--color-bg-secondary)',
-          borderRadius: '4px',
-        }}
-      >
-        <h4 style={{ marginTop: 0 }}>Create New List</h4>
+      <div className="lm-create-section">
+        <h4 className="lm-section-heading">Create New List</h4>
         <input
           type="text"
           placeholder="List name (e.g., Board Members)"
           value={newListName}
           onChange={(e) => setNewListName(e.target.value)}
-          style={{
-            width: '100%',
-            marginBottom: '10px',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid var(--border-color-default)',
-          }}
+          className="lm-input"
           onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
         />
         <input
@@ -216,27 +204,13 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
           placeholder="Description (optional)"
           value={newListDesc}
           onChange={(e) => setNewListDesc(e.target.value)}
-          style={{
-            width: '100%',
-            marginBottom: '10px',
-            padding: '8px',
-            borderRadius: '4px',
-            border: '1px solid var(--border-color-default)',
-          }}
+          className="lm-input"
           onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
         />
         <button
           onClick={handleCreateList}
           disabled={!newListName.trim()}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: 'var(--color-success)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: newListName.trim() ? 'pointer' : 'not-allowed',
-            opacity: newListName.trim() ? 1 : 0.5,
-          }}
+          className="lm-create-btn"
         >
           Create List
         </button>
@@ -244,67 +218,31 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
 
       {/* Edit List Section */}
       {editingListId && (
-        <div
-          style={{
-            marginBottom: '20px',
-            padding: '15px',
-            backgroundColor: 'var(--color-warning-bg)',
-            borderRadius: '4px',
-          }}
-        >
-          <h4 style={{ marginTop: 0 }}>Edit List</h4>
+        <div className="lm-edit-section">
+          <h4 className="lm-section-heading">Edit List</h4>
           <input
             type="text"
             placeholder="List name"
             value={editingListName}
             onChange={(e) => setEditingListName(e.target.value)}
-            style={{
-              width: '100%',
-              marginBottom: '10px',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid var(--border-color-default)',
-            }}
+            className="lm-input"
           />
           <input
             type="text"
             placeholder="Description (optional)"
             value={editingListDesc}
             onChange={(e) => setEditingListDesc(e.target.value)}
-            style={{
-              width: '100%',
-              marginBottom: '10px',
-              padding: '8px',
-              borderRadius: '4px',
-              border: '1px solid var(--border-color-default)',
-            }}
+            className="lm-input"
           />
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div className="lm-edit-actions">
             <button
               onClick={handleSaveRename}
               disabled={!editingListName.trim()}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--color-accent-primary)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: editingListName.trim() ? 'pointer' : 'not-allowed',
-                opacity: editingListName.trim() ? 1 : 0.5,
-              }}
+              className="lm-edit-save-btn"
             >
               Save
             </button>
-            <button
-              onClick={() => setEditingListId(null)}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: 'var(--color-bg-secondary)',
-                border: '1px solid var(--border-color-default)',
-                borderRadius: '4px',
-                cursor: 'pointer',
-              }}
-            >
+            <button onClick={() => setEditingListId(null)} className="lm-edit-cancel-btn">
               Cancel
             </button>
           </div>
@@ -317,65 +255,29 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
           <p className="text-muted">No lists available</p>
         ) : (
           lists.map((list) => (
-            <div
-              key={list['List ID']}
-              style={{
-                marginBottom: '10px',
-                padding: '12px',
-                border: '1px solid var(--border-color-default)',
-                borderRadius: '4px',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'flex-start',
-                  justifyContent: 'space-between',
-                  marginBottom: '8px',
-                }}
-              >
-                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1 }}>
+            <div key={list['List ID']} className="lm-list-item">
+              <div className="lm-list-item-top">
+                <label className="lm-list-label">
                   <input
                     type="checkbox"
                     checked={selectedListIds.includes(list['List ID'])}
                     onChange={() => handleToggleList(list['List ID'])}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 'bold' }}>{list['List Name']}</div>
+                  <div className="lm-list-label-content">
+                    <div className="lm-list-name">{list['List Name']}</div>
                     {list['Description'] && (
-                      <div style={{ fontSize: '0.9em', color: 'var(--color-text-secondary)' }}>
-                        {list['Description']}
-                      </div>
+                      <div className="lm-list-desc">{list['Description']}</div>
                     )}
                   </div>
                 </label>
               </div>
-              <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-                <button
-                  onClick={() => handleStartEdit(list)}
-                  style={{
-                    padding: '4px 12px',
-                    fontSize: '0.85em',
-                    backgroundColor: 'var(--color-accent-primary)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                  }}
-                >
+              <div className="lm-list-actions">
+                <button onClick={() => handleStartEdit(list)} className="lm-rename-btn">
                   Rename
                 </button>
                 <button
                   onClick={() => setListToDelete(list['List ID'])}
-                  style={{
-                    padding: '4px 12px',
-                    fontSize: '0.85em',
-                    backgroundColor: 'var(--color-danger)',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '3px',
-                    cursor: 'pointer',
-                  }}
+                  className="lm-delete-btn"
                 >
                   Delete
                 </button>

@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import { useState, memo } from 'react';
 import { Phone, Mail, MessageSquare, Calendar, Zap, FileText } from 'lucide-react';
 
 /**
@@ -67,7 +67,7 @@ const TimelineItem = memo(function TimelineItem({ touchpoint, isClickable, onCli
         <div
           className={`timeline-dot ${typeConfig.color} ${outcome ? `outcome-${outcome.toLowerCase().replace(/\s+/g, '-')}` : ''}`}
         >
-          <TypeIcon size={6} style={{ color: 'white', flexShrink: 0 }} />
+          <TypeIcon size={6} className="timeline-dot-icon" />
         </div>
         <div className="timeline-line" />
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { AlertCircle, CheckCircle, Loader } from 'lucide-react';
 import { migrateSheet } from '../services/migrationService';
 import './MigrationBanner.css';
@@ -58,7 +58,7 @@ export default function MigrationBanner({ accessToken, sheetId, onComplete }) {
   return (
     <div className="migration-banner running">
       <Loader size={20} className="spinner" />
-      <div style={{ flex: 1 }}>
+      <div className="migration-banner-content">
         <div>{progress.message}</div>
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress.percent}%` }} />

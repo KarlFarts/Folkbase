@@ -1,5 +1,5 @@
 import { error as logError } from '../utils/logger';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import IconMap from './IconMap';
 import WindowTemplate from './WindowTemplate';
 import {
@@ -266,58 +266,42 @@ export default function AddRelationshipModal({
     >
       <form onSubmit={handleSubmit}>
         {/* Source Entity (read-only) */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>From</label>
+        <div className="arm-field-group">
+          <label className="arm-label">From</label>
           <div
+            className="arm-source-entity"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '8px 12px',
               border: `2px solid ${sourceConfig?.color || 'var(--border-color-default)'}`,
-              borderRadius: '4px',
               background: `${sourceConfig?.color || 'var(--border-color-default)'}11`,
             }}
           >
             <IconMap name={sourceConfig?.icon} size={20} />
             <div>
-              <div style={{ fontWeight: '500' }}>{actualSourceName}</div>
-              <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{actualSourceType}</div>
+              <div className="arm-entity-name">{actualSourceName}</div>
+              <div className="arm-entity-type">{actualSourceType}</div>
             </div>
           </div>
         </div>
 
         {/* Target Entity Type Selector (multi-entity mode only) */}
         {isMultiEntity && (
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-              Connect to Entity Type
-            </label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div className="arm-field-group">
+            <label className="arm-label">Connect to Entity Type</label>
+            <div className="arm-entity-type-row">
               {Object.entries(ENTITY_CONFIG).map(([type, config]) => (
                 <button
                   key={type}
                   type="button"
                   onClick={() => handleChange('Target Entity Type', type)}
-                  style={{
-                    flex: 1,
-                    padding: '12px 8px',
-                    border:
-                      formData['Target Entity Type'] === type
-                        ? `2px solid ${config.color}`
-                        : '1px solid var(--border-color-default)',
-                    borderRadius: '8px',
-                    background:
-                      formData['Target Entity Type'] === type ? `${config.color}11` : 'white',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}
+                  className={`arm-entity-type-btn ${formData['Target Entity Type'] === type ? 'arm-entity-type-btn--active' : ''}`}
+                  style={
+                    formData['Target Entity Type'] === type
+                      ? { border: `2px solid ${config.color}`, background: `${config.color}11` }
+                      : undefined
+                  }
                 >
                   <IconMap name={config.icon} size={24} />
-                  <span style={{ fontSize: '12px', fontWeight: '500' }}>{type}</span>
+                  <span className="arm-entity-type-label">{type}</span>
                 </button>
               ))}
             </div>
@@ -325,19 +309,14 @@ export default function AddRelationshipModal({
         )}
 
         {/* Target Entity Selector */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-            To <span style={{ color: 'red' }}>*</span>
+        <div className="arm-field-group">
+          <label className="arm-label">
+            To <span className="arm-required">*</span>
           </label>
           <select
             value={formData['Target Entity ID']}
             onChange={(e) => handleChange('Target Entity ID', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: errors['Target Entity ID'] ? '1px solid var(--color-danger)' : '1px solid var(--border-color-default)',
-              borderRadius: '4px',
-            }}
+            className={`arm-select${errors['Target Entity ID'] ? ' arm-select--error' : ''}`}
           >
             <option value="">
               Select{' '}
@@ -351,26 +330,19 @@ export default function AddRelationshipModal({
             ))}
           </select>
           {errors['Target Entity ID'] && (
-            <div style={{ color: 'red', fontSize: '12px', marginTop: '4px' }}>
-              {errors['Target Entity ID']}
-            </div>
+            <div className="arm-error-msg">{errors['Target Entity ID']}</div>
           )}
         </div>
 
         {/* Relationship Type */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-            Relationship Type <span style={{ color: 'red' }}>*</span>
+        <div className="arm-field-group">
+          <label className="arm-label">
+            Relationship Type <span className="arm-required">*</span>
           </label>
           <select
             value={formData['Relationship Type']}
             onChange={(e) => handleChange('Relationship Type', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid var(--border-color-default)',
-              borderRadius: '4px',
-            }}
+            className="arm-select"
           >
             {isMultiEntity ? (
               validRelationshipTypes.map((type) => (
@@ -390,20 +362,13 @@ export default function AddRelationshipModal({
         </div>
 
         {/* Relationship Subtype */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-            Specific Relationship
-          </label>
+        <div className="arm-field-group">
+          <label className="arm-label">Specific Relationship</label>
           {availableSubtypes.length > 0 ? (
             <select
               value={formData['Relationship Subtype']}
               onChange={(e) => handleChange('Relationship Subtype', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid var(--border-color-default)',
-                borderRadius: '4px',
-              }}
+              className="arm-select"
             >
               <option value="">Select...</option>
               {availableSubtypes.map((subtype) => (
@@ -418,28 +383,23 @@ export default function AddRelationshipModal({
               value={formData['Relationship Subtype']}
               onChange={(e) => handleChange('Relationship Subtype', e.target.value)}
               placeholder="Enter custom relationship type"
-              style={{
-                width: '100%',
-                padding: '8px',
-                border: '1px solid var(--border-color-default)',
-                borderRadius: '4px',
-              }}
+              className="arm-input"
             />
           )}
         </div>
 
         {/* Bidirectional Checkbox */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+        <div className="arm-field-group">
+          <label className="arm-checkbox-label">
             <input
               type="checkbox"
               checked={!formData['Is Directional']}
               onChange={(e) => handleChange('Is Directional', !e.target.checked)}
-              style={{ marginRight: '8px' }}
+              className="arm-checkbox"
             />
-            <span style={{ fontWeight: '500' }}>Bidirectional relationship</span>
+            <span className="arm-checkbox-text">Bidirectional relationship</span>
           </label>
-          <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginLeft: '24px', marginTop: '4px' }}>
+          <div className="arm-hint">
             {formData['Is Directional']
               ? 'One-way relationship (e.g., employee → organization)'
               : 'Two-way relationship (e.g., partner ↔ partner)'}
@@ -447,19 +407,12 @@ export default function AddRelationshipModal({
         </div>
 
         {/* Relationship Strength */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-            Relationship Strength
-          </label>
+        <div className="arm-field-group">
+          <label className="arm-label">Relationship Strength</label>
           <select
             value={formData.Strength}
             onChange={(e) => handleChange('Strength', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid var(--border-color-default)',
-              borderRadius: '4px',
-            }}
+            className="arm-select"
           >
             <option value={RELATIONSHIP_STRENGTH.STRONG}>Strong</option>
             <option value={RELATIONSHIP_STRENGTH.GOOD}>Good</option>
@@ -470,47 +423,31 @@ export default function AddRelationshipModal({
         </div>
 
         {/* Notes */}
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>Notes</label>
+        <div className="arm-field-group">
+          <label className="arm-label">Notes</label>
           <textarea
             value={formData.Notes}
             onChange={(e) => handleChange('Notes', e.target.value)}
             placeholder="Add context about this relationship..."
             rows={3}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid var(--border-color-default)',
-              borderRadius: '4px',
-              fontFamily: 'inherit',
-              resize: 'vertical',
-            }}
+            className="arm-textarea"
           />
         </div>
 
         {/* Date Established */}
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500' }}>
-            Date Established
-          </label>
+        <div className="arm-field-group arm-field-group--last">
+          <label className="arm-label">Date Established</label>
           <input
             type="date"
             value={formData['Date Established']}
             onChange={(e) => handleChange('Date Established', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px',
-              border: '1px solid var(--border-color-default)',
-              borderRadius: '4px',
-            }}
+            className="arm-input"
           />
         </div>
 
         {/* Submit Error */}
         {errors.submit && (
-          <div className="alert alert-danger" style={{ marginTop: '16px' }}>
-            {errors.submit}
-          </div>
+          <div className="alert alert-danger arm-submit-error">{errors.submit}</div>
         )}
       </form>
     </WindowTemplate>

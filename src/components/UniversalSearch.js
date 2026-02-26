@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Search, User, Calendar, Building2, CheckSquare, X } from 'lucide-react';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
+import './UniversalSearch.css';
 
 /**
  * UniversalSearch - Global search across all entity types
@@ -167,42 +168,18 @@ function UniversalSearch({ onNavigate, onClose }) {
     results.tasks.length;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.7)',
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: 'var(--spacing-xl)',
-        paddingTop: '10vh',
-      }}
-      onClick={onClose}
-    >
-      <div
-        className="card"
-        style={{ maxWidth: '700px', width: '100%', maxHeight: '80vh', overflow: 'auto' }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div
-          className="card-header"
-          style={{ position: 'sticky', top: 0, background: 'var(--color-bg-elevated)', zIndex: 1 }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)' }}>
+    <div className="us-overlay" onClick={onClose}>
+      <div className="card us-card" onClick={(e) => e.stopPropagation()}>
+        <div className="card-header us-header">
+          <div className="us-header-row">
             <Search size={20} />
             <input
               type="text"
-              className="form-input"
+              className="form-input us-search-input"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search contacts, events, organizations, tasks..."
               autoFocus
-              style={{ flex: 1, border: 'none', fontSize: 'var(--font-size-lg)' }}
             />
             {onClose && (
               <button onClick={onClose} className="btn btn-ghost btn-sm">
@@ -211,10 +188,7 @@ function UniversalSearch({ onNavigate, onClose }) {
             )}
           </div>
           {query && (
-            <p
-              className="text-muted"
-              style={{ marginTop: 'var(--spacing-sm)', fontSize: 'var(--font-size-sm)' }}
-            >
+            <p className="text-muted us-result-count">
               {totalResults} result{totalResults !== 1 ? 's' : ''} found
             </p>
           )}
@@ -222,83 +196,43 @@ function UniversalSearch({ onNavigate, onClose }) {
 
         <div className="card-body">
           {!query && (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: 'var(--spacing-xl)',
-                color: 'var(--color-text-muted)',
-              }}
-            >
-              <Search size={48} style={{ margin: '0 auto var(--spacing-md) auto', opacity: 0.5 }} />
+            <div className="us-empty-state">
+              <Search size={48} className="us-empty-icon" />
               <p>Search by name, ID, email, tag, or any other field</p>
-              <p style={{ fontSize: 'var(--font-size-sm)', marginTop: 'var(--spacing-sm)' }}>
+              <p className="us-empty-hint">
                 Examples: "John Smith", "CON001", "Labor", "Meeting"
               </p>
             </div>
           )}
 
           {query && totalResults === 0 && !loading && (
-            <div
-              style={{
-                textAlign: 'center',
-                padding: 'var(--spacing-xl)',
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            <div className="us-no-results">
               <p>No results found for "{query}"</p>
             </div>
           )}
 
           {/* Contacts Results */}
           {results.contacts.length > 0 && (
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-              <h4
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+            <div className="us-section">
+              <h4 className="us-section-heading">
                 <User size={18} /> Contacts ({results.contacts.length})
               </h4>
               {results.contacts.map((contact) => (
                 <div
                   key={contact['Contact ID']}
                   onClick={() => handleResultClick('contact', contact['Contact ID'])}
-                  className="card"
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    marginBottom: 'var(--spacing-sm)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                  }}
+                  className="card us-result-item"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                  <div className="us-result-inner">
                     <div>
                       <strong>{contact['Display Name'] || contact.Name}</strong>
-                      <div className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                      <div className="text-muted us-result-sub">
                         {contact.Organization && <span>{contact.Organization}</span>}
                         {contact.Organization && contact.Role && <span> · </span>}
                         {contact.Role && <span>{contact.Role}</span>}
                       </div>
                     </div>
-                    <span
-                      className="badge badge-status-inactive"
-                      style={{ fontSize: 'var(--font-size-xs)' }}
-                    >
+                    <span className="badge badge-status-inactive us-result-id">
                       {contact['Contact ID']}
                     </span>
                   </div>
@@ -309,54 +243,26 @@ function UniversalSearch({ onNavigate, onClose }) {
 
           {/* Events Results */}
           {results.events.length > 0 && (
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-              <h4
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+            <div className="us-section">
+              <h4 className="us-section-heading">
                 <Calendar size={18} /> Events ({results.events.length})
               </h4>
               {results.events.map((event) => (
                 <div
                   key={event['Event ID']}
                   onClick={() => handleResultClick('event', event['Event ID'])}
-                  className="card"
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    marginBottom: 'var(--spacing-sm)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                  }}
+                  className="card us-result-item"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                  <div className="us-result-inner">
                     <div>
                       <strong>{event['Event Name']}</strong>
-                      <div className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                      <div className="text-muted us-result-sub">
                         {event['Event Date'] && <span>{event['Event Date']}</span>}
                         {event['Event Date'] && event['Event Type'] && <span> · </span>}
                         {event['Event Type'] && <span>{event['Event Type']}</span>}
                       </div>
                     </div>
-                    <span
-                      className="badge badge-status-inactive"
-                      style={{ fontSize: 'var(--font-size-xs)' }}
-                    >
+                    <span className="badge badge-status-inactive us-result-id">
                       {event['Event ID']}
                     </span>
                   </div>
@@ -367,54 +273,26 @@ function UniversalSearch({ onNavigate, onClose }) {
 
           {/* Organizations Results */}
           {results.organizations.length > 0 && (
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-              <h4
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+            <div className="us-section">
+              <h4 className="us-section-heading">
                 <Building2 size={18} /> Organizations ({results.organizations.length})
               </h4>
               {results.organizations.map((org) => (
                 <div
                   key={org['Organization ID']}
                   onClick={() => handleResultClick('organization', org['Organization ID'])}
-                  className="card"
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    marginBottom: 'var(--spacing-sm)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                  }}
+                  className="card us-result-item"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                  <div className="us-result-inner">
                     <div>
                       <strong>{org['Display Name'] || org.Name}</strong>
-                      <div className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                      <div className="text-muted us-result-sub">
                         {org.Type && <span>{org.Type}</span>}
                         {org.Type && org.Industry && <span> · </span>}
                         {org.Industry && <span>{org.Industry}</span>}
                       </div>
                     </div>
-                    <span
-                      className="badge badge-status-inactive"
-                      style={{ fontSize: 'var(--font-size-xs)' }}
-                    >
+                    <span className="badge badge-status-inactive us-result-id">
                       {org['Organization ID']}
                     </span>
                   </div>
@@ -425,63 +303,29 @@ function UniversalSearch({ onNavigate, onClose }) {
 
           {/* Tasks Results */}
           {results.tasks.length > 0 && (
-            <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-              <h4
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+            <div className="us-section">
+              <h4 className="us-section-heading">
                 <CheckSquare size={18} /> Tasks ({results.tasks.length})
               </h4>
               {results.tasks.map((task) => (
                 <div
                   key={task['Task ID']}
                   onClick={() => handleResultClick('task', task['Task ID'])}
-                  className="card"
-                  style={{
-                    padding: 'var(--spacing-md)',
-                    marginBottom: 'var(--spacing-sm)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-tertiary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'var(--color-bg-elevated)';
-                  }}
+                  className="card us-result-item"
                 >
-                  <div
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'flex-start',
-                    }}
-                  >
+                  <div className="us-result-inner">
                     <div>
                       <strong>{task.Title}</strong>
-                      <div className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                      <div className="text-muted us-result-sub">
                         {task.Status && (
-                          <span
-                            className="badge badge-status-inactive"
-                            style={{
-                              fontSize: 'var(--font-size-xs)',
-                              marginRight: 'var(--spacing-xs)',
-                            }}
-                          >
+                          <span className="badge badge-status-inactive us-task-status">
                             {task.Status}
                           </span>
                         )}
                         {task['Due Date'] && <span>Due: {task['Due Date']}</span>}
                       </div>
                     </div>
-                    <span
-                      className="badge badge-status-inactive"
-                      style={{ fontSize: 'var(--font-size-xs)' }}
-                    >
+                    <span className="badge badge-status-inactive us-result-id">
                       {task['Task ID']}
                     </span>
                   </div>

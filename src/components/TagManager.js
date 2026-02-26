@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import WindowTemplate from './WindowTemplate';
 
 /**
@@ -84,41 +84,20 @@ export default function TagManager({ contacts, onUpdateContacts, onClose }) {
       }
     >
       {/* Tag List */}
-      <div
-        style={{
-          maxHeight: '300px',
-          overflowY: 'auto',
-          marginBottom: 'var(--spacing-lg)',
-          border: '1px solid var(--border-color-default)',
-          borderRadius: 'var(--radius-md)',
-        }}
-      >
+      <div className="tm-tag-list">
         {allTags.length === 0 ? (
-          <div style={{ padding: 'var(--spacing-md)', color: 'var(--color-text-muted)' }}>
-            No tags available
-          </div>
+          <div className="tm-tag-empty">No tags available</div>
         ) : (
           allTags.map((tag) => (
             <div
               key={tag}
               onClick={() => setSelectedTag(tag)}
-              style={{
-                padding: 'var(--spacing-sm) var(--spacing-md)',
-                cursor: 'pointer',
-                backgroundColor:
-                  selectedTag === tag ? 'var(--color-accent-secondary)' : 'transparent',
-                borderBottom: '1px solid var(--border-color-default)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
+              className={`tm-tag-row${selectedTag === tag ? ' tm-tag-row--selected' : ''}`}
             >
               <span>
                 <strong>{tag}</strong>
               </span>
-              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.9em' }}>
-                ({tagCounts[tag]} contacts)
-              </span>
+              <span className="tm-tag-count">({tagCounts[tag]} contacts)</span>
             </div>
           ))
         )}
@@ -126,22 +105,14 @@ export default function TagManager({ contacts, onUpdateContacts, onClose }) {
 
       {/* Rename Section */}
       {selectedTag && (
-        <div
-          style={{
-            marginBottom: 'var(--spacing-lg)',
-            padding: 'var(--spacing-md)',
-            backgroundColor: 'var(--color-bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-          }}
-        >
-          <h3 style={{ marginTop: 0 }}>Rename &quot;{selectedTag}&quot;</h3>
+        <div className="tm-rename-section">
+          <h3 className="tm-rename-heading">Rename &quot;{selectedTag}&quot;</h3>
           <input
             type="text"
-            className="form-input"
+            className="form-input tm-rename-input"
             placeholder="New tag name"
             value={newTagName}
             onChange={(e) => setNewTagName(e.target.value)}
-            style={{ width: '100%', marginBottom: 'var(--spacing-sm)' }}
             onKeyPress={(e) => e.key === 'Enter' && handleRename()}
           />
           <button className="btn btn-primary" onClick={handleRename} disabled={!newTagName.trim()}>
@@ -152,8 +123,8 @@ export default function TagManager({ contacts, onUpdateContacts, onClose }) {
 
       {/* Delete Section */}
       {selectedTag && (
-        <div style={{ marginBottom: 'var(--spacing-lg)' }}>
-          <button className="btn btn-danger" onClick={handleDelete} style={{ width: '100%' }}>
+        <div className="tm-delete-section">
+          <button className="btn btn-danger tm-delete-btn" onClick={handleDelete}>
             Delete &quot;{selectedTag}&quot; from all contacts
           </button>
         </div>

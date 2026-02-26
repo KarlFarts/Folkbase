@@ -96,6 +96,11 @@
   white-space: nowrap;
 }
 
+.install-prompt-inline-icon {
+  display: inline;
+  vertical-align: middle;
+}
+
 /* Mobile adjustments */
 @media (max-width: 640px) {
   .install-prompt {

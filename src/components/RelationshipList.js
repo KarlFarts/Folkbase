@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 /**
  * Sort icon component for table headers
@@ -6,7 +6,7 @@ import React, { useState, useMemo } from 'react';
 const SortIcon = ({ field, sortField, sortDirection }) => {
   if (sortField !== field) return null;
   return (
-    <span style={{ marginLeft: '4px', fontSize: '12px' }}>
+    <span className="rl-sort-icon">
       {sortDirection === 'asc' ? '↑' : '↓'}
     </span>
   );
@@ -94,205 +94,87 @@ export default function RelationshipList({
 
   if (!relationships || relationships.length === 0) {
     return (
-      <div
-        style={{
-          padding: '40px',
-          textAlign: 'center',
-          color: 'var(--color-text-secondary)',
-          border: '1px solid var(--border-color-default)',
-          borderRadius: '8px',
-          background: 'var(--color-background-secondary, #f7f3ef)',
-        }}
-      >
-        <p style={{ fontSize: '16px', marginBottom: '8px' }}>No relationships yet</p>
-        <p style={{ fontSize: '14px' }}>Click "Add Relationship" to get started</p>
+      <div className="rl-empty-state">
+        <p className="rl-empty-primary">No relationships yet</p>
+        <p className="rl-empty-secondary">Click "Add Relationship" to get started</p>
       </div>
     );
   }
 
   return (
-    <div style={{ width: '100%', overflowX: 'auto' }}>
-      <table
-        style={{
-          width: '100%',
-          borderCollapse: 'collapse',
-          border: '1px solid var(--border-color-default)',
-        }}
-      >
+    <div className="rl-wrap">
+      <table className="rl-table">
         <thead>
-          <tr style={{ background: 'var(--color-background-secondary, #f7f3ef)' }}>
-            <th
-              onClick={() => handleSort('Contact')}
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+          <tr className="rl-thead-row">
+            <th className="rl-th rl-th--sortable" onClick={() => handleSort('Contact')}>
               Contact <SortIcon field="Contact" sortField={sortField} sortDirection={sortDirection} />
             </th>
-            <th
-              onClick={() => handleSort('Relationship Type')}
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+            <th className="rl-th rl-th--sortable" onClick={() => handleSort('Relationship Type')}>
               Type <SortIcon field="Relationship Type" sortField={sortField} sortDirection={sortDirection} />
             </th>
-            <th
-              onClick={() => handleSort('Relationship Subtype')}
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+            <th className="rl-th rl-th--sortable" onClick={() => handleSort('Relationship Subtype')}>
               Relationship <SortIcon field="Relationship Subtype" sortField={sortField} sortDirection={sortDirection} />
             </th>
-            <th
-              onClick={() => handleSort('Strength')}
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+            <th className="rl-th rl-th--sortable" onClick={() => handleSort('Strength')}>
               Strength <SortIcon field="Strength" sortField={sortField} sortDirection={sortDirection} />
             </th>
-            <th
-              onClick={() => handleSort('Date Established')}
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
-            >
+            <th className="rl-th rl-th--sortable" onClick={() => handleSort('Date Established')}>
               Date <SortIcon field="Date Established" sortField={sortField} sortDirection={sortDirection} />
             </th>
-            <th
-              style={{
-                padding: '12px',
-                textAlign: 'left',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-              }}
-            >
-              Direction
-            </th>
-            <th
-              style={{
-                padding: '12px',
-                textAlign: 'right',
-                fontWeight: '600',
-                borderBottom: '2px solid var(--border-color-default)',
-              }}
-            >
-              Actions
-            </th>
+            <th className="rl-th">Direction</th>
+            <th className="rl-th rl-th--right">Actions</th>
           </tr>
         </thead>
         <tbody>
           {sortedRelationships.map((rel, index) => (
             <tr
               key={`${rel['Relationship ID']}-${index}`}
-              style={{
-                borderBottom: '1px solid var(--border-color-default)',
-                background: index % 2 === 0 ? 'white' : 'var(--color-background-secondary, #f7f3ef)',
-              }}
+              className={`rl-row ${index % 2 === 0 ? 'rl-row--even' : 'rl-row--odd'}`}
             >
-              <td style={{ padding: '12px' }}>
+              <td className="rl-td">
                 <div>
                   <button
                     onClick={() => onContactClick && onContactClick(rel.otherContactId)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      color: 'var(--color-accent-primary, #c2703e)',
-                      cursor: 'pointer',
-                      fontWeight: '500',
-                      textDecoration: 'underline',
-                      padding: 0,
-                      fontSize: 'inherit',
-                    }}
+                    className="rl-contact-link"
                   >
                     {rel.otherContactName}
                   </button>
                   {rel.otherContactOrganization && (
-                    <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)', marginTop: '2px' }}>
-                      {rel.otherContactOrganization}
-                    </div>
+                    <div className="rl-contact-org">{rel.otherContactOrganization}</div>
                   )}
                 </div>
               </td>
-              <td style={{ padding: '12px' }}>
+              <td className="rl-td">
                 <span
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    background: getTypeColor(rel['Relationship Type']),
-                    color: 'white',
-                  }}
+                  className="rl-type-badge"
+                  style={{ background: getTypeColor(rel['Relationship Type']) }}
                 >
                   {rel['Relationship Type']}
                 </span>
               </td>
-              <td style={{ padding: '12px' }}>{rel['Relationship Subtype'] || '-'}</td>
-              <td style={{ padding: '12px' }}>
+              <td className="rl-td">{rel['Relationship Subtype'] || '-'}</td>
+              <td className="rl-td">
                 <span
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    background: getStrengthColor(rel['Strength']),
-                    color: 'var(--color-text-primary)',
-                  }}
+                  className="rl-strength-badge"
+                  style={{ background: getStrengthColor(rel['Strength']) }}
                 >
                   {rel['Strength'] || '-'}
                 </span>
               </td>
-              <td style={{ padding: '12px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+              <td className="rl-td rl-td--date">
                 {rel['Date Established'] || '-'}
               </td>
-              <td style={{ padding: '12px', fontSize: '14px' }}>
+              <td className="rl-td rl-td--direction">
                 {rel['Is Directional'] === 'FALSE' || rel['Is Directional'] === false
                   ? '↔'
                   : rel.isSource
                   ? '→'
                   : '←'}
               </td>
-              <td style={{ padding: '12px', textAlign: 'right' }}>
-                <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+              <td className="rl-td rl-td--actions">
+                <div className="rl-actions">
                   {onEdit && (
-                    <button
-                      onClick={() => onEdit(rel)}
-                      style={{
-                        padding: '6px 12px',
-                        border: '1px solid var(--border-color-default)',
-                        borderRadius: '4px',
-                        background: 'var(--color-bg-primary)',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                      }}
-                    >
+                    <button onClick={() => onEdit(rel)} className="rl-btn-edit">
                       Edit
                     </button>
                   )}
@@ -303,15 +185,7 @@ export default function RelationshipList({
                           onDelete(rel['Relationship ID']);
                         }
                       }}
-                      style={{
-                        padding: '6px 12px',
-                        border: '1px solid var(--color-danger)',
-                        borderRadius: '4px',
-                        background: 'var(--color-bg-primary)',
-                        color: 'var(--color-danger)',
-                        cursor: 'pointer',
-                        fontSize: '13px',
-                      }}
+                      className="rl-btn-delete"
                     >
                       Delete
                     </button>
