@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Star } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -167,14 +167,7 @@ function OrgContactsManager({ organizationId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="dm-header">
         <h3>Key Contacts</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Contact
@@ -209,9 +202,7 @@ function OrgContactsManager({ organizationId }) {
               return (
                 <tr key={orgContact['Org Contact ID']}>
                   <td>
-                    <div
-                      style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-                    >
+                    <div className="dm-name-cell">
                       {(orgContact['Is Primary Contact'] === 'TRUE' ||
                         orgContact['Is Primary Contact'] === true) && (
                         <Star size={14} fill="var(--color-warning)" color="var(--color-warning)" />
@@ -230,7 +221,7 @@ function OrgContactsManager({ organizationId }) {
                     )}
                   </td>
                   <td>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                    <div className="dm-action-btns">
                       <button
                         onClick={() => openEditModal(orgContact)}
                         className="btn btn-ghost btn-sm"
@@ -263,7 +254,7 @@ function OrgContactsManager({ organizationId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="dm-form-stack">
             <div>
               <label className="form-label">Contact (from database)</label>
               <select
@@ -282,7 +273,7 @@ function OrgContactsManager({ organizationId }) {
 
             <div>
               <label className="form-label">
-                Contact Name <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Contact Name <span className="form-required">*</span>
               </label>
               <input
                 type="text"
@@ -318,13 +309,7 @@ function OrgContactsManager({ organizationId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="dm-two-col">
               <div>
                 <label className="form-label">Start Date</label>
                 <input
@@ -347,8 +332,8 @@ function OrgContactsManager({ organizationId }) {
               </div>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+            <div className="dm-checkbox-stack">
+              <label className="dm-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Current']}
@@ -357,7 +342,7 @@ function OrgContactsManager({ organizationId }) {
                 <span>Currently in this role</span>
               </label>
 
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <label className="dm-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Primary Contact']}

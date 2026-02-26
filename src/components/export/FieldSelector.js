@@ -1,4 +1,3 @@
-import React from 'react';
 import { FIELD_PRESETS } from '../../services/exportService';
 
 function FieldSelector({
@@ -45,14 +44,7 @@ function FieldSelector({
 
   return (
     <div className="field-selector">
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="fs-header">
         <div>
           <label htmlFor="preset-select" className="form-label">
             Field Preset
@@ -62,7 +54,7 @@ function FieldSelector({
             className="form-select"
             value={currentPreset}
             onChange={handlePresetChange}
-            style={{ width: '200px' }}
+            className="fs-preset-select"
           >
             <option value="basic">Basic Info</option>
             <option value="full">Full Contact</option>
@@ -71,7 +63,7 @@ function FieldSelector({
           </select>
         </div>
 
-        <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+        <div className="fs-btn-row">
           <button type="button" className="btn btn-text" onClick={handleSelectAll}>
             Select All
           </button>
@@ -81,50 +73,24 @@ function FieldSelector({
         </div>
       </div>
 
-      <div
-        className="field-checkboxes"
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: 'var(--spacing-sm)',
-          padding: 'var(--spacing-md)',
-          backgroundColor: 'var(--color-background)',
-          borderRadius: 'var(--border-radius)',
-          border: '1px solid var(--color-border)',
-          maxHeight: '300px',
-          overflowY: 'auto',
-        }}
-      >
+      <div className="field-checkboxes fs-checkboxes">
         {availableFields.map((field) => (
           <label
             key={field}
-            className="checkbox-label"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              cursor: 'pointer',
-              padding: 'var(--spacing-xs)',
-              borderRadius: 'var(--border-radius)',
-              transition: 'background-color 0.2s',
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = 'var(--color-background-hover)')
-            }
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            className="checkbox-label fs-field-label"
           >
             <input
               type="checkbox"
               checked={selectedFields.includes(field)}
               onChange={() => handleFieldToggle(field)}
-              style={{ cursor: 'pointer' }}
+              className="fs-field-checkbox"
             />
             <span>{field}</span>
           </label>
         ))}
       </div>
 
-      <p className="text-muted" style={{ marginTop: 'var(--spacing-sm)', fontSize: '0.9em' }}>
+      <p className="text-muted fs-count">
         {selectedFields.length} of {availableFields.length} fields selected
       </p>
     </div>

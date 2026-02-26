@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -176,14 +176,7 @@ function DepartmentsManager({ organizationId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="dm-header">
         <h3>Departments</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Department
@@ -213,7 +206,7 @@ function DepartmentsManager({ organizationId }) {
                 <td>{department.Size || <span className="text-muted">—</span>}</td>
                 <td>
                   {department.Phone || department.Email ? (
-                    <div style={{ fontSize: 'var(--font-size-sm)' }}>
+                    <div className="dm-contact-info">
                       {department.Phone && <div>{department.Phone}</div>}
                       {department.Email && <div>{department.Email}</div>}
                     </div>
@@ -222,7 +215,7 @@ function DepartmentsManager({ organizationId }) {
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="dm-action-btns">
                     <button
                       onClick={() => openEditModal(department)}
                       className="btn btn-ghost btn-sm"
@@ -254,10 +247,10 @@ function DepartmentsManager({ organizationId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="dm-form-stack">
             <div>
               <label className="form-label">
-                Department Name <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Department Name <span className="form-required">*</span>
               </label>
               <input
                 type="text"
@@ -314,13 +307,7 @@ function DepartmentsManager({ organizationId }) {
               </small>
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="dm-two-col">
               <div>
                 <label className="form-label">Phone</label>
                 <input
