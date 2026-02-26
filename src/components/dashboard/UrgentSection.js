@@ -1,4 +1,3 @@
-import React from 'react';
 import UrgentCard from './UrgentCard';
 
 function UrgentSection({ title, items, urgentType, onNavigate, onMarkDone, markingDone }) {
@@ -10,7 +9,7 @@ function UrgentSection({ title, items, urgentType, onNavigate, onMarkDone, marki
     <div className="urgent-section">
       <div className="urgent-section-header">
         <h2>{title}</h2>
-        <span className="badge" style={{ marginLeft: 'var(--spacing-sm)' }}>
+        <span className="badge us-count-badge">
           {items.length}
         </span>
       </div>

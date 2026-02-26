@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useNotification } from '../../contexts/NotificationContext';
 import ContactSelector from '../ContactSelector';
@@ -79,107 +79,37 @@ function IncompleteTouchpointsWidget({ incompleteTouchpoints, contacts, onComple
   return (
     <>
       <div className="sidebar-section">
-        <h3
-          style={{
-            fontSize: 'var(--font-size-base)',
-            fontWeight: 600,
-            marginBottom: 'var(--spacing-sm)',
-          }}
-        >
+        <h3 className="itw-heading">
           Incomplete Touchpoints
-          <span
-            style={{
-              marginLeft: 'var(--spacing-xs)',
-              background: 'var(--color-warning)',
-              color: 'white',
-              padding: '2px 8px',
-              borderRadius: 'var(--radius-full)',
-              fontSize: 'var(--font-size-xs)',
-              fontWeight: 600,
-            }}
-          >
-            {incompleteTouchpoints.length}
-          </span>
+          <span className="itw-count-badge">{incompleteTouchpoints.length}</span>
         </h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div className="itw-list">
           {incompleteTouchpoints.slice(0, 5).map((touchpoint) => (
-            <div
-              key={touchpoint['Touchpoint ID']}
-              style={{
-                padding: 'var(--spacing-sm)',
-                background: 'var(--color-bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                border: '1px solid var(--color-border)',
-              }}
-            >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  marginBottom: 'var(--spacing-xs)',
-                }}
-              >
-                <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                  {touchpoint.Date || 'No date'}
-                </div>
+            <div key={touchpoint['Touchpoint ID']} className="itw-item">
+              <div className="itw-item-header">
+                <div className="itw-item-date">{touchpoint.Date || 'No date'}</div>
                 <button
-                  className="btn btn-primary btn-sm"
+                  className="btn btn-primary btn-sm itw-complete-btn"
                   onClick={() => handleEditClick(touchpoint)}
-                  style={{ fontSize: 'var(--font-size-xs)', padding: '2px 8px' }}
                 >
                   Complete
                 </button>
               </div>
-              <div
-                style={{
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-text-primary)',
-                  lineHeight: 1.4,
-                }}
-              >
-                {truncateNotes(touchpoint.Notes)}
-              </div>
+              <div className="itw-item-notes">{truncateNotes(touchpoint.Notes)}</div>
             </div>
           ))}
         </div>
 
         {incompleteTouchpoints.length > 5 && (
-          <div
-            style={{
-              marginTop: 'var(--spacing-sm)',
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-muted)',
-              textAlign: 'center',
-            }}
-          >
-            + {incompleteTouchpoints.length - 5} more
-          </div>
+          <div className="itw-more">+ {incompleteTouchpoints.length - 5} more</div>
         )}
       </div>
 
       {/* Edit Modal */}
       {editingTouchpoint && touchpointData && (
-        <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.7)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1000,
-            padding: 'var(--spacing-md)',
-          }}
-        >
-          <div
-            className="card"
-            style={{ maxWidth: '500px', width: '100%', maxHeight: '90vh', overflow: 'auto' }}
-          >
+        <div className="itw-modal-overlay">
+          <div className="card itw-modal-card">
             <div className="card-header">
               <h3>Complete Touchpoint</h3>
               <button className="btn btn-ghost btn-sm" onClick={handleClose}>
@@ -256,13 +186,7 @@ function IncompleteTouchpointsWidget({ incompleteTouchpoints, contacts, onComple
                 </select>
               </div>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: 'var(--spacing-md)',
-                }}
-              >
+              <div className="itw-form-two-col">
                 <div className="form-group">
                   <label className="form-label">Follow-up Needed</label>
                   <select
@@ -305,10 +229,7 @@ function IncompleteTouchpointsWidget({ incompleteTouchpoints, contacts, onComple
                 </div>
               )}
             </div>
-            <div
-              className="card-footer"
-              style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}
-            >
+            <div className="card-footer itw-modal-footer">
               <button className="btn btn-secondary" onClick={handleClose} disabled={saving}>
                 Cancel
               </button>

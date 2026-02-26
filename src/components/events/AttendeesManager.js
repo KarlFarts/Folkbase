@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Check } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -172,14 +172,7 @@ function AttendeesManager({ eventId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="atm-header">
         <h3>Attendees</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Attendee
@@ -219,7 +212,7 @@ function AttendeesManager({ eventId }) {
                 <td>{attendee.Role}</td>
                 <td>
                   {attendee['Check-In Time'] ? (
-                    <span style={{ color: 'var(--color-success)' }}>
+                    <span className="atm-checkin-icon">
                       <Check size={16} />
                     </span>
                   ) : (
@@ -233,7 +226,7 @@ function AttendeesManager({ eventId }) {
                   )}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="atm-actions">
                     <button
                       onClick={() => openEditModal(attendee)}
                       className="btn btn-ghost btn-sm"
@@ -265,7 +258,7 @@ function AttendeesManager({ eventId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="atm-form">
             <div>
               <label className="form-label">Contact (from database)</label>
               <select
@@ -284,7 +277,7 @@ function AttendeesManager({ eventId }) {
 
             <div>
               <label className="form-label">
-                Contact Name <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Contact Name <span className="atm-required">*</span>
               </label>
               <input
                 type="text"

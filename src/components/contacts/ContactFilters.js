@@ -1,4 +1,3 @@
-import React from 'react';
 
 /**
  * ContactFilters - Search and filter controls for contact list
@@ -19,17 +18,9 @@ function ContactFilters({
   availableTags,
 }) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        gap: 'var(--spacing-md)',
-        marginBottom: 'var(--spacing-lg)',
-        flexWrap: 'wrap',
-        alignItems: 'flex-start',
-      }}
-    >
+    <div className="cf-filters-row">
       {/* Search Input */}
-      <div className="search-container" style={{ flex: '1', minWidth: '250px' }}>
+      <div className="search-container cf-search-container">
         <svg
           className="search-icon"
           viewBox="0 0 24 24"
@@ -51,8 +42,7 @@ function ContactFilters({
 
       {/* Priority Filter */}
       <select
-        className="form-select"
-        style={{ width: 'auto', minWidth: '150px' }}
+        className="form-select cf-select"
         value={priorityFilter}
         onChange={(e) => onPriorityChange(e.target.value)}
       >
@@ -66,8 +56,7 @@ function ContactFilters({
 
       {/* Status Filter */}
       <select
-        className="form-select"
-        style={{ width: 'auto', minWidth: '150px' }}
+        className="form-select cf-select"
         value={statusFilter}
         onChange={(e) => onStatusChange(e.target.value)}
       >
@@ -82,8 +71,7 @@ function ContactFilters({
       {/* Tag Filter */}
       {availableTags.length > 0 && (
         <select
-          className="form-select"
-          style={{ width: 'auto', minWidth: '150px' }}
+          className="form-select cf-select"
           value={tagFilter}
           onChange={(e) => onTagChange(e.target.value)}
         >
@@ -98,8 +86,7 @@ function ContactFilters({
 
       {/* Sort Options */}
       <select
-        className="form-select"
-        style={{ width: 'auto', minWidth: '150px' }}
+        className="form-select cf-select"
         value={sortBy}
         onChange={(e) => onSortChange(e.target.value)}
       >

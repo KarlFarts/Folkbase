@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -158,14 +158,7 @@ function EmploymentManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="emp-header">
         <h3>Employment History</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Employment
@@ -205,7 +198,7 @@ function EmploymentManager({ contactId }) {
                   <td>{emp.Department || <span className="text-muted">—</span>}</td>
                   <td>{period || <span className="text-muted">—</span>}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                    <div className="emp-actions">
                       <button
                         onClick={() => openEditModal(emp)}
                         className="btn btn-ghost btn-sm"
@@ -238,7 +231,7 @@ function EmploymentManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="emp-form">
             <div>
               <label className="form-label">Organization (from database)</label>
               <select
@@ -257,7 +250,7 @@ function EmploymentManager({ contactId }) {
 
             <div>
               <label className="form-label">
-                Organization (manual entry) <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Organization (manual entry) <span className="emp-required">*</span>
               </label>
               <input
                 type="text"
@@ -293,13 +286,7 @@ function EmploymentManager({ contactId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="emp-two-col">
               <div>
                 <label className="form-label">Start Date</label>
                 <input
@@ -323,7 +310,7 @@ function EmploymentManager({ contactId }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <label className="emp-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Current']}

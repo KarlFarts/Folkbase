@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -131,14 +131,7 @@ function DistrictsManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="dis-header">
         <h3>Electoral Districts</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add District
@@ -164,7 +157,7 @@ function DistrictsManager({ contactId }) {
                 <td>{district['District Name'] || <span className="text-muted">—</span>}</td>
                 <td>{district.Representative || <span className="text-muted">—</span>}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="dis-actions">
                     <button
                       onClick={() => openEditModal(district)}
                       className="btn btn-ghost btn-sm"
@@ -196,10 +189,10 @@ function DistrictsManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="dis-form">
             <div>
               <label className="form-label">
-                District Type <span style={{ color: 'var(--color-danger)' }}>*</span>
+                District Type <span className="dis-required">*</span>
               </label>
               <select
                 className="form-select"

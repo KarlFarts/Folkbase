@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Calendar, List, CheckSquare, X } from 'lucide-react';
 import './LinkedEntitiesDisplay.css';

@@ -1,5 +1,5 @@
 import { error as logError } from '../../utils/logger';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -65,7 +65,7 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
   const buttonClass = className || 'btn btn-primary';
 
   return (
-    <div style={{ position: 'relative', display: 'inline-block' }}>
+    <div className="qcb-wrapper">
       <button
         className={buttonClass}
         onClick={handleQuickCommit}
@@ -84,46 +84,14 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
 
       {/* Error Toast */}
       {error && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginTop: '8px',
-            padding: '8px 12px',
-            background: 'var(--color-danger)',
-            color: 'var(--color-text-inverse)',
-            borderRadius: '4px',
-            fontSize: '13px',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-            zIndex: 1000,
-          }}
-        >
+        <div className="qcb-toast qcb-toast-error">
           {error}
         </div>
       )}
 
       {/* Success Toast */}
       {success && (
-        <div
-          style={{
-            position: 'absolute',
-            top: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginTop: '8px',
-            padding: '8px 12px',
-            background: 'var(--color-success)',
-            color: 'var(--color-text-inverse)',
-            borderRadius: '4px',
-            fontSize: '13px',
-            whiteSpace: 'nowrap',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
-            zIndex: 1000,
-          }}
-        >
+        <div className="qcb-toast qcb-toast-success">
           Note committed successfully!
         </div>
       )}

@@ -1,4 +1,3 @@
-import React from 'react';
 import Avatar from '../Avatar';
 
 function UrgentCard({
@@ -83,45 +82,22 @@ function UrgentCard({
   return (
     <div className={getCardClass()} onClick={handleCardClick}>
       <div className="urgent-card-left">
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-md)',
-            marginBottom: 'var(--spacing-xs)',
-          }}
-        >
+        <div className="uc-avatar-row">
           <Avatar
             name={name}
             size="sm"
             customColor={contact['Avatar Color']}
             customIcon={contact['Avatar Icon']}
           />
-          <div style={{ flex: 1 }}>
-            <div
-              style={{ fontWeight: 600, fontSize: 'var(--font-size-base)', marginBottom: '2px' }}
-            >
-              {name}
-            </div>
-            {org && (
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                {org}
-              </div>
-            )}
+          <div className="uc-name-block">
+            <div className="uc-name">{name}</div>
+            {org && <div className="uc-org">{org}</div>}
           </div>
         </div>
 
-        <div
-          style={{
-            fontSize: 'var(--font-size-sm)',
-            color: 'var(--color-text-secondary)',
-            marginBottom: 'var(--spacing-xs)',
-          }}
-        >
-          {getLastTouchpointSummary()}
-        </div>
+        <div className="uc-summary">{getLastTouchpointSummary()}</div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}>
+        <div className="uc-badge-row">
           <span className={getUrgentBadgeClass()}>{urgentDetail}</span>
         </div>
       </div>

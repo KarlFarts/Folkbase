@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 function CelebrationsWidget({ contacts, onNavigate, daysAhead = 30, bare = false }) {
   const [currentIndex, setCurrentIndex] = useState(0);

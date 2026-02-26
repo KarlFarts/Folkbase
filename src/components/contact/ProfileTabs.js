@@ -1,4 +1,3 @@
-import React from 'react';
 import { X } from 'lucide-react';
 import { getFieldsByGroup, FIELD_GROUPS } from '../../utils/fieldDefinitions';
 import { sanitizeUrl, buildTelUrl, buildSmsUrl, buildMailtoUrl } from '../../utils/sanitize';
@@ -32,14 +31,14 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
 
   if (fields.length === 0) {
     return (
-      <div className="empty-state" style={{ padding: 'var(--spacing-lg)', textAlign: 'center' }}>
+      <div className="empty-state pt-empty-state">
         <p className="text-muted">No fields available for this tab yet</p>
       </div>
     );
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+    <div className="pt-fields-list">
       {fields.map((field) => (
         <FieldRenderer
           key={field.key}
@@ -60,7 +59,7 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
 function FieldRenderer({ field, value, isEditing, editValue, onChange }) {
   return (
     <div>
-      <label className="form-label" style={{ marginBottom: 'var(--spacing-xs)' }}>
+      <label className="form-label pt-field-label">
         {field.label}
       </label>
       {isEditing ? (
@@ -347,12 +346,9 @@ function DisplayField({ field, value }) {
     case 'multi-text': {
       const items = parseMultiple(value);
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+        <div className="pt-multi-text-list">
           {items.map((item, i) => (
-            <div
-              key={i}
-              style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}
-            >
+            <div key={i} className="pt-multi-text-item">
               <span>{item}</span>
               {field.actionable && field.actions?.includes('call') && (
                 <a href={buildTelUrl(item)} className="btn btn-ghost btn-sm">
@@ -376,12 +372,12 @@ function DisplayField({ field, value }) {
     }
 
     case 'textarea':
-      return <p style={{ whiteSpace: 'pre-wrap' }}>{value}</p>;
+      return <p className="pt-textarea-display">{value}</p>;
 
     case 'tags': {
       const tags = parseMultiple(value);
       return (
-        <div style={{ display: 'flex', gap: 'var(--spacing-xs)', flexWrap: 'wrap' }}>
+        <div className="pt-tags-display">
           {tags.map((tag, i) => (
             <span key={i} className="tag">
               {tag}
@@ -398,7 +394,7 @@ function DisplayField({ field, value }) {
           href={safeUrl}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ color: 'var(--color-primary)' }}
+          className="pt-url-link"
         >
           {value}
         </a>

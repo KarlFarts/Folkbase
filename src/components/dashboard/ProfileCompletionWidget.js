@@ -1,4 +1,3 @@
-import React from 'react';
 import CollapsibleWidget from './CollapsibleWidget';
 
 const ProfileCompletionWidget = ({ items, onNavigate }) => {
@@ -14,7 +13,7 @@ const ProfileCompletionWidget = ({ items, onNavigate }) => {
       onViewAll={() => onNavigate('contacts')}
       defaultExpanded={true}
     >
-      <div style={{ padding: '8px' }}>
+      <div className="pcw-body">
         {items.slice(0, 5).map((item) => (
           <div
             key={item.contact['Contact ID'] || item.contact.Name}
@@ -37,14 +36,7 @@ const ProfileCompletionWidget = ({ items, onNavigate }) => {
           </div>
         ))}
         {items.length > 5 && (
-          <div style={{
-            padding: '8px',
-            textAlign: 'center',
-            color: 'var(--color-text-muted)',
-            fontSize: 'var(--font-size-xs)'
-          }}>
-            +{items.length - 5} more
-          </div>
+          <div className="pcw-more">+{items.length - 5} more</div>
         )}
       </div>
     </CollapsibleWidget>

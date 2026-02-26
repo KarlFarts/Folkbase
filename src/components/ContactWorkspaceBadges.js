@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, ExternalLink, Unlink } from 'lucide-react';
 import { useWorkspace } from '../contexts/WorkspaceContext';

@@ -1,4 +1,3 @@
-import React from 'react';
 import CollapsibleWidget from './CollapsibleWidget';
 
 const CustomActionsWidget = ({ actions }) => {

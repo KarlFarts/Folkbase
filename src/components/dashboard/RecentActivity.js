@@ -1,5 +1,3 @@
-import React from 'react';
-
 function RecentActivity({ activities, onNavigate }) {
   const formatRelativeDate = (date) => {
     if (!date) return '';
@@ -21,43 +19,33 @@ function RecentActivity({ activities, onNavigate }) {
   if (!activities || activities.length === 0) {
     return (
       <div className="sidebar-section">
-        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-          Recent Activity
-        </h3>
-        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-          No recent activity
-        </div>
+        <h3 className="ra-heading">Recent Activity</h3>
+        <div className="ra-empty">No recent activity</div>
       </div>
     );
   }
 
   return (
     <div className="sidebar-section">
-      <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-        Recent Activity
-      </h3>
+      <h3 className="ra-heading">Recent Activity</h3>
 
       <div className="activity-list">
         {activities.map((activity, index) => (
           <div key={index} className="activity-item">
-            <div style={{ fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
-              {activity.description}
-            </div>
-            <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-              {formatRelativeDate(activity.date)}
-            </div>
+            <div className="ra-activity-desc">{activity.description}</div>
+            <div className="ra-activity-date">{formatRelativeDate(activity.date)}</div>
           </div>
         ))}
       </div>
 
-      <div style={{ marginTop: 'var(--spacing-sm)' }}>
+      <div className="ra-view-all-row">
         <a
           href="#"
           onClick={(e) => {
             e.preventDefault();
             onNavigate('touchpoints');
           }}
-          style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-primary)' }}
+          className="ra-view-all-link"
         >
           View All Activity
         </a>

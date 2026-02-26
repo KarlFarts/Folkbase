@@ -1,4 +1,3 @@
-import React from 'react';
 import { TimelineContainer } from '../TimelineItem';
 import NotesDisplaySection from '../notes/NotesDisplaySection';
 
@@ -12,10 +11,10 @@ export function TouchpointHistoryCard({
   maxHeight,
 }) {
   return (
-    <div className="card" style={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+    <div className="card ca-card-flex">
       <div className="card-header">
         <h3>Touchpoint History</h3>
-        <span className="badge" style={{ background: 'var(--color-bg-elevated)' }}>
+        <span className="badge ca-count-badge">
           {touchpoints.length}
         </span>
       </div>
@@ -29,11 +28,8 @@ export function TouchpointHistoryCard({
         }}
       >
         {touchpoints.length === 0 ? (
-          <div style={{ padding: 'var(--spacing-lg)', textAlign: 'center' }}>
-            <p
-              className="text-muted"
-              style={{ fontStyle: 'italic', marginBottom: 'var(--spacing-md)' }}
-            >
+          <div className="ca-empty-state">
+            <p className="text-muted ca-empty-text">
               No touchpoints logged yet
             </p>
             <button className="btn btn-primary btn-sm" onClick={onLogTouchpoint}>
@@ -64,7 +60,7 @@ export function NotesCard({ notes, contactId, onNavigate }) {
 
   return (
     <div className="card">
-      <div className="card-body" style={{ padding: 0 }}>
+      <div className="card-body ca-notes-body">
         <NotesDisplaySection
           notes={notes || []}
           entityType="contact"

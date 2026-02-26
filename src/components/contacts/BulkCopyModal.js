@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Info } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 
@@ -150,7 +150,7 @@ function BulkCopyModal({
             onChange={(e) => setCreateLink(e.target.checked)}
             disabled={isLoading}
           />
-          <span style={{ marginLeft: '0.5rem' }}>
+          <span className="bcm2-checkbox-span">
             Create sync links (changes will sync between workspaces)
           </span>
         </label>
@@ -211,18 +211,9 @@ function BulkCopyModal({
           {syncStrategy === 'custom' && (
             <div className="form-group">
               <label className="form-label">Select Fields to Sync</label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '0.5rem',
-                }}
-              >
+              <div className="bcm2-fields-grid">
                 {FIELD_OPTIONS.map((field) => (
-                  <label
-                    key={field}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                  >
+                  <label key={field} className="bcm2-field-label">
                     <input
                       type="checkbox"
                       checked={customFields.includes(field)}
@@ -257,14 +248,7 @@ function BulkCopyModal({
 
       {/* Notes Sharing Section */}
       {selectedWorkspaceId && totalNotesCount > 0 && (
-        <div
-          className="form-group"
-          style={{
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--border-color-default)',
-          }}
-        >
+        <div className="form-group bcm2-notes-section">
           <label className="form-label">
             <input
               type="checkbox"
@@ -272,16 +256,16 @@ function BulkCopyModal({
               onChange={(e) => setShareNotes(e.target.checked)}
               disabled={isLoading}
             />
-            <span style={{ marginLeft: '0.5rem' }}>Also share linked notes to workspace</span>
+            <span className="bcm2-checkbox-span">Also share linked notes to workspace</span>
           </label>
 
-          <p className="text-sm text-muted" style={{ marginLeft: '1.5rem' }}>
+          <p className="text-sm text-muted bcm2-notes-info">
             <Info size={16} /> {totalNotesCount} total note{totalNotesCount !== 1 ? 's' : ''} linked
             to selected contacts
           </p>
 
           {shareNotes && (
-            <div style={{ marginLeft: '1.5rem', marginTop: '0.75rem' }}>
+            <div className="bcm2-notes-visibility">
               <label className="form-label">Note Visibility in Workspace</label>
               <div className="radio-group">
                 <label className="radio-option">

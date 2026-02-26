@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNotification } from '../contexts/NotificationContext';
 import ContactSelector from './ContactSelector';
 import WindowTemplate from './WindowTemplate';
@@ -71,13 +71,7 @@ function LogTouchpointQuickModal({ contacts, onClose, onSave, saving, filterCont
         }
       >
         {availableContacts.length === 0 ? (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: 'var(--spacing-lg)',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
+          <div className="ltqm-empty-state">
             <p>No contacts available. Add a contact first.</p>
           </div>
         ) : (
@@ -114,27 +108,16 @@ function LogTouchpointQuickModal({ contacts, onClose, onSave, saving, filterCont
       }
     >
       {/* Selected Contact Display */}
-      <div
-        style={{
-          marginBottom: 'var(--spacing-md)',
-          padding: 'var(--spacing-sm)',
-          background: 'var(--color-bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
+      <div className="ltqm-contact-display">
         <div>
-          <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+          <div className="ltqm-contact-label">
             Contact
           </div>
-          <div style={{ fontWeight: 500 }}>{selectedContactName || 'Unknown Contact'}</div>
+          <div className="ltqm-contact-name">{selectedContactName || 'Unknown Contact'}</div>
         </div>
         <button
-          className="btn btn-ghost btn-sm"
+          className="btn btn-ghost btn-sm ltqm-change-btn"
           onClick={handleChangeContact}
-          style={{ fontSize: 'var(--font-size-sm)' }}
         >
           Change
         </button>
@@ -195,7 +178,7 @@ function LogTouchpointQuickModal({ contacts, onClose, onSave, saving, filterCont
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+      <div className="ltqm-two-col-grid">
         <div className="form-group">
           <label className="form-label">Follow-up Needed</label>
           <select

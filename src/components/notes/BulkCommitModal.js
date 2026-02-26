@@ -1,5 +1,5 @@
 import { error as logError } from '../../utils/logger';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { updateNote, batchLinkNoteToEntities, readSheetData } from '../../utils/devModeWrapper';
@@ -223,15 +223,8 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
       }
     >
       {/* Notes Count */}
-      <div
-        style={{
-          padding: 'var(--spacing-sm)',
-          background: 'var(--color-bg-secondary)',
-          borderRadius: 'var(--radius-md)',
-          marginBottom: 'var(--spacing-lg)',
-        }}
-      >
-        <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+      <div className="bcm-info-box">
+        <p className="bcm-info-text">
           Committing <strong>{notes.length}</strong> note{notes.length !== 1 ? 's' : ''}
         </p>
       </div>
@@ -276,35 +269,19 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
             disabled={isProcessing}
             placeholder="e.g. user1@example.com, user2@example.com"
           />
-          <div
-            style={{
-              fontSize: '13px',
-              color: 'var(--color-text-secondary)',
-              marginTop: 'var(--spacing-xs)',
-            }}
-          >
+          <div className="bcm-hint-text">
             Separate multiple email addresses with commas
           </div>
         </div>
       )}
 
       {/* Link to Same Entity Option */}
-      <div
-        style={{
-          marginBottom: 'var(--spacing-md)',
-          padding: 'var(--spacing-sm)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-        }}
-      >
+      <div className="bcm-link-entity-box">
         <label
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 'var(--spacing-xs)',
-            cursor: 'pointer',
             marginBottom: linkToSameEntity ? 'var(--spacing-sm)' : '0',
           }}
+          className="bcm-link-entity-label"
         >
           <input
             type="checkbox"
@@ -312,7 +289,7 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
             onChange={(e) => setLinkToSameEntity(e.target.checked)}
             disabled={isProcessing}
           />
-          <span style={{ fontSize: '14px', fontWeight: '500' }}>
+          <span className="bcm-link-entity-span">
             Link all notes to the same entity
           </span>
         </label>
@@ -360,30 +337,14 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
 
       {/* Progress Bar */}
       {isProcessing && (
-        <div style={{ marginBottom: 'var(--spacing-md)' }}>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginBottom: 'var(--spacing-xs)',
-              fontSize: '13px',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
+        <div className="bcm-progress-wrapper">
+          <div className="bcm-progress-header">
             <span>Processing...</span>
             <span>
               {processedCount} / {notes.length}
             </span>
           </div>
-          <div
-            style={{
-              width: '100%',
-              height: '8px',
-              background: 'var(--color-border)',
-              borderRadius: 'var(--radius-sm)',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="bcm-progress-track">
             <div
               style={{
                 width: `${progress}%`,

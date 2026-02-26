@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 
 function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImportEvent }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -69,13 +69,13 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
   return (
     <div className="calendar-view">
       {/* Calendar Header */}
-      <div className="card" style={{ marginBottom: 'var(--spacing-md)' }}>
-        <div className="card-body" style={{ padding: 'var(--spacing-md)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ margin: 0, fontSize: 'var(--font-size-xl)' }}>
+      <div className="card cv-header-card">
+        <div className="card-body cv-header-body">
+          <div className="cv-header-row">
+            <h2 className="cv-month-title">
               {monthName} {year}
             </h2>
-            <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+            <div className="cv-nav-buttons">
               <button
                 className="btn btn-secondary btn-sm"
                 onClick={goToPreviousMonth}
@@ -118,22 +118,13 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
 
       {/* Calendar Grid */}
       <div className="card">
-        <div className="card-body" style={{ padding: 0 }}>
+        <div className="card-body cv-grid-body">
           <div className="calendar-grid">
             {/* Day headers */}
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
               <div
                 key={day}
-                className="calendar-day-header"
-                style={{
-                  padding: 'var(--spacing-sm)',
-                  textAlign: 'center',
-                  fontWeight: 600,
-                  borderBottom: '2px solid var(--color-border-default)',
-                  backgroundColor: 'var(--color-bg-secondary)',
-                  fontSize: 'var(--font-size-sm)',
-                  color: 'var(--color-text-secondary)',
-                }}
+                className="calendar-day-header cv-day-header"
               >
                 {day}
               </div>
@@ -147,17 +138,13 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
               return (
                 <div
                   key={index}
-                  className="calendar-day"
+                  className="calendar-day cv-day-cell"
                   style={{
-                    minHeight: '100px',
-                    padding: 'var(--spacing-xs)',
-                    border: '1px solid var(--color-border-default)',
                     backgroundColor: isCurrentMonth
                       ? 'var(--color-bg-primary)'
                       : 'var(--color-bg-secondary)',
                     opacity: isCurrentMonth ? 1 : 0.5,
                     cursor: dayEvents.length > 0 ? 'pointer' : 'default',
-                    position: 'relative',
                   }}
                   onClick={() => {
                     if (dayEvents.length === 1) {
@@ -166,10 +153,9 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                   }}
                 >
                   <div
+                    className="cv-day-number"
                     style={{
-                      fontSize: 'var(--font-size-sm)',
                       fontWeight: today ? 700 : 600,
-                      marginBottom: 'var(--spacing-xs)',
                       color: today
                         ? 'var(--color-primary)'
                         : isCurrentMonth
@@ -179,16 +165,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                   >
                     {today && (
                       <span
-                        style={{
-                          display: 'inline-block',
-                          width: '24px',
-                          height: '24px',
-                          lineHeight: '24px',
-                          textAlign: 'center',
-                          borderRadius: '50%',
-                          backgroundColor: 'var(--color-primary)',
-                          color: 'white',
-                        }}
+                        className="cv-today-circle"
                       >
                         {date.getDate()}
                       </span>
@@ -198,23 +175,12 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
 
                   {/* Event indicators */}
                   {(dayEvents.length > 0 || googleEvents.length > 0) && (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div className="cv-event-indicators">
                       {/* CRM Events */}
                       {dayEvents.slice(0, 2).map((event, idx) => (
                         <div
                           key={`crm-${idx}`}
-                          className="calendar-event-indicator"
-                          style={{
-                            fontSize: 'var(--font-size-xs)',
-                            padding: '2px 4px',
-                            backgroundColor: 'var(--color-primary-alpha-20)',
-                            color: 'var(--color-primary)',
-                            borderRadius: '3px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            cursor: 'pointer',
-                          }}
+                          className="calendar-event-indicator cv-crm-event-indicator"
                           onClick={(e) => {
                             e.stopPropagation();
                             onEventClick(event['Event ID']);
@@ -228,19 +194,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                       {googleEvents.slice(0, 2).map((event, idx) => (
                         <div
                           key={`gcal-${idx}`}
-                          className="calendar-event-indicator"
-                          style={{
-                            fontSize: 'var(--font-size-xs)',
-                            padding: '2px 4px',
-                            backgroundColor: 'rgba(5, 150, 105, 0.1)',
-                            color: 'var(--color-success)',
-                            borderRadius: '3px',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap',
-                            cursor: 'pointer',
-                            borderLeft: '3px solid var(--color-success)',
-                          }}
+                          className="calendar-event-indicator cv-gcal-event-indicator"
                           onClick={(e) => {
                             e.stopPropagation();
                             if (onImportEvent) {
@@ -253,14 +207,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                         </div>
                       ))}
                       {dayEvents.length + googleEvents.length > 4 && (
-                        <div
-                          style={{
-                            fontSize: 'var(--font-size-xs)',
-                            color: 'var(--color-text-secondary)',
-                            fontWeight: 600,
-                            paddingLeft: '4px',
-                          }}
-                        >
+                        <div className="cv-more-count">
                           +{dayEvents.length + googleEvents.length - 4} more
                         </div>
                       )}

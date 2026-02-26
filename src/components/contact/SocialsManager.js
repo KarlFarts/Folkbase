@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -128,14 +128,7 @@ function SocialsManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="soc-header">
         <h3>Social Media Profiles</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Profile
@@ -166,7 +159,7 @@ function SocialsManager({ contactId }) {
                       href={social.URL}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: 'var(--color-primary)' }}
+                      className="soc-url-link"
                     >
                       Link
                     </a>
@@ -178,7 +171,7 @@ function SocialsManager({ contactId }) {
                   {social['Is Primary'] === 'TRUE' || social['Is Primary'] === true ? '✓' : ''}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="soc-actions">
                     <button
                       onClick={() => openEditModal(social)}
                       className="btn btn-ghost btn-sm"
@@ -210,10 +203,10 @@ function SocialsManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="soc-form">
             <div>
               <label className="form-label">
-                Platform <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Platform <span className="soc-required">*</span>
               </label>
               <select
                 className="form-select"
@@ -252,7 +245,7 @@ function SocialsManager({ contactId }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <label className="soc-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Primary']}

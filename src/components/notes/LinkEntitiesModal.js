@@ -1,5 +1,5 @@
 import { error as logError } from '../../utils/logger';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { readSheetData } from '../../utils/devModeWrapper';
@@ -272,13 +272,7 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
 
     if (items.length === 0) {
       return (
-        <div
-          style={{
-            padding: 'var(--spacing-lg)',
-            textAlign: 'center',
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <div className="lem-empty-state">
           No {activeTab} found
         </div>
       );
@@ -287,17 +281,11 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
     return items.map((item) => (
       <div
         key={item[idKey]}
+        className="lem-entity-item"
         style={{
-          display: 'flex',
-          alignItems: 'center',
-          padding: 'var(--spacing-sm)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          marginBottom: 'var(--spacing-xs)',
           background: selectedIds.includes(item[idKey])
             ? 'var(--color-accent-secondary, #f0f8ff)'
             : 'var(--color-bg-primary)',
-          cursor: 'pointer',
         }}
         onClick={() => toggleFn(item[idKey])}
       >
@@ -305,20 +293,14 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
           type="checkbox"
           checked={selectedIds.includes(item[idKey])}
           onChange={() => toggleFn(item[idKey])}
-          style={{ marginRight: 'var(--spacing-sm)' }}
+          className="lem-entity-checkbox"
         />
-        <div style={{ flex: 1 }}>
-          <div style={{ fontWeight: '500', fontSize: '14px' }}>
+        <div className="lem-entity-info">
+          <div className="lem-entity-name">
             {item[nameKey] || `Unnamed ${activeTab.slice(0, -1)}`}
           </div>
           {item[subtitleKey] && (
-            <div
-              style={{
-                fontSize: '13px',
-                color: 'var(--color-text-secondary)',
-                marginTop: '2px',
-              }}
-            >
+            <div className="lem-entity-subtitle">
               {subtitleKey === 'Status' ? `Status: ${item[subtitleKey]}` : item[subtitleKey]}
             </div>
           )}
@@ -346,25 +328,12 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
       }
     >
       {note && (
-        <div
-          style={{
-            marginBottom: 'var(--spacing-lg)',
-            padding: 'var(--spacing-sm)',
-            background: 'var(--color-bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-          }}
-        >
-          <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+        <div className="lem-note-info-box">
+          <p className="lem-note-info-text">
             Linking note: <strong>{note['Note ID']}</strong>
           </p>
           {note.Content && (
-            <p
-              style={{
-                margin: 'var(--spacing-xs) 0 0 0',
-                fontSize: '13px',
-                color: 'var(--color-text-muted)',
-              }}
-            >
+            <p className="lem-note-preview">
               {note.Content.substring(0, 100)}
               {note.Content.length > 100 ? '...' : ''}
             </p>
@@ -373,14 +342,7 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
       )}
 
       {/* Tabs */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--spacing-xs)',
-          marginBottom: 'var(--spacing-md)',
-          borderBottom: '2px solid var(--color-border)',
-        }}
-      >
+      <div className="lem-tabs-row">
         {tabs.map((tab) => (
           <button
             key={tab.key}
@@ -417,13 +379,7 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
       </div>
 
       {/* Select All / Deselect All Buttons */}
-      <div
-        style={{
-          display: 'flex',
-          gap: 'var(--spacing-xs)',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="lem-select-actions">
         <button className="btn btn-ghost btn-sm" onClick={selectAll} disabled={isLoading}>
           Select All
         </button>
@@ -433,23 +389,9 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
       </div>
 
       {/* Entity List */}
-      <div
-        style={{
-          maxHeight: '400px',
-          overflowY: 'auto',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius-md)',
-          padding: 'var(--spacing-xs)',
-        }}
-      >
+      <div className="lem-entity-list">
         {isLoading ? (
-          <div
-            style={{
-              padding: 'var(--spacing-xl)',
-              textAlign: 'center',
-              color: 'var(--color-text-secondary)',
-            }}
-          >
+          <div className="lem-loading-state">
             Loading entities...
           </div>
         ) : (
@@ -458,7 +400,7 @@ export default function LinkEntitiesModal({ isOpen, onClose, note, onSave, exist
       </div>
 
       {error && (
-        <div className="alert alert-danger" style={{ marginTop: 'var(--spacing-md)' }}>
+        <div className="alert alert-danger lem-alert-top">
           {error}
         </div>
       )}
