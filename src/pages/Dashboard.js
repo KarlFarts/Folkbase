@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -79,9 +79,8 @@ function Dashboard({ onNavigate }) {
       setOrganizations(organizationsResult.data);
       setLocations(locationsResult.data);
       setTasks(tasksResult.data);
-    } catch {
-      // Error handled
-      if (error.response?.status === 401 || error.response?.status === 403) {
+    } catch (err) {
+      if (err.response?.status === 401 || err.response?.status === 403) {
         setNeedsReauth(true);
         setError('Your session has expired. Please sign in again to continue.');
       } else {
@@ -146,190 +145,193 @@ function Dashboard({ onNavigate }) {
     }
   };
 
-  // Build contact lookup map for efficiency
-  const contactMap = {};
-  contacts.forEach((contact) => {
-    contactMap[contact['Contact ID']] = contact;
-  });
+  // Memoize all expensive derived data so it only recomputes when data changes
+  const {
+    contactMap,
+    today,
+    overdueFollowups,
+    dueTodayFollowups,
+    _highPriorityContacts,
+    contactsNeedingFollowUp,
+    _staleContacts,
+    _reviewQueueContacts,
+    _recentActivity,
+    _incompleteTouchpoints,
+  } = useMemo(() => {
+    // Build contact lookup map for efficiency
+    const cMap = {};
+    contacts.forEach((contact) => {
+      cMap[contact['Contact ID']] = contact;
+    });
 
-  // Get today's date for comparisons
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+    // Get today's date for comparisons
+    const td = new Date();
+    td.setHours(0, 0, 0, 0);
 
-  // Filter overdue follow-ups
-  const overdueFollowups = touchpoints
-    .filter((tp) => {
-      const followUpNeeded = tp['Follow-up Needed'];
-      const followUpDate = tp['Follow-up Date'];
-      if (followUpNeeded !== 'Yes' || !followUpDate) return false;
+    // Helper: get most recent touchpoint for a contact
+    const getLatestTouchpoint = (contactId) => {
+      return touchpoints
+        .filter((t) => t['Contact ID'] === contactId)
+        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']))[0] || null;
+    };
 
-      const fpDate = new Date(followUpDate);
-      fpDate.setHours(0, 0, 0, 0);
-      return fpDate < today;
-    })
-    .map((tp) => {
-      const contact = contactMap[tp['Contact ID']];
-      if (!contact) return null;
+    // Filter overdue follow-ups
+    const overdue = touchpoints
+      .filter((tp) => {
+        const followUpNeeded = tp['Follow-up Needed'];
+        const followUpDate = tp['Follow-up Date'];
+        if (followUpNeeded !== 'Yes' || !followUpDate) return false;
 
-      // Get all touchpoints for this contact to find the most recent one
-      const contactTouchpoints = touchpoints
-        .filter((t) => t['Contact ID'] === tp['Contact ID'])
-        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
+        const fpDate = new Date(followUpDate);
+        fpDate.setHours(0, 0, 0, 0);
+        return fpDate < td;
+      })
+      .map((tp) => {
+        const contact = cMap[tp['Contact ID']];
+        if (!contact) return null;
 
-      return {
+        return {
+          contact,
+          lastTouchpoint: getLatestTouchpoint(tp['Contact ID']) || tp,
+          urgentDetail: `Follow-up overdue: ${new Date(tp['Follow-up Date']).toLocaleDateString()}`,
+        };
+      })
+      .filter((item) => item !== null)
+      .sort(
+        (a, b) =>
+          new Date(a.lastTouchpoint['Follow-up Date']) -
+          new Date(b.lastTouchpoint['Follow-up Date'])
+      );
+
+    // Filter due today follow-ups
+    const dueToday = touchpoints
+      .filter((tp) => {
+        const followUpNeeded = tp['Follow-up Needed'];
+        const followUpDate = tp['Follow-up Date'];
+        if (followUpNeeded !== 'Yes' || !followUpDate) return false;
+
+        const fpDate = new Date(followUpDate);
+        fpDate.setHours(0, 0, 0, 0);
+        return fpDate.getTime() === td.getTime();
+      })
+      .map((tp) => {
+        const contact = cMap[tp['Contact ID']];
+        if (!contact) return null;
+
+        return {
+          contact,
+          lastTouchpoint: getLatestTouchpoint(tp['Contact ID']) || tp,
+          urgentDetail: 'Follow-up due today',
+        };
+      })
+      .filter((item) => item !== null);
+
+    // Filter high priority contacts
+    const highPriority = contacts
+      .filter((contact) => {
+        const priority = contact['Priority'];
+        const status = contact['Status'];
+        return (priority === 'Urgent' || priority === 'High') && status === 'Active';
+      })
+      .map((contact) => ({
         contact,
-        lastTouchpoint: contactTouchpoints[0] || tp,
-        urgentDetail: `Follow-up overdue: ${new Date(tp['Follow-up Date']).toLocaleDateString()}`,
-      };
-    })
-    .filter((item) => item !== null)
-    .sort(
-      (a, b) =>
-        new Date(a.lastTouchpoint['Follow-up Date']) - new Date(b.lastTouchpoint['Follow-up Date'])
-    );
-
-  // Filter due today follow-ups
-  const dueTodayFollowups = touchpoints
-    .filter((tp) => {
-      const followUpNeeded = tp['Follow-up Needed'];
-      const followUpDate = tp['Follow-up Date'];
-      if (followUpNeeded !== 'Yes' || !followUpDate) return false;
-
-      const fpDate = new Date(followUpDate);
-      fpDate.setHours(0, 0, 0, 0);
-      return fpDate.getTime() === today.getTime();
-    })
-    .map((tp) => {
-      const contact = contactMap[tp['Contact ID']];
-      if (!contact) return null;
-
-      const contactTouchpoints = touchpoints
-        .filter((t) => t['Contact ID'] === tp['Contact ID'])
-        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
-
-      return {
-        contact,
-        lastTouchpoint: contactTouchpoints[0] || tp,
-        urgentDetail: 'Follow-up due today',
-      };
-    })
-    .filter((item) => item !== null);
-
-  // Filter high priority contacts
-  const _highPriorityContacts = contacts
-    .filter((contact) => {
-      const priority = contact['Priority'];
-      const status = contact['Status'];
-      return (priority === 'Urgent' || priority === 'High') && status === 'Active';
-    })
-    .map((contact) => {
-      const contactTouchpoints = touchpoints
-        .filter((t) => t['Contact ID'] === contact['Contact ID'])
-        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
-
-      return {
-        contact,
-        lastTouchpoint: contactTouchpoints[0] || null,
+        lastTouchpoint: getLatestTouchpoint(contact['Contact ID']),
         urgentDetail: `Priority: ${contact['Priority']}`,
-      };
-    });
+      }));
 
-  // Filter contacts needing follow-up (unified)
-  const contactsNeedingFollowUp = contacts
-    .filter((contact) => {
-      const followUpDate = contact['Follow-up Date'];
-      const lastContact = contact['Last Contact Date'];
+    // Filter contacts needing follow-up (unified)
+    const needingFollowUp = contacts
+      .filter((contact) => {
+        const followUpDate = contact['Follow-up Date'];
+        const lastContact = contact['Last Contact Date'];
 
-      // Include if contact-level follow-up date is set and due
-      if (followUpDate) {
-        const fpDate = new Date(followUpDate);
-        fpDate.setHours(0, 0, 0, 0);
-        if (fpDate <= today) return true;
-      }
-
-      // Include if never contacted
-      if (!lastContact) return true;
-
-      // Include if not contacted in 30+ days
-      const daysSince = Math.floor((today - new Date(lastContact)) / (1000 * 60 * 60 * 24));
-      return daysSince > 30;
-    })
-    .map((contact) => {
-      const contactTouchpoints = touchpoints
-        .filter((t) => t['Contact ID'] === contact['Contact ID'])
-        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
-
-      // Determine reason for follow-up
-      let reason = '';
-      const followUpDate = contact['Follow-up Date'];
-      const lastContact = contact['Last Contact Date'];
-
-      if (followUpDate) {
-        const fpDate = new Date(followUpDate);
-        fpDate.setHours(0, 0, 0, 0);
-        if (fpDate <= today) {
-          reason = `Follow-up reminder set for ${fpDate.toLocaleDateString()}`;
+        if (followUpDate) {
+          const fpDate = new Date(followUpDate);
+          fpDate.setHours(0, 0, 0, 0);
+          if (fpDate <= td) return true;
         }
-      }
 
-      if (!reason && !lastContact) {
-        reason = 'Never contacted';
-      }
+        if (!lastContact) return true;
 
-      if (!reason && lastContact) {
-        reason = `Last contact: ${new Date(lastContact).toLocaleDateString()}`;
-      }
+        const daysSince = Math.floor((td - new Date(lastContact)) / (1000 * 60 * 60 * 24));
+        return daysSince > 30;
+      })
+      .map((contact) => {
+        let reason = '';
+        const followUpDate = contact['Follow-up Date'];
+        const lastContact = contact['Last Contact Date'];
 
-      return {
+        if (followUpDate) {
+          const fpDate = new Date(followUpDate);
+          fpDate.setHours(0, 0, 0, 0);
+          if (fpDate <= td) {
+            reason = `Follow-up reminder set for ${fpDate.toLocaleDateString()}`;
+          }
+        }
+
+        if (!reason && !lastContact) {
+          reason = 'Never contacted';
+        }
+
+        if (!reason && lastContact) {
+          reason = `Last contact: ${new Date(lastContact).toLocaleDateString()}`;
+        }
+
+        return {
+          contact,
+          lastTouchpoint: getLatestTouchpoint(contact['Contact ID']),
+          urgentDetail: reason,
+        };
+      });
+
+    // Filter review queue (contacts flagged for review)
+    const reviewQueue = contacts
+      .filter((contact) => {
+        const flags = (contact.QuickFlags || '').toLowerCase();
+        return flags.includes('review') || flags.includes('cleanup') || flags.includes('merge');
+      })
+      .map((contact) => ({
         contact,
-        lastTouchpoint: contactTouchpoints[0] || null,
-        urgentDetail: reason,
-      };
-    });
-
-  // Keep stale contacts for backward compatibility
-  const _staleContacts = contactsNeedingFollowUp;
-
-  // Filter review queue (contacts flagged for review)
-  const _reviewQueueContacts = contacts
-    .filter((contact) => {
-      const flags = (contact.QuickFlags || '').toLowerCase();
-      return flags.includes('review') || flags.includes('cleanup') || flags.includes('merge');
-    })
-    .map((contact) => {
-      const contactTouchpoints = touchpoints
-        .filter((t) => t['Contact ID'] === contact['Contact ID'])
-        .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
-
-      return {
-        contact,
-        lastTouchpoint: contactTouchpoints[0] || null,
+        lastTouchpoint: getLatestTouchpoint(contact['Contact ID']),
         urgentDetail: contact.QuickFlags || 'Flagged for review',
-      };
-    });
+      }));
 
-  // Build recent activity feed
-  const _recentActivity = touchpoints
-    .sort((a, b) => new Date(b['Date']) - new Date(a['Date']))
-    .slice(0, 7)
-    .map((tp) => {
-      const contact = contactMap[tp['Contact ID']];
-      const contactName = contact ? contact['Name'] : 'Unknown Contact';
-      const type = tp['Type'] || 'Contact';
-      const notes = tp['Notes']
-        ? ` - ${tp['Notes'].substring(0, 30)}${tp['Notes'].length > 30 ? '...' : ''}`
-        : '';
+    // Build recent activity feed
+    const recentActivity = [...touchpoints]
+      .sort((a, b) => new Date(b['Date']) - new Date(a['Date']))
+      .slice(0, 7)
+      .map((tp) => {
+        const contact = cMap[tp['Contact ID']];
+        const contactName = contact ? contact['Name'] : 'Unknown Contact';
+        const type = tp['Type'] || 'Contact';
+        const notes = tp['Notes']
+          ? ` - ${tp['Notes'].substring(0, 30)}${tp['Notes'].length > 30 ? '...' : ''}`
+          : '';
 
-      return {
-        description: `${type} with ${contactName}${notes}`,
-        date: tp['Date'],
-      };
-    });
+        return {
+          description: `${type} with ${contactName}${notes}`,
+          date: tp['Date'],
+        };
+      });
 
-  // Filter incomplete touchpoints (no contact connected)
-  const _incompleteTouchpoints = touchpoints
-    .filter((tp) => tp['Status'] === 'incomplete')
-    .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
+    // Filter incomplete touchpoints (no contact connected)
+    const incomplete = touchpoints
+      .filter((tp) => tp['Status'] === 'incomplete')
+      .sort((a, b) => new Date(b['Date']) - new Date(a['Date']));
+
+    return {
+      contactMap: cMap,
+      today: td,
+      overdueFollowups: overdue,
+      dueTodayFollowups: dueToday,
+      _highPriorityContacts: highPriority,
+      contactsNeedingFollowUp: needingFollowUp,
+      _staleContacts: needingFollowUp,
+      _reviewQueueContacts: reviewQueue,
+      _recentActivity: recentActivity,
+      _incompleteTouchpoints: incomplete,
+    };
+  }, [contacts, touchpoints]);
 
   // Handler to complete a touchpoint by adding contact
   const _handleCompleteTouchpoint = async (touchpointId, updatedData) => {
@@ -345,9 +347,8 @@ function Dashboard({ onNavigate }) {
 
       // Reload data to reflect changes
       await loadData();
-    } catch {
-      // Error handled
-      throw error;
+    } catch (err) {
+      throw err;
     }
   };
 
@@ -374,63 +375,76 @@ function Dashboard({ onNavigate }) {
     }
   };
 
-  // Get upcoming events
-  const upcomingEvents = events
-    .filter((event) => {
-      const eventDate = new Date(event['Event Date']);
-      eventDate.setHours(0, 0, 0, 0);
-      return eventDate >= today;
-    })
-    .sort((a, b) => new Date(a['Event Date']) - new Date(b['Event Date']))
-    .slice(0, 5);
+  // Memoize secondary derived data
+  const {
+    upcomingEvents,
+    _pinnedContacts,
+    _touchpointsThisWeek,
+    _upcomingEventsCount,
+    _allEmpty,
+    _incompleteProfiles,
+  } = useMemo(() => {
+    const upcoming = events
+      .filter((event) => {
+        const eventDate = new Date(event['Event Date']);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      })
+      .sort((a, b) => new Date(a['Event Date']) - new Date(b['Event Date']))
+      .slice(0, 5);
 
-  // Filter pinned contacts
-  const _pinnedContacts = contacts.filter((c) => c.Pinned === 'Yes' || c.Pinned === true);
+    const pinned = contacts.filter((c) => c.Pinned === 'Yes' || c.Pinned === true);
 
-  // Calculate dashboard stats
-  const weekAgo = new Date(today);
-  weekAgo.setDate(weekAgo.getDate() - 7);
-  const _touchpointsThisWeek = touchpoints.filter((tp) => new Date(tp['Date']) >= weekAgo).length;
-  const _upcomingEventsCount = events.filter((e) => new Date(e['Event Date']) >= today).length;
+    const weekAgo = new Date(today);
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const tpThisWeek = touchpoints.filter((tp) => new Date(tp['Date']) >= weekAgo).length;
+    const upcomingCount = events.filter((e) => new Date(e['Event Date']) >= today).length;
 
-  // Check if all urgent sections are empty
-  const _allEmpty =
-    overdueFollowups.length === 0 &&
-    dueTodayFollowups.length === 0 &&
-    _highPriorityContacts.length === 0;
+    const allEmpty =
+      overdueFollowups.length === 0 &&
+      dueTodayFollowups.length === 0 &&
+      _highPriorityContacts.length === 0;
 
-  // Profile Completion Tracking - identify contacts with missing key fields
-  const _incompleteProfiles = contacts
-    .filter((contact) => {
-      const hasPhone = contact['Phone'];
-      const hasEmail = contact['Email'];
-      const hasAddress = contact['Address'];
-      const hasRelationship = contact['Relationship Type'];
-      const hasOrg = contact['Organization'];
+    const incomplete = contacts
+      .filter((contact) => {
+        const hasPhone = contact['Phone'];
+        const hasEmail = contact['Email'];
+        const hasAddress = contact['Address'];
+        const hasRelationship = contact['Relationship Type'];
+        const hasOrg = contact['Organization'];
 
-      // Missing 2+ key fields = incomplete profile
-      const missingFields = [hasPhone, hasEmail, hasAddress, hasRelationship, hasOrg].filter(
-        (field) => !field
-      ).length;
+        const missingCount = [hasPhone, hasEmail, hasAddress, hasRelationship, hasOrg].filter(
+          (field) => !field
+        ).length;
 
-      return missingFields >= 2;
-    })
-    .map((contact) => {
-      const missing = [];
-      if (!contact['Phone']) missing.push('Phone');
-      if (!contact['Email']) missing.push('Email');
-      if (!contact['Address']) missing.push('Address');
-      if (!contact['Relationship Type']) missing.push('Relationship');
-      if (!contact['Organization']) missing.push('Organization');
+        return missingCount >= 2;
+      })
+      .map((contact) => {
+        const missing = [];
+        if (!contact['Phone']) missing.push('Phone');
+        if (!contact['Email']) missing.push('Email');
+        if (!contact['Address']) missing.push('Address');
+        if (!contact['Relationship Type']) missing.push('Relationship');
+        if (!contact['Organization']) missing.push('Organization');
 
-      return {
-        contact,
-        missingFields: missing,
-        missingCount: missing.length,
-      };
-    })
-    .sort((a, b) => b.missingCount - a.missingCount)
-    .slice(0, 10);
+        return {
+          contact,
+          missingFields: missing,
+          missingCount: missing.length,
+        };
+      })
+      .sort((a, b) => b.missingCount - a.missingCount)
+      .slice(0, 10);
+
+    return {
+      upcomingEvents: upcoming,
+      _pinnedContacts: pinned,
+      _touchpointsThisWeek: tpThisWeek,
+      _upcomingEventsCount: upcomingCount,
+      _allEmpty: allEmpty,
+      _incompleteProfiles: incomplete,
+    };
+  }, [contacts, touchpoints, events, today, overdueFollowups, dueTodayFollowups, _highPriorityContacts]);
 
   // Setup Issues Detection
   const setupIssues = [];

@@ -442,11 +442,11 @@ export const syncContactData = async (
   if (!link) throw new Error('Contact link not found');
 
   // Read source and target contacts
-  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, 'Contacts').then(
+  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.source_contact_id)
   );
 
-  const targetContact = await readSheetData(accessToken, link.target_sheet_id, 'Contacts').then(
+  const targetContact = await readSheetData(accessToken, link.target_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.target_contact_id)
   );
 
@@ -530,11 +530,11 @@ export const detectConflicts = async (accessToken, sheetId, linkId) => {
   if (!link) throw new Error('Contact link not found');
 
   // Read source and target contacts
-  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, 'Contacts').then(
+  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.source_contact_id)
   );
 
-  const targetContact = await readSheetData(accessToken, link.target_sheet_id, 'Contacts').then(
+  const targetContact = await readSheetData(accessToken, link.target_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.target_contact_id)
   );
 
@@ -659,11 +659,11 @@ export const resolveConflict = async (
   }
 
   // Update both contacts with final value
-  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, 'Contacts').then(
+  const sourceContact = await readSheetData(accessToken, link.source_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.source_contact_id)
   );
 
-  const targetContact = await readSheetData(accessToken, link.target_sheet_id, 'Contacts').then(
+  const targetContact = await readSheetData(accessToken, link.target_sheet_id, SHEET_NAMES.CONTACTS).then(
     (data) => data.find((c) => c['Contact ID'] === link.target_contact_id)
   );
 

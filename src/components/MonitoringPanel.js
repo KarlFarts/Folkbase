@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Activity, ChevronUp, ChevronDown, Database, Zap, Gauge } from 'lucide-react';
-import { useCacheMonitoring } from '../context/MonitoringContext';
+import { useCacheMonitoring } from '../contexts/MonitoringContext';
 import './MonitoringPanel.css';
 
 export function MonitoringPanel() {

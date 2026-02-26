@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
-import { readSheetData, addOrganization } from '../utils/devModeWrapper';
+import { readSheetData, addOrganization, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateOrganizations } from '../services/organizationService';
 import { sanitizeFormData, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
 
@@ -44,7 +44,7 @@ function AddOrganization({ onNavigate }) {
     }
 
     try {
-      const { data: existingOrgs } = await readSheetData(accessToken, sheetId, 'Organizations');
+      const { data: existingOrgs } = await readSheetData(accessToken, sheetId, SHEETS.ORGANIZATIONS);
       const dups = detectDuplicateOrganizations(existingOrgs, formData);
 
       if (dups.length > 0) {
