@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Phone, Globe, MapPin } from 'lucide-react';
 
 // Tag overflow helper - shows max N tags with "+X more" indicator
@@ -187,7 +187,7 @@ const LocationCard = memo(function LocationCard({ location, compact, onClick }) 
               {type && <div className="contact-org">{type}</div>}
               {address && (
                 <div className="contact-org card-text-sm">
-                  <MapPin size={12} style={{ display: 'inline', marginRight: '4px' }} />
+                  <MapPin size={12} className="lc-mappin-icon" />
                   {truncateAddress(address)}
                 </div>
               )}

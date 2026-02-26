@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import IconMap from './IconMap';
 
 const Avatar = memo(function Avatar({ name, size = 'md', customColor, customIcon }) {

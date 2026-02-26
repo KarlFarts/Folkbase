@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RelationshipGraph from './RelationshipGraph';
 import RelationshipList from './RelationshipList';
@@ -64,7 +64,7 @@ export default function RelationshipManager({
   const [error, setError] = useState(null);
 
   // Define loadData with useCallback to prevent infinite loops
-  const loadData = React.useCallback(async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
@@ -208,7 +208,7 @@ export default function RelationshipManager({
 
   if (isLoading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
+      <div className="rm-loading">
         <p>Loading relationships...</p>
       </div>
     );
@@ -216,15 +216,7 @@ export default function RelationshipManager({
 
   if (error) {
     return (
-      <div
-        style={{
-          padding: '20px',
-          background: 'var(--color-danger-bg)',
-          border: '1px solid var(--color-danger)',
-          borderRadius: '8px',
-          color: 'var(--color-danger)',
-        }}
-      >
+      <div className="rm-error">
         <strong>Error:</strong> {error}
       </div>
     );
@@ -247,56 +239,23 @@ export default function RelationshipManager({
   };
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="rm-container">
       {/* Header with view toggle and add button */}
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '20px',
-        }}
-      >
-        <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>Relationship Network</h3>
+      <div className="rm-header">
+        <h3 className="rm-title">Relationship Network</h3>
 
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div className="rm-header-actions">
           {/* View Toggle */}
-          <div
-            style={{
-              display: 'inline-flex',
-              border: '1px solid var(--border-color-default)',
-              borderRadius: '6px',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="rm-view-toggle">
             <button
               onClick={() => setView('graph')}
-              style={{
-                padding: '8px 16px',
-                border: 'none',
-                background: view === 'graph' ? 'var(--color-accent-primary, #c2703e)' : 'white',
-                color: view === 'graph' ? 'white' : '#111827',
-                cursor: 'pointer',
-                fontWeight: '500',
-                fontSize: '14px',
-                transition: 'all 0.2s',
-              }}
+              className={`rm-view-btn ${view === 'graph' ? 'rm-view-btn--active' : ''}`}
             >
               Graph View
             </button>
             <button
               onClick={() => setView('list')}
-              style={{
-                padding: '8px 16px',
-                border: 'none',
-                borderLeft: '1px solid var(--border-color-default)',
-                background: view === 'list' ? 'var(--color-accent-primary, #c2703e)' : 'white',
-                color: view === 'list' ? 'white' : '#111827',
-                cursor: 'pointer',
-                fontWeight: '500',
-                fontSize: '14px',
-                transition: 'all 0.2s',
-              }}
+              className={`rm-view-btn rm-view-btn--right ${view === 'list' ? 'rm-view-btn--active' : ''}`}
             >
               List View
             </button>
@@ -305,16 +264,8 @@ export default function RelationshipManager({
           {/* Add Relationship Button */}
           <button
             onClick={() => setShowAddModal(true)}
-            style={{
-              padding: '8px 16px',
-              border: 'none',
-              borderRadius: '6px',
-              background: entityConfig?.color || 'var(--color-accent-primary, #c2703e)',
-              color: 'white',
-              cursor: 'pointer',
-              fontWeight: '500',
-              fontSize: '14px',
-            }}
+            className="rm-add-btn"
+            style={{ background: entityConfig?.color || 'var(--color-accent-primary, #c2703e)' }}
           >
             + Add Relationship
           </button>
@@ -322,7 +273,7 @@ export default function RelationshipManager({
       </div>
 
       {/* Relationship count */}
-      <div style={{ marginBottom: '16px', fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+      <div className="rm-count">
         {relationships.length} {relationships.length === 1 ? 'relationship' : 'relationships'}
       </div>
 

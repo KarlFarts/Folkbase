@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Check, Square } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -190,18 +190,11 @@ function ChecklistManager({ taskId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="cm-header">
         <div>
           <h3>Checklist</h3>
           {checklistItems.length > 0 && (
-            <p className="text-muted" style={{ marginTop: 'var(--spacing-xs)' }}>
+            <p className="text-muted cm-progress">
               {completedCount} of {checklistItems.length} completed
             </p>
           )}
@@ -214,33 +207,19 @@ function ChecklistManager({ taskId }) {
       {checklistItems.length === 0 ? (
         <p className="text-muted">No checklist items yet. Click "Add Item" to get started.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div className="cm-list">
           {checklistItems.map((item) => {
             const isCompleted = item['Is Completed'] === 'TRUE' || item['Is Completed'] === true;
             return (
               <div
                 key={item['Checklist Item ID']}
-                className="card"
-                style={{
-                  padding: 'var(--spacing-md)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  opacity: isCompleted ? 0.6 : 1,
-                }}
+                className="card cm-item"
+                style={{ opacity: isCompleted ? 0.6 : 1 }}
               >
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-md)',
-                    flex: 1,
-                  }}
-                >
+                <div className="cm-item-left">
                   <button
                     onClick={() => handleToggleComplete(item)}
-                    className="btn btn-ghost btn-sm"
-                    style={{ padding: '4px' }}
+                    className="btn btn-ghost btn-sm cm-toggle-btn"
                   >
                     {isCompleted ? (
                       <Check size={20} color="var(--color-success)" />
@@ -248,7 +227,7 @@ function ChecklistManager({ taskId }) {
                       <Square size={20} />
                     )}
                   </button>
-                  <div style={{ flex: 1 }}>
+                  <div className="cm-item-content">
                     <p
                       style={{
                         textDecoration: isCompleted ? 'line-through' : 'none',
@@ -258,13 +237,13 @@ function ChecklistManager({ taskId }) {
                       {item['Item Text']}
                     </p>
                     {item['Assigned To Name'] && (
-                      <p className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+                      <p className="text-muted cm-assignee">
                         Assigned to: {item['Assigned To Name']}
                       </p>
                     )}
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                <div className="cm-item-actions">
                   <button
                     onClick={() => openEditModal(item)}
                     className="btn btn-ghost btn-sm"
@@ -295,10 +274,10 @@ function ChecklistManager({ taskId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="cm-form">
             <div>
               <label className="form-label">
-                Item Text <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Item Text <span className="cm-required">*</span>
               </label>
               <input
                 type="text"
@@ -336,13 +315,7 @@ function ChecklistManager({ taskId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="cm-two-col">
               <div>
                 <label className="form-label">Display Order</label>
                 <input
@@ -367,7 +340,7 @@ function ChecklistManager({ taskId }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <label className="cm-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Completed']}

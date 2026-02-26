@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Download, Share } from 'lucide-react';
 import './InstallPrompt.css';
 
@@ -113,7 +113,7 @@ function InstallPrompt() {
               <h3>Install Folkbase</h3>
               <p>
                 Add Folkbase to your home screen for quick access. Tap the{' '}
-                <Share size={14} style={{ display: 'inline', verticalAlign: 'middle' }} /> Share
+                <Share size={14} className="install-prompt-inline-icon" /> Share
                 button below, then select "Add to Home Screen"
               </p>
             </div>

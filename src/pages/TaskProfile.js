@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckSquare, Calendar, User, Clock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -68,7 +68,7 @@ export default function TaskProfile({ onNavigate }) {
   if (loading) {
     return (
       <div className="page-container">
-        <div style={{ textAlign: 'center', padding: 'var(--spacing-xl)' }}>
+        <div className="tp-center-pad">
           <p>Loading task...</p>
         </div>
       </div>
@@ -78,7 +78,7 @@ export default function TaskProfile({ onNavigate }) {
   if (!task) {
     return (
       <div className="page-container">
-        <div style={{ textAlign: 'center', padding: 'var(--spacing-xl)' }}>
+        <div className="tp-center-pad">
           <p>Task not found</p>
         </div>
       </div>
@@ -88,59 +88,28 @@ export default function TaskProfile({ onNavigate }) {
   return (
     <div className="page-container">
       {/* Header */}
-      <div
-        className="card"
-        style={{
-          marginBottom: 'var(--spacing-lg)',
-          background:
-            'linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-tertiary) 100%)',
-        }}
-      >
+      <div className="card tp-header-card">
         <div className="card-body">
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--spacing-md)' }}>
-            <div
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: 'var(--border-radius)',
-                background: 'var(--color-primary)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
-              }}
-            >
+          <div className="tp-header-row">
+            <div className="tp-icon-box">
               <CheckSquare size={32} />
             </div>
-            <div style={{ flex: 1 }}>
-              <h1 style={{ marginBottom: 'var(--spacing-xs)' }}>{task.Title}</h1>
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-md)',
-                  flexWrap: 'wrap',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+            <div className="tp-header-info">
+              <h1 className="tp-title">{task.Title}</h1>
+              <div className="tp-badges">
                 <span className="badge badge-status-inactive">{task['Task ID']}</span>
                 {task.Priority && (
                   <span
-                    className="badge"
-                    style={{
-                      background: getPriorityColor(task.Priority),
-                      color: 'white',
-                    }}
+                    className="badge tp-priority-badge"
+                    style={{ background: getPriorityColor(task.Priority) }}
                   >
                     {task.Priority}
                   </span>
                 )}
                 {task.Status && (
                   <span
-                    className="badge"
-                    style={{
-                      background: getStatusColor(task.Status),
-                      color: 'white',
-                    }}
+                    className="badge tp-status-badge"
+                    style={{ background: getStatusColor(task.Status) }}
                   >
                     {task.Status}
                   </span>
@@ -148,10 +117,7 @@ export default function TaskProfile({ onNavigate }) {
               </div>
               {task['Due Date'] && (
                 <p className="text-muted">
-                  <Calendar
-                    size={16}
-                    style={{ verticalAlign: 'middle', marginRight: 'var(--spacing-xs)' }}
-                  />
+                  <Calendar size={16} className="tp-inline-icon" />
                   Due: {task['Due Date']}
                 </p>
               )}
@@ -161,24 +127,14 @@ export default function TaskProfile({ onNavigate }) {
       </div>
 
       {/* Tab Navigation */}
-      <div className="card" style={{ marginBottom: 'var(--spacing-lg)' }}>
-        <div className="card-header" style={{ padding: 0 }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)' }}>
+      <div className="card tp-tabs-card">
+        <div className="card-header tp-tabs-header">
+          <div className="tp-tab-bar">
             {['overview', 'checklist', 'time-tracking'].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                style={{
-                  padding: 'var(--spacing-md)',
-                  background: 'none',
-                  border: 'none',
-                  borderBottom:
-                    activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
-                  color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-muted)',
-                  fontWeight: activeTab === tab ? 600 : 400,
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                }}
+                className={`tp-tab${activeTab === tab ? ' tp-tab--active' : ''}`}
               >
                 {tab === 'overview' && 'Overview'}
                 {tab === 'checklist' && 'Checklist'}
@@ -193,30 +149,21 @@ export default function TaskProfile({ onNavigate }) {
       {activeTab === 'overview' && (
         <div className="card">
           <div className="card-body">
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: 'var(--spacing-lg)',
-              }}
-            >
+            <div className="tp-overview-grid">
               {/* Description */}
               {task.Description && (
                 <div>
-                  <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Description</h3>
-                  <p style={{ whiteSpace: 'pre-wrap' }}>{task.Description}</p>
+                  <h3 className="tp-section-heading">Description</h3>
+                  <p className="tp-pre-wrap">{task.Description}</p>
                 </div>
               )}
 
               {/* Assignment */}
               <div>
-                <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Assignment</h3>
+                <h3 className="tp-section-heading">Assignment</h3>
                 {task['Assigned To Name'] && (
                   <p>
-                    <User
-                      size={16}
-                      style={{ verticalAlign: 'middle', marginRight: 'var(--spacing-xs)' }}
-                    />
+                    <User size={16} className="tp-inline-icon" />
                     Assigned to: {task['Assigned To Name']}
                   </p>
                 )}
@@ -227,15 +174,12 @@ export default function TaskProfile({ onNavigate }) {
 
               {/* Timing */}
               <div>
-                <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Timeline</h3>
+                <h3 className="tp-section-heading">Timeline</h3>
                 {task['Start Date'] && <p>Start: {task['Start Date']}</p>}
                 {task['Due Date'] && <p>Due: {task['Due Date']}</p>}
                 {task['Estimated Hours'] && (
                   <p>
-                    <Clock
-                      size={16}
-                      style={{ verticalAlign: 'middle', marginRight: 'var(--spacing-xs)' }}
-                    />
+                    <Clock size={16} className="tp-inline-icon" />
                     Estimated: {task['Estimated Hours']}h
                   </p>
                 )}
@@ -249,10 +193,10 @@ export default function TaskProfile({ onNavigate }) {
                 task['Related Event ID'] ||
                 task['Related Organization ID']) && (
                 <div>
-                  <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Related To</h3>
+                  <h3 className="tp-section-heading">Related To</h3>
                   {task['Related Contact ID'] && (
                     <p
-                      style={{ cursor: 'pointer', color: 'var(--color-primary)' }}
+                      className="tp-link"
                       onClick={() => onNavigate('contact-profile', task['Related Contact ID'])}
                     >
                       Contact: {task['Related Contact ID']}
@@ -260,7 +204,7 @@ export default function TaskProfile({ onNavigate }) {
                   )}
                   {task['Related Event ID'] && (
                     <p
-                      style={{ cursor: 'pointer', color: 'var(--color-primary)' }}
+                      className="tp-link"
                       onClick={() => onNavigate('event-details', task['Related Event ID'])}
                     >
                       Event: {task['Related Event ID']}
@@ -268,7 +212,7 @@ export default function TaskProfile({ onNavigate }) {
                   )}
                   {task['Related Organization ID'] && (
                     <p
-                      style={{ cursor: 'pointer', color: 'var(--color-primary)' }}
+                      className="tp-link"
                       onClick={() =>
                         onNavigate('organization-profile', task['Related Organization ID'])
                       }
@@ -282,23 +226,12 @@ export default function TaskProfile({ onNavigate }) {
               {/* Progress */}
               {task['Completion Percentage'] && (
                 <div>
-                  <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Progress</h3>
-                  <div style={{ marginBottom: 'var(--spacing-xs)' }}>
-                    <div
-                      style={{
-                        height: '8px',
-                        background: 'var(--color-bg-tertiary)',
-                        borderRadius: 'var(--border-radius)',
-                        overflow: 'hidden',
-                      }}
-                    >
+                  <h3 className="tp-section-heading">Progress</h3>
+                  <div className="tp-progress-wrap">
+                    <div className="tp-progress-bar">
                       <div
-                        style={{
-                          height: '100%',
-                          width: `${task['Completion Percentage']}%`,
-                          background: 'var(--color-success)',
-                          transition: 'width 0.3s',
-                        }}
+                        className="tp-progress-fill"
+                        style={{ width: `${task['Completion Percentage']}%` }}
                       />
                     </div>
                   </div>
@@ -308,9 +241,9 @@ export default function TaskProfile({ onNavigate }) {
 
               {/* Notes */}
               {task.Notes && (
-                <div style={{ gridColumn: '1 / -1' }}>
-                  <h3 style={{ marginBottom: 'var(--spacing-sm)' }}>Notes</h3>
-                  <p style={{ whiteSpace: 'pre-wrap' }}>{task.Notes}</p>
+                <div className="tp-full-width">
+                  <h3 className="tp-section-heading">Notes</h3>
+                  <p className="tp-pre-wrap">{task.Notes}</p>
                 </div>
               )}
             </div>

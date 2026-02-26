@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { convertToGraphData } from '../utils/devModeWrapper';
@@ -30,9 +30,9 @@ const ContactNode = ({ data }) => {
         e.currentTarget.style.transform = 'scale(1)';
       }}
     >
-      <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '4px' }}>{data.label}</div>
+      <div className="rg-node-label">{data.label}</div>
       {data.organization && (
-        <div style={{ fontSize: '12px', color: 'var(--color-text-secondary)' }}>{data.organization}</div>
+        <div className="rg-node-org">{data.organization}</div>
       )}
     </div>
   );
@@ -124,11 +124,9 @@ const EntityNode = ({ data }) => {
         >
           <IconMap name={data.icon} size={20} />
           <div>
-            <div style={{ fontWeight: '600', fontSize: '14px' }}>{data.label}</div>
+            <div className="rg-node-label">{data.label}</div>
             {data.entityType && data.nodeShape !== 'diamond' && (
-              <div style={{ fontSize: '11px', color: 'var(--color-text-muted)', marginTop: '2px' }}>
-                {data.entityType}
-              </div>
+              <div className="rg-node-entity-type">{data.entityType}</div>
             )}
           </div>
         </div>
@@ -274,36 +272,17 @@ export default function RelationshipGraph({
 
   if (!relationships || relationships.length === 0) {
     return (
-      <div
-        style={{
-          width: '100%',
-          height: '600px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          border: '1px solid var(--border-color-default)',
-          borderRadius: '8px',
-          background: 'var(--color-background-secondary, #f7f3ef)',
-        }}
-      >
-        <div style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-          <p style={{ fontSize: '16px', marginBottom: '8px' }}>No relationships yet</p>
-          <p style={{ fontSize: '14px' }}>Add a relationship to see the network graph</p>
+      <div className="rg-empty">
+        <div className="rg-empty-content">
+          <p className="rg-empty-primary">No relationships yet</p>
+          <p className="rg-empty-secondary">Add a relationship to see the network graph</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '600px',
-        border: '1px solid var(--border-color-default)',
-        borderRadius: '8px',
-        overflow: 'hidden',
-      }}
-    >
+    <div className="rg-container">
       <ReactFlow
         nodes={nodes}
         edges={edges}

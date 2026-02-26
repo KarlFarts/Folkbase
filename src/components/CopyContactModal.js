@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Info } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
@@ -225,7 +225,7 @@ function CopyContactModal({ isOpen, onClose, contact, workspaces, onCopy }) {
             onChange={(e) => setCreateLink(e.target.checked)}
             disabled={isLoading}
           />
-          <span style={{ marginLeft: '0.5rem' }}>
+          <span className="ccm-checkbox-label">
             Create sync link (changes will sync between workspaces)
           </span>
         </label>
@@ -286,18 +286,9 @@ function CopyContactModal({ isOpen, onClose, contact, workspaces, onCopy }) {
           {syncStrategy === 'custom' && (
             <div className="form-group">
               <label className="form-label">Select Fields to Sync</label>
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '0.5rem',
-                }}
-              >
+              <div className="ccm-fields-grid">
                 {FIELD_OPTIONS.map((field) => (
-                  <label
-                    key={field}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                  >
+                  <label key={field} className="ccm-field-label">
                     <input
                       type="checkbox"
                       checked={customFields.includes(field)}
@@ -331,14 +322,7 @@ function CopyContactModal({ isOpen, onClose, contact, workspaces, onCopy }) {
 
       {/* Notes Sharing Section */}
       {selectedWorkspaceId && notesCount > 0 && (
-        <div
-          className="form-group"
-          style={{
-            marginTop: '1.5rem',
-            paddingTop: '1.5rem',
-            borderTop: '1px solid var(--border-color-default)',
-          }}
-        >
+        <div className="form-group ccm-notes-section">
           <label className="form-label">
             <input
               type="checkbox"
@@ -346,22 +330,20 @@ function CopyContactModal({ isOpen, onClose, contact, workspaces, onCopy }) {
               onChange={(e) => setShareNotes(e.target.checked)}
               disabled={isLoading || loadingNotes}
             />
-            <span style={{ marginLeft: '0.5rem' }}>Also share linked notes to workspace</span>
+            <span className="ccm-checkbox-label">Also share linked notes to workspace</span>
           </label>
 
           {loadingNotes ? (
-            <p className="text-sm text-muted" style={{ marginLeft: '1.5rem' }}>
-              Loading notes...
-            </p>
+            <p className="text-sm text-muted ccm-notes-hint">Loading notes...</p>
           ) : (
-            <p className="text-sm text-muted" style={{ marginLeft: '1.5rem' }}>
+            <p className="text-sm text-muted ccm-notes-hint">
               <Info size={16} /> {notesCount} note{notesCount !== 1 ? 's' : ''} linked to this
               contact
             </p>
           )}
 
           {shareNotes && (
-            <div style={{ marginLeft: '1.5rem', marginTop: '0.75rem' }}>
+            <div className="ccm-notes-visibility">
               <label className="form-label">Note Visibility in Workspace</label>
               <div className="radio-group">
                 <label className="radio-option">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Clock } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -175,20 +175,11 @@ function TimeEntryManager({ taskId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="tem-header">
         <div>
           <h3>Time Tracking</h3>
           {totalHours > 0 && (
-            <p className="text-muted" style={{ marginTop: 'var(--spacing-xs)' }}>
-              Total: {totalHours.toFixed(2)} hours
-            </p>
+            <p className="text-muted tem-total">Total: {totalHours.toFixed(2)} hours</p>
           )}
         </div>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
@@ -220,9 +211,7 @@ function TimeEntryManager({ taskId }) {
                 <td>{entry['End Time'] || <span className="text-muted">—</span>}</td>
                 <td>
                   {entry['Duration (Hours)'] ? (
-                    <span
-                      style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-xs)' }}
-                    >
+                    <span className="tem-duration">
                       <Clock size={14} />
                       {entry['Duration (Hours)']} hrs
                     </span>
@@ -230,11 +219,11 @@ function TimeEntryManager({ taskId }) {
                     <span className="text-muted">—</span>
                   )}
                 </td>
-                <td style={{ maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <td className="tem-notes-cell">
                   {entry.Notes || <span className="text-muted">—</span>}
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="tem-actions">
                     <button
                       onClick={() => openEditModal(entry)}
                       className="btn btn-ghost btn-sm"
@@ -266,10 +255,10 @@ function TimeEntryManager({ taskId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="tem-form">
             <div>
               <label className="form-label">
-                Date <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Date <span className="tem-required">*</span>
               </label>
               <input
                 type="date"
@@ -306,13 +295,7 @@ function TimeEntryManager({ taskId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="tem-two-col">
               <div>
                 <label className="form-label">Start Time</label>
                 <input

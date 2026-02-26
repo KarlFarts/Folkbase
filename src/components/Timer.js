@@ -38,23 +38,12 @@ export default function Timer({ onTimeUpdate = () => {} }) {
   };
 
   return (
-    <div style={{
-      background: 'var(--color-bg-secondary)',
-      borderRadius: 'var(--radius-lg)',
-      padding: 'var(--spacing-lg)',
-      textAlign: 'center'
-    }}>
-      <div style={{
-        fontSize: '2.5rem',
-        fontWeight: 'bold',
-        color: 'var(--color-primary)',
-        marginBottom: 'var(--spacing-lg)',
-        fontFamily: 'monospace'
-      }}>
+    <div className="timer-container">
+      <div className="timer-display">
         {formatTime(seconds)}
       </div>
 
-      <div style={{ display: 'flex', gap: 'var(--spacing-md)', justifyContent: 'center' }}>
+      <div className="timer-controls">
         {!isRunning ? (
           <button
             className="btn btn-primary"

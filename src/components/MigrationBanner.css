@@ -57,3 +57,7 @@
   background: currentColor;
   transition: width 0.3s ease;
 }
+
+.migration-banner-content {
+  flex: 1;
+}

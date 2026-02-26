@@ -1,5 +1,3 @@
-import React from 'react';
-
 /**
  * Skeleton loading components that show the structure of content while loading.
  * Uses CSS shimmer animation defined in index.css.
@@ -66,16 +64,9 @@ export function SkeletonContactList({ count = 5 }) {
 
 export function DashboardSkeleton() {
   return (
-    <div style={{ padding: 'var(--spacing-xl)' }}>
+    <div className="skeleton-dashboard-wrap">
       {/* Hero area */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--spacing-xl)',
-          marginBottom: 'var(--spacing-2xl)',
-        }}
-      >
+      <div className="skeleton-hero-row">
         <SkeletonAvatar size={80} />
         <div className="card-col">
           <SkeletonText width="45%" height={28} />
@@ -88,7 +79,7 @@ export function DashboardSkeleton() {
       <SkeletonStatGrid count={3} />
 
       {/* Sections */}
-      <div style={{ marginTop: 'var(--spacing-2xl)' }}>
+      <div className="skeleton-sections">
         <SkeletonText width="20%" height={20} />
         <div className="skeleton-spacer-2xl" />
         <SkeletonCard rows={3} />
@@ -102,7 +93,7 @@ export function DashboardSkeleton() {
 export function ContactListSkeleton() {
   return (
     <div>
-      <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+      <div className="skeleton-header-section">
         <SkeletonText width="25%" height={28} />
         <div className="skeleton-spacer-xl" />
         <SkeletonText width="100%" height={40} />
@@ -115,7 +106,7 @@ export function ContactListSkeleton() {
 export function ListPageSkeleton({ count = 5 }) {
   return (
     <div>
-      <div style={{ marginBottom: 'var(--spacing-xl)' }}>
+      <div className="skeleton-header-section">
         <SkeletonText width="30%" height={28} />
         <div className="skeleton-spacer-xl" />
         <SkeletonText width="100%" height={40} />
@@ -132,14 +123,7 @@ export function ListPageSkeleton({ count = 5 }) {
 export function ProfileSkeleton() {
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 'var(--spacing-lg)',
-          marginBottom: 'var(--spacing-2xl)',
-        }}
-      >
+      <div className="skeleton-profile-header">
         <SkeletonAvatar size={64} />
         <div className="card-col">
           <SkeletonText width="35%" height={24} />
@@ -148,7 +132,7 @@ export function ProfileSkeleton() {
         </div>
       </div>
       <SkeletonStatGrid count={3} />
-      <div style={{ marginTop: 'var(--spacing-xl)' }}>
+      <div className="skeleton-profile-card">
         <SkeletonCard rows={4} />
       </div>
     </div>

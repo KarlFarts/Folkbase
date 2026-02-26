@@ -1,5 +1,3 @@
-import React from 'react';
-
 function ProgressTracker({ progress }) {
   const { phase, total, processed, current, canCancel, onCancel } = progress;
 
