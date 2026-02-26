@@ -1,4 +1,3 @@
-import React from 'react';
 import SearchBar from './SearchBar';
 import QuickActions from './QuickActions';
 import UpcomingBirthdays from './UpcomingBirthdays';

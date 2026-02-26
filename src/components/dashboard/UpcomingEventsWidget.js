@@ -1,4 +1,3 @@
-import React from 'react';
 import CollapsibleWidget from './CollapsibleWidget';
 
 function UpcomingEventsWidget({ events, contacts, onNavigate, isSidebar = false }) {

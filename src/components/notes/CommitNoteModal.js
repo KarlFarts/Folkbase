@@ -1,5 +1,5 @@
 import { error as logError } from '../../utils/logger';
-import React, { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import LinkEntitiesModal from './LinkEntitiesModal';
 import WindowTemplate from '../WindowTemplate';
@@ -244,15 +244,10 @@ export default function CommitNoteModal({
         footer={renderFooter()}
       >
         {/* Progress Indicator */}
-        <div
-          style={{
-            padding: 'var(--spacing-sm) 0',
-            marginBottom: 'var(--spacing-md)',
-          }}
-        >
-          <div style={{ display: 'flex', gap: 'var(--spacing-xs)', alignItems: 'center' }}>
+        <div className="cnm-progress-wrapper">
+          <div className="cnm-progress-bar-row">
             {[1, 2, 3].map((step) => (
-              <React.Fragment key={step}>
+              <Fragment key={step}>
                 <div
                   style={{
                     flex: 1,
@@ -285,40 +280,34 @@ export default function CommitNoteModal({
                     {currentStep > step ? <Check size={14} /> : step + 1}
                   </div>
                 )}
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: 'var(--spacing-xs)',
-            }}
-          >
+          <div className="cnm-step-labels">
             <span
               style={{
-                fontSize: '13px',
                 color:
                   currentStep === 1 ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
               }}
+              className="cnm-step-label"
             >
               Review Content
             </span>
             <span
               style={{
-                fontSize: '13px',
                 color:
                   currentStep === 2 ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
               }}
+              className="cnm-step-label"
             >
               Link Entities
             </span>
             <span
               style={{
-                fontSize: '13px',
                 color:
                   currentStep === 3 ? 'var(--color-accent-primary)' : 'var(--color-text-secondary)',
               }}
+              className="cnm-step-label"
             >
               Set Visibility
             </span>
@@ -326,15 +315,8 @@ export default function CommitNoteModal({
         </div>
 
         {note && (
-          <div
-            style={{
-              marginBottom: 'var(--spacing-lg)',
-              padding: 'var(--spacing-sm)',
-              background: 'var(--color-bg-secondary)',
-              borderRadius: 'var(--radius-md)',
-            }}
-          >
-            <p style={{ margin: 0, fontSize: '14px', color: 'var(--color-text-secondary)' }}>
+          <div className="cnm-note-info-box">
+            <p className="cnm-note-info-text">
               Note ID: <strong>{note['Note ID']}</strong>
             </p>
           </div>
@@ -391,46 +373,25 @@ export default function CommitNoteModal({
         {/* Step 2: Link Entities */}
         {currentStep === 2 && (
           <div>
-            <div
-              style={{
-                padding: 'var(--spacing-md)',
-                background: 'var(--color-bg-secondary)',
-                borderRadius: 'var(--radius-md)',
-                marginBottom: 'var(--spacing-md)',
-              }}
-            >
-              <p
-                style={{
-                  margin: '0 0 var(--spacing-sm) 0',
-                  fontSize: '14px',
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+            <div className="cnm-entity-info-box">
+              <p className="cnm-entity-info-text">
                 Link this note to contacts, events, lists, or tasks for better organization.
               </p>
-              <div style={{ display: 'flex', gap: 'var(--spacing-md)', flexWrap: 'wrap' }}>
+              <div className="cnm-entity-counts">
                 <div>
-                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Contacts:{' '}
-                  </span>
+                  <span className="cnm-count-label">Contacts:{' '}</span>
                   <strong>{selectedContactIds.length}</strong>
                 </div>
                 <div>
-                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Events:{' '}
-                  </span>
+                  <span className="cnm-count-label">Events:{' '}</span>
                   <strong>{selectedEventIds.length}</strong>
                 </div>
                 <div>
-                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Lists:{' '}
-                  </span>
+                  <span className="cnm-count-label">Lists:{' '}</span>
                   <strong>{selectedListIds.length}</strong>
                 </div>
                 <div>
-                  <span style={{ fontSize: '13px', color: 'var(--color-text-muted)' }}>
-                    Tasks:{' '}
-                  </span>
+                  <span className="cnm-count-label">Tasks:{' '}</span>
                   <strong>{selectedTaskIds.length}</strong>
                 </div>
               </div>
@@ -440,13 +401,13 @@ export default function CommitNoteModal({
               className="btn btn-primary"
               onClick={() => setShowLinkEntitiesModal(true)}
               disabled={isCommitting}
-              style={{ width: '100%' }}
+              className="cnm-full-width"
             >
               {totalEntitiesSelected > 0 ? 'Edit Entity Links' : 'Add Entity Links'}
             </button>
 
             {totalEntitiesSelected > 0 && (
-              <div className="alert alert-success" style={{ marginTop: 'var(--spacing-md)' }}>
+              <div className="alert alert-success cnm-alert-top">
                 {totalEntitiesSelected} entit{totalEntitiesSelected === 1 ? 'y' : 'ies'} selected
               </div>
             )}
@@ -486,8 +447,8 @@ export default function CommitNoteModal({
                     disabled={isCommitting}
                   />
                   <div>
-                    <div style={{ fontWeight: '500', fontSize: '14px' }}>{option}</div>
-                    <div style={{ fontSize: '13px', color: 'var(--color-text-secondary)' }}>
+                    <div className="cnm-option-title">{option}</div>
+                    <div className="cnm-option-desc">
                       {option === 'Private' && 'Only you can see this note'}
                       {option === 'Shared' && 'Share with specific people'}
                       {option === 'Workspace-Wide' && 'Everyone in the workspace can see this'}
@@ -508,13 +469,7 @@ export default function CommitNoteModal({
                   disabled={isCommitting}
                   placeholder="e.g. user1@example.com, user2@example.com"
                 />
-                <div
-                  style={{
-                    fontSize: '13px',
-                    color: 'var(--color-text-secondary)',
-                    marginTop: 'var(--spacing-xs)',
-                  }}
-                >
+                <div className="cnm-hint-text">
                   Separate multiple email addresses with commas
                 </div>
               </div>
@@ -524,7 +479,7 @@ export default function CommitNoteModal({
 
         {/* Error Message */}
         {error && (
-          <div className="alert alert-danger" style={{ marginTop: 'var(--spacing-md)' }}>
+          <div className="alert alert-danger cnm-alert-top">
             {error}
           </div>
         )}

@@ -75,38 +75,15 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
 
   return (
     <WindowTemplate isOpen={isOpen} onClose={onClose} title="Sync Conflict Detected" width="700px">
-      <div
-        style={{
-          padding: 'var(--spacing-md)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-md)',
-        }}
-      >
+      <div className="scm-body">
         {/* Alert Banner */}
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            backgroundColor: 'rgba(217, 119, 6, 0.1)',
-            borderRadius: 'var(--radius-md)',
-            borderLeft: '4px solid rgba(217, 119, 6, 0.3)',
-            display: 'flex',
-            gap: 'var(--spacing-sm)',
-            alignItems: 'flex-start',
-          }}
-        >
-          <AlertTriangle size={20} color="var(--color-warning)" style={{ marginTop: '2px', flexShrink: 0 }} />
+        <div className="scm-alert-banner">
+          <AlertTriangle size={20} color="var(--color-warning)" className="scm-alert-icon" />
           <div>
-            <h4
-              style={{
-                margin: '0 0 var(--spacing-xs) 0',
-                color: 'var(--color-warning)',
-                fontSize: 'var(--font-size-md)',
-              }}
-            >
+            <h4 className="scm-alert-title">
               This event was modified in both places
             </h4>
-            <p style={{ margin: 0, color: 'var(--color-warning)', fontSize: 'var(--font-size-sm)' }}>
+            <p className="scm-alert-message">
               The event &quot;{crmEvent['Event Name']}&quot; has conflicting changes. Choose which
               version to keep.
             </p>
@@ -114,53 +91,16 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
         </div>
 
         {/* Comparison Table */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '150px 1fr 1fr',
-            gap: '1px',
-            backgroundColor: 'var(--color-border-default)',
-            border: '1px solid var(--color-border-default)',
-            borderRadius: 'var(--radius-md)',
-            overflow: 'hidden',
-          }}
-        >
+        <div className="scm-comparison-grid">
           {/* Header Row */}
-          <div
-            style={{
-              padding: 'var(--spacing-sm)',
-              backgroundColor: 'var(--color-bg-secondary)',
-              fontWeight: 600,
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
+          <div className="scm-grid-header">
             Field
           </div>
-          <div
-            style={{
-              padding: 'var(--spacing-sm)',
-              backgroundColor: 'var(--color-bg-secondary)',
-              fontWeight: 600,
-              fontSize: 'var(--font-size-sm)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-            }}
-          >
+          <div className="scm-grid-header scm-grid-header--icon">
             <Database size={16} />
             CRM Version
           </div>
-          <div
-            style={{
-              padding: 'var(--spacing-sm)',
-              backgroundColor: 'var(--color-bg-secondary)',
-              fontWeight: 600,
-              fontSize: 'var(--font-size-sm)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-            }}
-          >
+          <div className="scm-grid-header scm-grid-header--icon">
             <Calendar size={16} />
             Calendar Version
           </div>
@@ -169,10 +109,9 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
           {fields.map((field, idx) => (
             <React.Fragment key={idx}>
               <div
+                className="scm-grid-cell scm-grid-label"
                 style={{
-                  padding: 'var(--spacing-sm)',
                   backgroundColor: field.isDifferent ? 'rgba(217, 119, 6, 0.1)' : 'var(--color-bg-primary)',
-                  fontSize: 'var(--font-size-sm)',
                   fontWeight: field.isDifferent ? 600 : 400,
                   color: field.isDifferent ? 'var(--color-warning)' : 'var(--color-text-primary)',
                 }}
@@ -180,29 +119,25 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
                 {field.label}
               </div>
               <div
+                className="scm-grid-cell scm-grid-value"
                 style={{
-                  padding: 'var(--spacing-sm)',
                   backgroundColor: field.isDifferent ? 'rgba(220, 38, 38, 0.1)' : 'var(--color-bg-primary)',
-                  fontSize: 'var(--font-size-sm)',
-                  wordBreak: 'break-word',
                 }}
               >
                 {field.crmValue || (
-                  <span style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
+                  <span className="scm-empty-value">
                     Empty
                   </span>
                 )}
               </div>
               <div
+                className="scm-grid-cell scm-grid-value"
                 style={{
-                  padding: 'var(--spacing-sm)',
                   backgroundColor: field.isDifferent ? 'rgba(124, 104, 83, 0.1)' : 'var(--color-bg-primary)',
-                  fontSize: 'var(--font-size-sm)',
-                  wordBreak: 'break-word',
                 }}
               >
                 {field.calendarValue || (
-                  <span style={{ color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
+                  <span className="scm-empty-value">
                     Empty
                   </span>
                 )}
@@ -212,96 +147,50 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
         </div>
 
         {/* Summary */}
-        <p
-          style={{
-            fontSize: 'var(--font-size-sm)',
-            color: 'var(--color-text-secondary)',
-            margin: 0,
-          }}
-        >
+        <p className="scm-summary">
           {differentFields.length} field{differentFields.length !== 1 ? 's' : ''} differ between
           versions: {differentFields.map((f) => f.label).join(', ')}
         </p>
 
         {/* Action Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div className="scm-actions">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary scm-action-btn"
             onClick={() => handleResolve('crm')}
             disabled={resolving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              justifyContent: 'center',
-            }}
           >
             <Database size={18} />
             Keep CRM Version
           </button>
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
-              margin: '-var(--spacing-xs) 0 0 var(--spacing-lg)',
-            }}
-          >
+          <p className="scm-action-hint">
             Overwrite Google Calendar with the CRM data
           </p>
 
           <button
-            className="btn btn-primary"
+            className="btn btn-primary scm-action-btn scm-action-btn--mt"
             onClick={() => handleResolve('calendar')}
             disabled={resolving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              justifyContent: 'center',
-              marginTop: 'var(--spacing-xs)',
-            }}
           >
             <Calendar size={18} />
             Keep Calendar Version
           </button>
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
-              margin: '-var(--spacing-xs) 0 0 var(--spacing-lg)',
-            }}
-          >
+          <p className="scm-action-hint">
             Overwrite CRM with the Google Calendar data
           </p>
 
           <button
-            className="btn btn-secondary"
+            className="btn btn-secondary scm-action-btn scm-action-btn--mt"
             onClick={() => handleResolve('latest')}
             disabled={resolving}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              justifyContent: 'center',
-              marginTop: 'var(--spacing-xs)',
-            }}
           >
             Keep Most Recent Edit
           </button>
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
-              margin: '-var(--spacing-xs) 0 0 var(--spacing-lg)',
-            }}
-          >
+          <p className="scm-action-hint">
             Use whichever version was edited last
           </p>
         </div>
 
-        <div
-          style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--spacing-sm)' }}
-        >
+        <div className="scm-footer">
           <button className="btn btn-secondary" onClick={onClose} disabled={resolving}>
             Cancel
           </button>

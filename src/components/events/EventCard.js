@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 
 const EventCard = memo(function EventCard({ event, onClick, viewMode = 'full', contacts = [] }) {
   const formatEventDate = (dateString) => {
@@ -52,21 +52,15 @@ const EventCard = memo(function EventCard({ event, onClick, viewMode = 'full', c
       <div className="event-card-compact hoverable" onClick={onClick}>
         <div className="card-row">
           <div className="card-col">
-            <h4 style={{ margin: 0, fontSize: 'var(--font-size-sm)', fontWeight: 600 }}>
+            <h4 className="ec-compact-title">
               {event['Event Name']}
             </h4>
-            <p
-              style={{
-                margin: '4px 0 0 0',
-                fontSize: 'var(--font-size-xs)',
-                color: 'var(--color-text-secondary)',
-              }}
-            >
+            <p className="ec-compact-date">
               {formatEventDate(event['Event Date'])}
             </p>
           </div>
           {attendeeCount > 0 && (
-            <span className="badge" style={{ fontSize: 'var(--font-size-xs)' }}>
+            <span className="badge ec-compact-badge">
               {attendeeCount}
             </span>
           )}
@@ -76,36 +70,18 @@ const EventCard = memo(function EventCard({ event, onClick, viewMode = 'full', c
   }
 
   return (
-    <div className="card event-card-full" style={{ cursor: 'pointer' }} onClick={onClick}>
+    <div className="card event-card-full ec-full-card" onClick={onClick}>
       <div className="card-body">
-        <div className="card-row" style={{ alignItems: 'start' }}>
+        <div className="card-row ec-full-row">
           <div className="card-col">
-            <h3 style={{ marginBottom: 'var(--spacing-xs)' }}>{event['Event Name']}</h3>
-            <div
-              style={{
-                display: 'flex',
-                gap: 'var(--spacing-md)',
-                marginBottom: 'var(--spacing-sm)',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-              }}
-            >
+            <h3 className="ec-full-title">{event['Event Name']}</h3>
+            <div className="ec-meta-row">
               {event['Event Type'] && (
-                <span
-                  className="badge badge-status-info"
-                  style={{ fontSize: 'var(--font-size-xs)' }}
-                >
+                <span className="badge badge-status-info ec-type-badge">
                   {event['Event Type']}
                 </span>
               )}
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 'var(--spacing-xs)',
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
+              <div className="ec-icon-row">
                 <svg
                   width="16"
                   height="16"
@@ -124,14 +100,7 @@ const EventCard = memo(function EventCard({ event, onClick, viewMode = 'full', c
                 </span>
               </div>
               {event['Event Location'] && (
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-xs)',
-                    color: 'var(--color-text-secondary)',
-                  }}
-                >
+                <div className="ec-icon-row">
                   <svg
                     width="16"
                     height="16"
@@ -148,26 +117,18 @@ const EventCard = memo(function EventCard({ event, onClick, viewMode = 'full', c
               )}
             </div>
             {event['Description'] && (
-              <p className="text-muted" style={{ marginTop: 'var(--spacing-sm)' }}>
+              <p className="text-muted ec-description">
                 {event['Description']}
               </p>
             )}
             {attendeeCount > 0 && (
-              <div style={{ marginTop: 'var(--spacing-sm)' }}>
-                <div style={{ marginBottom: 'var(--spacing-xs)' }}>
+              <div className="ec-attendees-section">
+                <div className="ec-attendees-badge-row">
                   <span className="badge badge-status-active">
                     {attendeeCount} attendee{attendeeCount !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <div
-                  style={{
-                    fontSize: 'var(--font-size-sm)',
-                    color: 'var(--color-text-secondary)',
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: 'var(--spacing-xs)',
-                  }}
-                >
+                <div className="ec-attendees-names">
                   {attendeeNames.map((name, idx) => (
                     <span key={idx} className="event-attendee-chip">
                       {name}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -180,14 +180,7 @@ function AgendaManager({ eventId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="agm-header">
         <h3>Agenda</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Agenda Item
@@ -197,61 +190,38 @@ function AgendaManager({ eventId }) {
       {agendaItems.length === 0 ? (
         <p className="text-muted">No agenda items yet. Click "Add Agenda Item" to get started.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div className="agm-items-list">
           {agendaItems.map((item) => (
             <div
               key={item['Agenda Item ID']}
-              className="card"
-              style={{
-                padding: 'var(--spacing-md)',
-                borderLeft: '3px solid var(--color-accent-primary)',
-              }}
+              className="card agm-item-card"
             >
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 'var(--spacing-md)',
-                      marginBottom: 'var(--spacing-xs)',
-                    }}
-                  >
-                    <span className="text-muted" style={{ fontSize: 'var(--font-size-sm)' }}>
+              <div className="agm-item-row">
+                <div className="agm-item-body">
+                  <div className="agm-item-meta">
+                    <span className="text-muted agm-time-label">
                       {item['Start Time']} - {item['End Time']}
                       {item['Duration (Minutes)'] && ` (${item['Duration (Minutes)']} min)`}
                     </span>
                     {item['Location/Room'] && (
-                      <span
-                        className="badge badge-status-inactive"
-                        style={{ fontSize: 'var(--font-size-xs)' }}
-                      >
+                      <span className="badge badge-status-inactive agm-location-badge">
                         {item['Location/Room']}
                       </span>
                     )}
                   </div>
-                  <h4 style={{ marginBottom: 'var(--spacing-xs)' }}>{item.Title}</h4>
+                  <h4 className="agm-item-title">{item.Title}</h4>
                   {item.Description && (
-                    <p
-                      className="text-muted"
-                      style={{ fontSize: 'var(--font-size-sm)', marginBottom: 'var(--spacing-xs)' }}
-                    >
+                    <p className="text-muted agm-item-description">
                       {item.Description}
                     </p>
                   )}
                   {item['Speaker Name'] && (
-                    <p style={{ fontSize: 'var(--font-size-sm)', fontWeight: '500' }}>
+                    <p className="agm-speaker">
                       Speaker: {item['Speaker Name']}
                     </p>
                   )}
                 </div>
-                <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                <div className="agm-item-actions">
                   <button
                     onClick={() => openEditModal(item)}
                     className="btn btn-ghost btn-sm"
@@ -282,10 +252,10 @@ function AgendaManager({ eventId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="agm-form">
             <div>
               <label className="form-label">
-                Title <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Title <span className="agm-required">*</span>
               </label>
               <input
                 type="text"
@@ -296,13 +266,7 @@ function AgendaManager({ eventId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="agm-time-grid">
               <div>
                 <label className="form-label">Start Time</label>
                 <input

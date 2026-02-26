@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import EventCard from './EventCard';
 
 function TimelineView({ events, onEventClick, contacts = [] }) {
@@ -49,39 +49,21 @@ function TimelineView({ events, onEventClick, contacts = [] }) {
   }
 
   return (
-    <div className="timeline-view" style={{ position: 'relative' }}>
+    <div className="timeline-view tv-container">
       {/* Timeline vertical line */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '20px',
-          top: '40px',
-          bottom: '0',
-          width: '2px',
-          backgroundColor: 'var(--color-border-default)',
-          zIndex: 0
-        }}
-      ></div>
+      <div className="tv-vertical-line"></div>
 
       {/* Timeline events */}
-      <div style={{ position: 'relative', zIndex: 1 }}>
+      <div className="tv-events-wrapper">
         {groupedByMonth.map((group, groupIndex) => (
-          <div key={groupIndex} style={{ marginBottom: 'var(--spacing-xl)' }}>
+          <div key={groupIndex} className="tv-month-group">
             {/* Month header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-md)', marginBottom: 'var(--spacing-lg)' }}>
+            <div className="tv-month-header">
               <div
+                className="tv-month-circle"
                 style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
                   backgroundColor: group.isPast ? 'var(--color-bg-secondary)' : 'var(--color-primary)',
                   border: `2px solid ${group.isPast ? 'var(--color-border-default)' : 'var(--color-primary)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  zIndex: 2,
-                  position: 'relative'
                 }}
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={group.isPast ? 'var(--color-text-secondary)' : 'white'} strokeWidth="2">
@@ -92,24 +74,22 @@ function TimelineView({ events, onEventClick, contacts = [] }) {
                 </svg>
               </div>
               <div>
-                <h3 style={{ margin: 0, fontSize: 'var(--font-size-lg)' }}>
+                <h3 className="tv-month-title">
                   {group.monthYear}
                 </h3>
-                <p style={{ margin: 0, fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+                <p className="tv-month-count">
                   {group.events.length} event{group.events.length !== 1 ? 's' : ''}
                 </p>
               </div>
             </div>
 
             {/* Events in this month */}
-            <div style={{ marginLeft: '60px', display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+            <div className="tv-events-list">
               {group.events.map((event, eventIndex) => (
                 <div
                   key={eventIndex}
-                  className="timeline-event"
+                  className="timeline-event tv-event-item"
                   style={{
-                    position: 'relative',
-                    paddingLeft: 'var(--spacing-md)',
                     borderLeft: `3px solid ${group.isPast ? 'var(--color-border-default)' : 'var(--color-primary-alpha-40)'}`
                   }}
                 >

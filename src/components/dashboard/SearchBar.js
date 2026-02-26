@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 function SearchBar({ contacts, onNavigate }) {
   const [searchTerm, setSearchTerm] = useState('');
@@ -77,11 +77,9 @@ function SearchBar({ contacts, onNavigate }) {
                   className="search-result-item"
                   onClick={() => handleResultClick(contact['Contact ID'])}
                 >
-                  <div style={{ fontWeight: 500 }}>{contact['Name']}</div>
+                  <div className="sb-result-name">{contact['Name']}</div>
                   {getMatchedField(contact, searchTerm) && (
-                    <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
-                      {getMatchedField(contact, searchTerm)}
-                    </div>
+                    <div className="sb-result-detail">{getMatchedField(contact, searchTerm)}</div>
                   )}
                 </div>
               ))}
@@ -94,7 +92,7 @@ function SearchBar({ contacts, onNavigate }) {
                 const email = (c['Email'] || '').toLowerCase();
                 return name.includes(term) || org.includes(term) || role.includes(term) || phone.includes(term) || email.includes(term);
               }).length > 5 && (
-                <div className="search-result-item" style={{ fontStyle: 'italic', opacity: 0.7 }}>
+                <div className="search-result-item sb-result-overflow">
                   See all {contacts.filter(c => {
                     const term = searchTerm.toLowerCase();
                     const name = (c['Name'] || '').toLowerCase();
@@ -108,7 +106,7 @@ function SearchBar({ contacts, onNavigate }) {
               )}
             </>
           ) : (
-            <div className="search-result-item" style={{ fontStyle: 'italic', opacity: 0.7 }}>
+            <div className="search-result-item sb-result-overflow">
               No matches found
             </div>
           )}

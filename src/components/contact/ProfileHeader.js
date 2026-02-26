@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Phone, MessageSquare, Mail, Copy, Check } from 'lucide-react';
 import Avatar from '../Avatar';
 import AvatarPicker from '../AvatarPicker';
@@ -43,25 +43,11 @@ function ProfileHeader({
   return (
     <div className="card">
       <div className="card-body">
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr auto',
-            gap: 'var(--spacing-lg)',
-            alignItems: 'flex-start',
-          }}
-        >
+        <div className="ph-layout">
           {/* Left Column: Avatar + Identity Info */}
-          <div style={{ display: 'flex', gap: 'var(--spacing-lg)', alignItems: 'flex-start' }}>
+          <div className="ph-identity-row">
             {/* Avatar */}
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-sm)',
-                alignItems: 'center',
-              }}
-            >
+            <div className="ph-avatar-col">
               <Avatar
                 name={isEditing ? editData['Display Name'] || editData.Name : displayName}
                 size="xl"
@@ -80,24 +66,17 @@ function ProfileHeader({
             </div>
 
             {/* Identity Info */}
-            <div style={{ flex: 1 }}>
+            <div className="ph-identity-info">
               {isEditing ? (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+                <div className="ph-edit-fields">
                   <input
                     type="text"
-                    className="form-input"
+                    className="form-input ph-name-input"
                     value={editData.Name || ''}
                     onChange={(e) => onChange({ ...editData, Name: e.target.value }, 'Name')}
                     placeholder="Full name"
-                    style={{ fontSize: 'var(--font-size-xl)', fontWeight: '600' }}
                   />
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: 'var(--spacing-sm)',
-                    }}
-                  >
+                  <div className="ph-org-role-grid">
                     <input
                       type="text"
                       className="form-input"
@@ -116,12 +95,9 @@ function ProfileHeader({
                 </div>
               ) : (
                 <>
-                  <h2 style={{ marginBottom: 'var(--spacing-xs)' }}>{displayName}</h2>
+                  <h2 className="ph-display-name">{displayName}</h2>
                   {(contact.Organization || contact.Role) && (
-                    <p
-                      className="text-muted"
-                      style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--spacing-sm)' }}
-                    >
+                    <p className="text-muted ph-org-role-text">
                       {contact.Organization}
                       {contact.Organization && contact.Role && ' · '}
                       {contact.Role}
@@ -131,20 +107,13 @@ function ProfileHeader({
               )}
 
               {/* Badges */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: 'var(--spacing-sm)',
-                  marginTop: 'var(--spacing-sm)',
-                }}
-              >
+              <div className="ph-badges-row">
                 {isEditing ? (
                   <>
                     <select
-                      className="form-select"
+                      className="form-select ph-select-auto"
                       value={editData.Priority || ''}
                       onChange={(e) => onChange({ ...editData, Priority: e.target.value }, 'Priority')}
-                      style={{ width: 'auto' }}
                     >
                       <option value="">Priority...</option>
                       <option value="Urgent">Urgent</option>
@@ -154,10 +123,9 @@ function ProfileHeader({
                       <option value="No Urgency">No Urgency</option>
                     </select>
                     <select
-                      className="form-select"
+                      className="form-select ph-select-auto"
                       value={editData.Status || ''}
                       onChange={(e) => onChange({ ...editData, Status: e.target.value }, 'Status')}
-                      style={{ width: 'auto' }}
                     >
                       <option value="">Status...</option>
                       <option value="Active">Active</option>
@@ -181,48 +149,22 @@ function ProfileHeader({
 
           {/* Right Column: Quick Contact Actions */}
           {!isEditing && (primaryPhone || primaryEmail) && (
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 'var(--spacing-md)',
-                minWidth: '200px',
-                borderLeft: '1px solid var(--color-bg-tertiary)',
-                paddingLeft: 'var(--spacing-lg)',
-              }}
-            >
+            <div className="ph-contact-actions">
               {primaryPhone && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-                  <span
-                    className="text-muted"
-                    style={{ fontSize: 'var(--font-size-sm)', fontWeight: '500' }}
-                  >
+                <div className="ph-phone-section">
+                  <span className="text-muted ph-contact-label">
                     {primaryPhone}
                   </span>
-                  <div
-                    style={{ display: 'flex', gap: 'var(--spacing-xs)', flexDirection: 'column' }}
-                  >
+                  <div className="ph-action-btns">
                     <a
                       href={`tel:${primaryPhone}`}
-                      className="btn btn-primary btn-sm profile-prominent-btn"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--spacing-xs)',
-                      }}
+                      className="btn btn-primary btn-sm profile-prominent-btn ph-action-btn-inner"
                     >
                       <Phone size={14} /> Call
                     </a>
                     <a
                       href={`sms:${primaryPhone}`}
-                      className="btn btn-secondary btn-sm profile-prominent-btn"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--spacing-xs)',
-                      }}
+                      className="btn btn-secondary btn-sm profile-prominent-btn ph-action-btn-inner"
                     >
                       <MessageSquare size={14} /> Text
                     </a>
@@ -230,37 +172,20 @@ function ProfileHeader({
                 </div>
               )}
               {primaryEmail && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
-                  <span
-                    className="text-muted"
-                    style={{ fontSize: 'var(--font-size-sm)', fontWeight: '500' }}
-                  >
+                <div className="ph-phone-section">
+                  <span className="text-muted ph-contact-label">
                     {primaryEmail}
                   </span>
-                  <div
-                    style={{ display: 'flex', gap: 'var(--spacing-xs)', flexDirection: 'column' }}
-                  >
+                  <div className="ph-action-btns">
                     <a
                       href={`mailto:${primaryEmail}`}
-                      className="btn btn-secondary btn-sm profile-prominent-btn"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--spacing-xs)',
-                      }}
+                      className="btn btn-secondary btn-sm profile-prominent-btn ph-action-btn-inner"
                     >
                       <Mail size={14} /> Email
                     </a>
                     <button
                       onClick={() => handleCopyEmail(primaryEmail)}
-                      className="btn btn-secondary btn-sm profile-prominent-btn"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 'var(--spacing-xs)',
-                      }}
+                      className="btn btn-secondary btn-sm profile-prominent-btn ph-action-btn-inner"
                     >
                       {copiedEmail === primaryEmail ? (
                         <>

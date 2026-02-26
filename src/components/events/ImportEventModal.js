@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Calendar, FileText } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import { useAuth } from '../../contexts/AuthContext';
@@ -89,116 +89,57 @@ function ImportEventModal({ isOpen, onClose, googleEvent, onImported, contacts =
       title="Import Google Calendar Event"
       width="500px"
     >
-      <div
-        style={{
-          padding: 'var(--spacing-md)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 'var(--spacing-md)',
-        }}
-      >
-        <div
-          style={{
-            padding: 'var(--spacing-md)',
-            backgroundColor: 'var(--color-bg-secondary)',
-            borderRadius: 'var(--radius-md)',
-            borderLeft: '4px solid var(--color-success)',
-          }}
-        >
-          <h3 style={{ margin: '0 0 var(--spacing-xs) 0', fontSize: 'var(--font-size-lg)' }}>
+      <div className="iem-body">
+        <div className="iem-event-preview">
+          <h3 className="iem-event-title">
             {googleEvent.summary || 'Untitled Event'}
           </h3>
-          <p
-            style={{
-              margin: 0,
-              color: 'var(--color-text-secondary)',
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
+          <p className="iem-event-date">
             {formattedDate}
           </p>
           {googleEvent.location && (
-            <p
-              style={{
-                margin: 'var(--spacing-xs) 0 0 0',
-                color: 'var(--color-text-secondary)',
-                fontSize: 'var(--font-size-sm)',
-              }}
-            >
+            <p className="iem-event-location">
               📍 {googleEvent.location}
             </p>
           )}
           {googleEvent.description && (
-            <p
-              style={{
-                margin: 'var(--spacing-sm) 0 0 0',
-                fontSize: 'var(--font-size-sm)',
-                color: 'var(--color-text-primary)',
-              }}
-            >
+            <p className="iem-event-description">
               {googleEvent.description}
             </p>
           )}
         </div>
 
-        <p style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-secondary)' }}>
+        <p className="iem-prompt">
           How would you like to import this event from Google Calendar?
         </p>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-sm)' }}>
+        <div className="iem-import-options">
           <button
-            className="btn btn-primary"
+            className="btn btn-primary iem-option-btn"
             onClick={handleImportAsEvent}
             disabled={importing}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              justifyContent: 'center',
-            }}
           >
             <Calendar size={18} />
             Import as CRM Event
           </button>
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
-              margin: '-var(--spacing-xs) 0 0 var(--spacing-lg)',
-            }}
-          >
+          <p className="iem-option-hint">
             Creates a full event with all details, location, and attendees
           </p>
 
           <button
-            className="btn btn-secondary"
+            className="btn btn-secondary iem-option-btn iem-option-btn--mt"
             onClick={handleImportAsTouchpoint}
             disabled={importing}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 'var(--spacing-xs)',
-              justifyContent: 'center',
-              marginTop: 'var(--spacing-xs)',
-            }}
           >
             <FileText size={18} />
             Log as Touchpoint
           </button>
-          <p
-            style={{
-              fontSize: 'var(--font-size-xs)',
-              color: 'var(--color-text-secondary)',
-              margin: '-var(--spacing-xs) 0 0 var(--spacing-lg)',
-            }}
-          >
+          <p className="iem-option-hint">
             Quick log as a meeting touchpoint with notes
           </p>
         </div>
 
-        <div
-          style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 'var(--spacing-sm)' }}
-        >
+        <div className="iem-footer">
           <button className="btn btn-secondary" onClick={onClose} disabled={importing}>
             Cancel
           </button>

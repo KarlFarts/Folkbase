@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -149,18 +149,11 @@ function ResourcesManager({ eventId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="resm-header">
         <div>
           <h3>Resources & Budget</h3>
           {totalBudget > 0 && (
-            <p className="text-muted" style={{ marginTop: 'var(--spacing-xs)' }}>
+            <p className="text-muted resm-total-budget">
               Total: ${totalBudget.toFixed(2)}
             </p>
           )}
@@ -207,7 +200,7 @@ function ResourcesManager({ eventId }) {
                 </td>
                 <td>{resource['Provider/Source'] || <span className="text-muted">—</span>}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                  <div className="resm-actions">
                     <button
                       onClick={() => openEditModal(resource)}
                       className="btn btn-ghost btn-sm"
@@ -239,10 +232,10 @@ function ResourcesManager({ eventId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="resm-form">
             <div>
               <label className="form-label">
-                Resource Type <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Resource Type <span className="resm-required">*</span>
               </label>
               <select
                 className="form-select"
@@ -269,13 +262,7 @@ function ResourcesManager({ eventId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="resm-cost-grid">
               <div>
                 <label className="form-label">Quantity</label>
                 <input

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -129,14 +129,7 @@ function EducationManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="edu-header">
         <h3>Education</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Education
@@ -176,7 +169,7 @@ function EducationManager({ contactId }) {
                   <td>{edu['Field of Study'] || <span className="text-muted">—</span>}</td>
                   <td>{years || <span className="text-muted">—</span>}</td>
                   <td>
-                    <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                    <div className="edu-actions">
                       <button
                         onClick={() => openEditModal(edu)}
                         className="btn btn-ghost btn-sm"
@@ -209,10 +202,10 @@ function EducationManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="edu-form">
             <div>
               <label className="form-label">
-                Institution <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Institution <span className="edu-required">*</span>
               </label>
               <input
                 type="text"
@@ -245,13 +238,7 @@ function EducationManager({ contactId }) {
               />
             </div>
 
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: 'var(--spacing-md)',
-              }}
-            >
+            <div className="edu-two-col">
               <div>
                 <label className="form-label">Start Year</label>
                 <input
@@ -277,7 +264,7 @@ function EducationManager({ contactId }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <label className="edu-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Current']}

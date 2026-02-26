@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { CONFIDENCE, formatMatchDetails } from '../../services/duplicateDetector';
 import '../../styles/DuplicateReviewPanel.css';
 

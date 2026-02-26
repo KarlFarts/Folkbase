@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
 
@@ -36,20 +36,8 @@ function LogTouchpointMinimal({ onClose, onSave, saving }) {
   };
 
   return (
-    <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      background: 'rgba(0,0,0,0.7)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1000,
-      padding: 'var(--spacing-md)'
-    }}>
-      <div className="card" style={{ maxWidth: '500px', width: '100%' }}>
+    <div className="ltm-overlay">
+      <div className="card ltm-card">
         <div className="card-header">
           <h3>Quick Note</h3>
           <button className="btn btn-ghost btn-sm" onClick={onClose}><X size={16} /></button>
@@ -76,16 +64,12 @@ function LogTouchpointMinimal({ onClose, onSave, saving }) {
               rows={6}
               autoFocus
             />
-            <div style={{
-              fontSize: 'var(--font-size-sm)',
-              color: 'var(--color-text-secondary)',
-              marginTop: 'var(--spacing-xs)'
-            }}>
+            <div className="ltm-tip">
               Tip: Press ⌘+Enter to save
             </div>
           </div>
         </div>
-        <div className="card-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--spacing-sm)' }}>
+        <div className="card-footer ltm-footer">
           <button className="btn btn-secondary" onClick={onClose}>
             Cancel
           </button>

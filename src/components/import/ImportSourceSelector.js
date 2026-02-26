@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Smartphone, FileSpreadsheet, FileText } from 'lucide-react';
 import FileDropzone from './FileDropzone';
 
@@ -74,12 +74,12 @@ function ImportSourceSelector({ onFileAccepted, isProcessing, _compact = false }
       {selectedSource && (
         <div className="import-source-content">
           {sources.find((s) => s.id === selectedSource)?.instructions && (
-            <div className="wizard-info-box" style={{ marginBottom: 'var(--spacing-md)' }}>
-              <ol style={{ margin: 0, paddingLeft: 'var(--spacing-lg)' }}>
+            <div className="wizard-info-box iss-info-box">
+              <ol className="iss-instructions">
                 {sources
                   .find((s) => s.id === selectedSource)
                   .instructions.map((instruction, index) => (
-                    <li key={index} style={{ marginBottom: 'var(--spacing-xs)' }}>
+                    <li key={index} className="iss-instruction-item">
                       {instruction}
                     </li>
                   ))}

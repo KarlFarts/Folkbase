@@ -1,4 +1,3 @@
-import React from 'react';
 import { Cake } from 'lucide-react';
 
 function UpcomingBirthdays({ contacts, onNavigate }) {
@@ -32,20 +31,16 @@ function UpcomingBirthdays({ contacts, onNavigate }) {
   if (!upcomingBirthdays || upcomingBirthdays.length === 0) {
     return (
       <div className="sidebar-section">
-        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-          Upcoming Birthdays
-        </h3>
-        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-          No upcoming birthdays
-        </div>
+        <h3 className="ub-heading">Upcoming Birthdays</h3>
+        <div className="ub-empty">No upcoming birthdays</div>
       </div>
     );
   }
 
   return (
     <div className="sidebar-section">
-      <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}><Cake size={16} /> Upcoming Birthdays</span>
+      <h3 className="ub-heading">
+        <span className="ub-heading-inner"><Cake size={16} /> Upcoming Birthdays</span>
       </h3>
 
       <div className="upcoming-birthdays-list">
@@ -60,10 +55,8 @@ function UpcomingBirthdays({ contacts, onNavigate }) {
               className="upcoming-birthday-item"
               onClick={() => onNavigate(`contact/${contact['Contact ID']}`)}
             >
-              <div style={{ fontWeight: 500, fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
-                {contact.Name}
-              </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}>
+              <div className="ub-item-name">{contact.Name}</div>
+              <div className="ub-item-date">
                 <span className={daysUntil <= 3 ? 'text-warning' : ''}>
                   {formatBirthdayDate(item.birthday)} • {daysLabel}
                 </span>

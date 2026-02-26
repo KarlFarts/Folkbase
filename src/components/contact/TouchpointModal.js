@@ -1,4 +1,3 @@
-import React from 'react';
 import { Trash2 } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 
@@ -77,7 +76,7 @@ export function LogTouchpointModal({ touchpointData, setTouchpointData, onClose,
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+      <div className="tpm-two-col">
         <div className="form-group">
           <label className="form-label">Follow-up Needed</label>
           <select
@@ -158,7 +157,7 @@ export function EditTouchpointModal({
           className="form-input"
           value={touchpoint['Contact Name'] || ''}
           disabled
-          style={{ backgroundColor: 'var(--color-bg-secondary)', cursor: 'not-allowed' }}
+          className="tpm-disabled-input"
         />
       </div>
 
@@ -217,7 +216,7 @@ export function EditTouchpointModal({
         </select>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-md)' }}>
+      <div className="tpm-two-col">
         <div className="form-group">
           <label className="form-label">Follow-up Needed</label>
           <select
@@ -270,13 +269,12 @@ export function TouchpointDetailModal({ touchpoint, onClose, onEdit, onDelete })
       title={touchpoint['Type']}
       size="md"
       footer={
-        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+        <div className="tpm-footer-row">
           <div>
             {onDelete && (
               <button
-                className="btn btn-ghost btn-sm"
+                className="btn btn-ghost btn-sm tpm-delete-btn"
                 onClick={() => onDelete(touchpoint)}
-                style={{ color: 'var(--color-danger)' }}
                 title="Delete touchpoint"
               >
                 <Trash2 size={16} />
@@ -284,7 +282,7 @@ export function TouchpointDetailModal({ touchpoint, onClose, onEdit, onDelete })
               </button>
             )}
           </div>
-          <div style={{ display: 'flex', gap: 'var(--spacing-sm)' }}>
+          <div className="tpm-footer-actions">
             <button className="btn btn-secondary" onClick={onClose}>
               Close
             </button>
@@ -297,7 +295,7 @@ export function TouchpointDetailModal({ touchpoint, onClose, onEdit, onDelete })
         </div>
       }
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+      <div className="tpm-detail-body">
         {/* Date */}
         <div>
           <label className="form-label">Date</label>
@@ -308,7 +306,7 @@ export function TouchpointDetailModal({ touchpoint, onClose, onEdit, onDelete })
         {touchpoint['Notes'] && (
           <div>
             <label className="form-label">Notes</label>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{touchpoint['Notes']}</p>
+            <p className="tpm-notes-text">{touchpoint['Notes']}</p>
           </div>
         )}
 
@@ -332,7 +330,7 @@ export function TouchpointDetailModal({ touchpoint, onClose, onEdit, onDelete })
         {touchpoint['Follow-up Needed'] === 'Yes' && (
           <div>
             <label className="form-label">Follow-up</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+            <div className="tpm-followup-row">
               <span className="badge badge-priority-high">Follow-up needed</span>
               {touchpoint['Follow-up Date'] && (
                 <span className="text-muted">by {touchpoint['Follow-up Date']}</span>

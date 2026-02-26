@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import ToDoWidget from './ToDoWidget';
 import UpcomingEventsWidget from './UpcomingEventsWidget';
 import SettingsWidget from './SettingsWidget';
@@ -19,7 +19,7 @@ function QuickActionBar({
   onToggleSection,
 }) {
   const [hasInitialized, setHasInitialized] = useState(false);
-  const initializingRef = React.useRef(false);
+  const initializingRef = useRef(false);
 
   const sections = [
     {
@@ -76,8 +76,8 @@ function QuickActionBar({
       label: 'Upload Contacts',
       icon: '',
       content: (
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ marginBottom: 'var(--spacing-md)' }}>
+        <div className="qab-sync-content">
+          <p className="qab-sync-text">
             Import contacts from your phone or other sources
           </p>
           <button className="btn btn-primary" onClick={() => onNavigate('quick-sync')}>

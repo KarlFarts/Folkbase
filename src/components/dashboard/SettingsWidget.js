@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check, AlertTriangle, Zap, Info } from 'lucide-react';
 import CollapsibleWidget from './CollapsibleWidget';
 
@@ -12,7 +11,7 @@ const SettingsWidget = ({ issues }) => {
       count={issueCount}
       defaultExpanded={issueCount > 0}
     >
-      <div style={{ padding: '8px' }}>
+      <div className="sw-body">
         {issueCount === 0 ? (
           <div className="setup-all-good">
             <span><Check size={14} /></span> Everything looks good!

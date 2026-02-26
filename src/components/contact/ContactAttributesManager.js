@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -141,14 +141,7 @@ function ContactAttributesManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="cam-header">
         <h3>Attributes</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Attribute
@@ -158,36 +151,27 @@ function ContactAttributesManager({ contactId }) {
       {attributes.length === 0 ? (
         <p className="text-muted">No attributes yet. Click "Add Attribute" to get started.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-lg)' }}>
+        <div className="cam-grouped-list">
           {Object.entries(grouped).map(([category, items]) => (
             <div key={category}>
-              <div
-                style={{
-                  fontSize: 'var(--font-size-sm)',
-                  fontWeight: '600',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.05em',
-                  color: 'var(--color-text-secondary)',
-                  marginBottom: 'var(--spacing-sm)',
-                }}
-              >
+              <div className="cam-category-label">
                 {category}
               </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 'var(--spacing-xs)' }}>
+              <div className="cam-pills-row">
                 {items.map((attr) => (
                   <div
                     key={attr['Attribute ID']}
                     className="tag-removable"
-                    style={{ cursor: 'default' }}
+                    className="cam-pill-item"
                     title={attr.Notes || undefined}
                   >
                     {attr.Value}
-                    <div style={{ display: 'flex', gap: '2px', marginLeft: 'var(--spacing-xs)' }}>
+                    <div className="cam-pill-actions">
                       <button
                         onClick={() => openEditModal(attr)}
                         className="tag-remove-btn"
                         title="Edit"
-                        style={{ color: 'var(--color-text-secondary)' }}
+                        className="cam-edit-btn"
                       >
                         <Pencil size={10} />
                       </button>
@@ -216,7 +200,7 @@ function ContactAttributesManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="cam-form">
             <div>
               <label className="form-label">Category</label>
               <select
@@ -234,7 +218,7 @@ function ContactAttributesManager({ contactId }) {
 
             <div>
               <label className="form-label">
-                Value <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Value <span className="cam-required">*</span>
               </label>
               <input
                 type="text"

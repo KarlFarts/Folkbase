@@ -1,5 +1,3 @@
-import React from 'react';
-
 function UpcomingEvents({ events, onNavigate }) {
   const formatEventDate = (dateStr) => {
     if (!dateStr) return '';
@@ -41,21 +39,15 @@ function UpcomingEvents({ events, onNavigate }) {
   if (!events || events.length === 0) {
     return (
       <div className="sidebar-section">
-        <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-          Upcoming Events
-        </h3>
-        <div style={{ fontSize: 'var(--font-size-sm)', color: 'var(--color-text-muted)', fontStyle: 'italic' }}>
-          No upcoming events
-        </div>
+        <h3 className="ue-heading">Upcoming Events</h3>
+        <div className="ue-empty">No upcoming events</div>
       </div>
     );
   }
 
   return (
     <div className="sidebar-section">
-      <h3 style={{ fontSize: 'var(--font-size-base)', fontWeight: 600, marginBottom: 'var(--spacing-sm)' }}>
-        Upcoming Events
-      </h3>
+      <h3 className="ue-heading">Upcoming Events</h3>
 
       <div className="upcoming-events-list">
         {events.map((event, index) => {
@@ -68,10 +60,8 @@ function UpcomingEvents({ events, onNavigate }) {
               className="upcoming-event-item"
               onClick={() => onNavigate('event-details', event['Event ID'])}
             >
-              <div style={{ fontWeight: 500, fontSize: 'var(--font-size-sm)', marginBottom: '2px' }}>
-                {event['Event Name'] || 'Untitled Event'}
-              </div>
-              <div style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+              <div className="ue-item-name">{event['Event Name'] || 'Untitled Event'}</div>
+              <div className="ue-item-date">
                 <span className={urgency === 'urgent' || urgency === 'soon' ? 'text-warning' : ''}>
                   {formatEventDate(event['Event Date'])}
                 </span>

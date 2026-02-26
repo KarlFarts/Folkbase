@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Phone, Mail, MapPin } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import {
@@ -175,14 +175,7 @@ function ContactMethodsManager({ contactId }) {
 
   return (
     <div>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 'var(--spacing-md)',
-        }}
-      >
+      <div className="cmm-header">
         <h3>Contact Methods</h3>
         <button onClick={openAddModal} className="btn btn-primary btn-sm">
           <Plus size={16} /> Add Method
@@ -192,72 +185,44 @@ function ContactMethodsManager({ contactId }) {
       {methods.length === 0 ? (
         <p className="text-muted">No contact methods yet. Click "Add Method" to get started.</p>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+        <div className="cmm-grouped-list">
           {Object.entries(grouped).map(([type, items]) => {
             const Icon = TYPE_ICONS[type];
             return (
               <div key={type}>
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 'var(--spacing-xs)',
-                    marginBottom: 'var(--spacing-sm)',
-                    color: 'var(--color-text-secondary)',
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: '600',
-                    textTransform: 'uppercase',
-                    letterSpacing: '0.05em',
-                  }}
-                >
+                <div className="cmm-type-label">
                   {Icon && <Icon size={14} />}
                   {type}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-xs)' }}>
+                <div className="cmm-items-list">
                   {items.map((method) => {
                     const href = getValueHref(method);
                     return (
                       <div
                         key={method['Contact Method ID']}
-                        className="card"
-                        style={{ padding: 'var(--spacing-sm) var(--spacing-md)' }}
+                        className="card cmm-method-card"
                       >
-                        <div
-                          style={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                          }}
-                        >
+                        <div className="cmm-method-row">
                           <div>
                             {href ? (
-                              <a
-                                href={href}
-                                style={{ color: 'var(--color-primary)', fontWeight: '500' }}
-                              >
+                              <a href={href} className="cmm-value-link">
                                 {method.Value}
                               </a>
                             ) : (
-                              <span style={{ fontWeight: '500' }}>{method.Value}</span>
+                              <span className="cmm-value-text">{method.Value}</span>
                             )}
                             {method.Label && (
-                              <span
-                                className="text-muted"
-                                style={{ marginLeft: 'var(--spacing-sm)', fontSize: 'var(--font-size-sm)' }}
-                              >
+                              <span className="text-muted cmm-label-text">
                                 {method.Label}
                               </span>
                             )}
                             {(method['Is Primary'] === 'TRUE' || method['Is Primary'] === true) && (
-                              <span
-                                className="badge badge-success"
-                                style={{ marginLeft: 'var(--spacing-sm)' }}
-                              >
+                              <span className="badge badge-success cmm-primary-badge">
                                 Primary
                               </span>
                             )}
                           </div>
-                          <div style={{ display: 'flex', gap: 'var(--spacing-xs)' }}>
+                          <div className="cmm-actions">
                             <button
                               onClick={() => openEditModal(method)}
                               className="btn btn-ghost btn-sm"
@@ -275,10 +240,7 @@ function ContactMethodsManager({ contactId }) {
                           </div>
                         </div>
                         {method.Notes && (
-                          <p
-                            className="text-muted"
-                            style={{ marginTop: 'var(--spacing-xs)', fontSize: 'var(--font-size-sm)' }}
-                          >
+                          <p className="text-muted cmm-notes-text">
                             {method.Notes}
                           </p>
                         )}
@@ -301,7 +263,7 @@ function ContactMethodsManager({ contactId }) {
             { label: 'Save', onClick: handleSave, variant: 'primary' },
           ]}
         >
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--spacing-md)' }}>
+          <div className="cmm-form">
             <div>
               <label className="form-label">Type</label>
               <select
@@ -319,7 +281,7 @@ function ContactMethodsManager({ contactId }) {
 
             <div>
               <label className="form-label">
-                Value <span style={{ color: 'var(--color-danger)' }}>*</span>
+                Value <span className="cmm-required">*</span>
               </label>
               <input
                 type="text"
@@ -342,7 +304,7 @@ function ContactMethodsManager({ contactId }) {
             </div>
 
             <div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)', cursor: 'pointer' }}>
+              <label className="cmm-checkbox-label">
                 <input
                   type="checkbox"
                   checked={formData['Is Primary']}

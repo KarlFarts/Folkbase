@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 function AttendeeSelector({ contacts, selectedIds, onChange }) {
   const [search, setSearch] = useState('');
@@ -18,61 +18,33 @@ function AttendeeSelector({ contacts, selectedIds, onChange }) {
   };
 
   return (
-    <div className="attendee-selector" style={{ marginBottom: '12px' }}>
+    <div className="attendee-selector ats-wrapper">
       <label
         htmlFor="attendee-search"
-        style={{
-          display: 'block',
-          fontSize: '12px',
-          fontWeight: '600',
-          marginBottom: '8px',
-          color: 'var(--color-text-primary)',
-        }}
+        className="ats-label"
       >
         Attendees
       </label>
       <input
         id="attendee-search"
         type="text"
-        className="form-input"
+        className="form-input ats-search-input"
         placeholder="Search contacts..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        style={{ marginBottom: '8px' }}
       />
       <div
-        className="attendee-list"
-        style={{
-          maxHeight: '200px',
-          overflowY: 'auto',
-          border: '1px solid var(--border-color-default)',
-          borderRadius: 'var(--radius-sm)',
-          padding: '8px',
-          background: 'var(--color-bg-secondary)',
-        }}
+        className="attendee-list ats-list"
       >
         {filtered.length === 0 ? (
-          <div
-            style={{
-              padding: '8px',
-              color: 'var(--color-text-muted)',
-              fontSize: 'var(--font-size-sm)',
-            }}
-          >
+          <div className="ats-empty">
             No contacts found
           </div>
         ) : (
           filtered.slice(0, 20).map((c) => (
             <label
               key={c['Contact ID']}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                padding: '8px',
-                cursor: 'pointer',
-                borderRadius: 'var(--radius-xs)',
-                transition: 'background-color var(--transition-fast)',
-              }}
+              className="ats-contact-row"
               onMouseEnter={(e) =>
                 (e.currentTarget.style.backgroundColor = 'var(--color-bg-tertiary)')
               }
@@ -82,22 +54,14 @@ function AttendeeSelector({ contacts, selectedIds, onChange }) {
                 type="checkbox"
                 checked={selectedIds.includes(c['Contact ID'])}
                 onChange={() => toggleContact(c['Contact ID'])}
-                style={{ marginRight: '8px' }}
+                className="ats-checkbox"
               />
-              <div style={{ flex: 1 }}>
-                <div
-                  style={{
-                    fontSize: 'var(--font-size-sm)',
-                    fontWeight: '500',
-                    color: 'var(--color-text-primary)',
-                  }}
-                >
+              <div className="ats-contact-info">
+                <div className="ats-contact-name">
                   {c.Name}
                 </div>
                 {c.Organization && (
-                  <div
-                    style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)' }}
-                  >
+                  <div className="ats-contact-org">
                     {c.Organization}
                   </div>
                 )}
@@ -107,13 +71,7 @@ function AttendeeSelector({ contacts, selectedIds, onChange }) {
         )}
       </div>
       {selectedIds.length > 0 && (
-        <div
-          style={{
-            marginTop: '8px',
-            fontSize: 'var(--font-size-xs)',
-            color: 'var(--color-text-muted)',
-          }}
-        >
+        <div className="ats-selected-count">
           {selectedIds.length} attendee{selectedIds.length !== 1 ? 's' : ''} selected
         </div>
       )}
