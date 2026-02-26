@@ -43,6 +43,8 @@ const STORAGE_KEY_CONTACT_SOCIALS = 'dev_contact_socials';
 const STORAGE_KEY_CONTACT_EDUCATION = 'dev_contact_education';
 const STORAGE_KEY_CONTACT_EMPLOYMENT = 'dev_contact_employment';
 const STORAGE_KEY_CONTACT_DISTRICTS = 'dev_contact_districts';
+export const STORAGE_KEY_CONTACT_METHODS = 'dev_contact_methods';
+export const STORAGE_KEY_CONTACT_ATTRIBUTES = 'dev_contact_attributes';
 const STORAGE_KEY_EVENT_ATTENDEES = 'dev_event_attendees';
 const STORAGE_KEY_EVENT_RESOURCES = 'dev_event_resources';
 const STORAGE_KEY_EVENT_AGENDA = 'dev_event_agenda';
@@ -1632,6 +1634,50 @@ export function getLocalContactDistricts() {
  */
 export function saveLocalContactDistricts(districts) {
   localStorage.setItem(STORAGE_KEY_CONTACT_DISTRICTS, JSON.stringify(districts));
+}
+
+/**
+ * Get contact methods from localStorage (dev mode only)
+ * @returns {Array} Array of contact method objects
+ */
+export function getLocalContactMethods() {
+  const stored = localStorage.getItem(STORAGE_KEY_CONTACT_METHODS);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save contact methods to localStorage (dev mode only)
+ * @param {Array} methods - Array of contact method objects
+ */
+export function saveLocalContactMethods(methods) {
+  localStorage.setItem(STORAGE_KEY_CONTACT_METHODS, JSON.stringify(methods));
+}
+
+/**
+ * Get contact attributes from localStorage (dev mode only)
+ * @returns {Array} Array of contact attribute objects
+ */
+export function getLocalContactAttributes() {
+  const stored = localStorage.getItem(STORAGE_KEY_CONTACT_ATTRIBUTES);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Save contact attributes to localStorage (dev mode only)
+ * @param {Array} attributes - Array of contact attribute objects
+ */
+export function saveLocalContactAttributes(attributes) {
+  localStorage.setItem(STORAGE_KEY_CONTACT_ATTRIBUTES, JSON.stringify(attributes));
 }
 
 /**

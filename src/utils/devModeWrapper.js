@@ -3372,6 +3372,10 @@ import {
   saveLocalContactEmployment,
   getLocalContactDistricts,
   saveLocalContactDistricts,
+  getLocalContactMethods,
+  saveLocalContactMethods,
+  getLocalContactAttributes,
+  saveLocalContactAttributes,
 } from '../__tests__/fixtures/seedTestData';
 
 // ============================================================================
@@ -3682,6 +3686,170 @@ export const getContactDistricts = async (accessToken, sheetId, contactId) => {
   }
   const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.CONTACT_DISTRICTS);
   return data.filter((d) => d['Contact ID'] === contactId);
+};
+
+// ============================================================================
+// CONTACT METHODS JUNCTION TAB
+// ============================================================================
+
+export const generateContactMethodID = async (accessToken, sheetId) => {
+  if (isDevMode()) {
+    const methods = getLocalContactMethods();
+    if (methods.length === 0) return 'CM001';
+    const ids = methods
+      .map((m) => m['Contact Method ID'])
+      .filter((id) => id && id.match(/^CM\d+$/))
+      .map((id) => parseInt(id.substring(2), 10))
+      .filter((num) => !isNaN(num));
+    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+    return `CM${String(maxId + 1).padStart(3, '0')}`;
+  }
+  return generateID(accessToken, sheetId, SHEET_NAMES.CONTACT_METHODS, 'Contact Method ID', 'CM');
+};
+
+export const addContactMethod = async (accessToken, sheetId, methodData) => {
+  if (isDevMode()) {
+    const methods = getLocalContactMethods();
+    const methodId = await generateContactMethodID(accessToken, sheetId);
+    const newMethod = { 'Contact Method ID': methodId, ...methodData };
+    methods.push(newMethod);
+    saveLocalContactMethods(methods);
+    return newMethod;
+  }
+  const methodId = await generateContactMethodID(accessToken, sheetId);
+  return appendSheetData(accessToken, sheetId, SHEET_NAMES.CONTACT_METHODS, {
+    'Contact Method ID': methodId,
+    ...methodData,
+  });
+};
+
+export const updateContactMethod = async (accessToken, sheetId, methodId, updatedData) => {
+  if (isDevMode()) {
+    const methods = getLocalContactMethods();
+    const index = methods.findIndex((m) => m['Contact Method ID'] === methodId);
+    if (index === -1) throw new Error('Contact method not found');
+    methods[index] = { ...methods[index], ...updatedData, 'Contact Method ID': methodId };
+    saveLocalContactMethods(methods);
+    return methods[index];
+  }
+  return updateSheetRow(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.CONTACT_METHODS,
+    'Contact Method ID',
+    methodId,
+    updatedData
+  );
+};
+
+export const deleteContactMethod = async (accessToken, sheetId, methodId) => {
+  if (isDevMode()) {
+    const methods = getLocalContactMethods();
+    const filtered = methods.filter((m) => m['Contact Method ID'] !== methodId);
+    saveLocalContactMethods(filtered);
+    return { success: true };
+  }
+  return deleteSheetRow(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.CONTACT_METHODS,
+    'Contact Method ID',
+    methodId
+  );
+};
+
+export const getContactMethods = async (accessToken, sheetId, contactId) => {
+  if (isDevMode()) {
+    const methods = getLocalContactMethods();
+    return methods.filter((m) => m['Contact ID'] === contactId);
+  }
+  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.CONTACT_METHODS);
+  return data.filter((m) => m['Contact ID'] === contactId);
+};
+
+// ============================================================================
+// CONTACT ATTRIBUTES JUNCTION TAB
+// ============================================================================
+
+export const generateAttributeID = async (accessToken, sheetId) => {
+  if (isDevMode()) {
+    const attrs = getLocalContactAttributes();
+    if (attrs.length === 0) return 'ATTR001';
+    const ids = attrs
+      .map((a) => a['Attribute ID'])
+      .filter((id) => id && id.match(/^ATTR\d+$/))
+      .map((id) => parseInt(id.substring(4), 10))
+      .filter((num) => !isNaN(num));
+    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
+    return `ATTR${String(maxId + 1).padStart(3, '0')}`;
+  }
+  return generateID(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.CONTACT_ATTRIBUTES,
+    'Attribute ID',
+    'ATTR'
+  );
+};
+
+export const addContactAttribute = async (accessToken, sheetId, attributeData) => {
+  if (isDevMode()) {
+    const attrs = getLocalContactAttributes();
+    const attrId = await generateAttributeID(accessToken, sheetId);
+    const newAttr = { 'Attribute ID': attrId, ...attributeData };
+    attrs.push(newAttr);
+    saveLocalContactAttributes(attrs);
+    return newAttr;
+  }
+  const attrId = await generateAttributeID(accessToken, sheetId);
+  return appendSheetData(accessToken, sheetId, SHEET_NAMES.CONTACT_ATTRIBUTES, {
+    'Attribute ID': attrId,
+    ...attributeData,
+  });
+};
+
+export const updateContactAttribute = async (accessToken, sheetId, attrId, updatedData) => {
+  if (isDevMode()) {
+    const attrs = getLocalContactAttributes();
+    const index = attrs.findIndex((a) => a['Attribute ID'] === attrId);
+    if (index === -1) throw new Error('Contact attribute not found');
+    attrs[index] = { ...attrs[index], ...updatedData, 'Attribute ID': attrId };
+    saveLocalContactAttributes(attrs);
+    return attrs[index];
+  }
+  return updateSheetRow(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.CONTACT_ATTRIBUTES,
+    'Attribute ID',
+    attrId,
+    updatedData
+  );
+};
+
+export const deleteContactAttribute = async (accessToken, sheetId, attrId) => {
+  if (isDevMode()) {
+    const attrs = getLocalContactAttributes();
+    const filtered = attrs.filter((a) => a['Attribute ID'] !== attrId);
+    saveLocalContactAttributes(filtered);
+    return { success: true };
+  }
+  return deleteSheetRow(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.CONTACT_ATTRIBUTES,
+    'Attribute ID',
+    attrId
+  );
+};
+
+export const getContactAttributes = async (accessToken, sheetId, contactId) => {
+  if (isDevMode()) {
+    const attrs = getLocalContactAttributes();
+    return attrs.filter((a) => a['Contact ID'] === contactId);
+  }
+  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.CONTACT_ATTRIBUTES);
+  return data.filter((a) => a['Contact ID'] === contactId);
 };
 
 // ============================================================================

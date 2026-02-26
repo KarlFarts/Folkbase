@@ -47,6 +47,8 @@ import SocialsManager from '../components/contact/SocialsManager';
 import EducationManager from '../components/contact/EducationManager';
 import EmploymentManager from '../components/contact/EmploymentManager';
 import DistrictsManager from '../components/contact/DistrictsManager';
+import ContactMethodsManager from '../components/contact/ContactMethodsManager';
+import ContactAttributesManager from '../components/contact/ContactAttributesManager';
 
 const CONTENT_TABS = [
   { value: 'profile', label: 'Profile' },
@@ -61,6 +63,8 @@ const CONTENT_TABS = [
   { value: 'education', label: 'Education' },
   { value: 'employment', label: 'Employment' },
   { value: 'districts', label: 'Districts' },
+  { value: 'methods', label: 'Methods' },
+  { value: 'attributes', label: 'Attributes' },
 ];
 
 function ContactProfile({ onNavigate }) {
@@ -755,6 +759,18 @@ function ContactProfile({ onNavigate }) {
         {state.contentView === 'districts' && (
           <div className="card-body">
             <DistrictsManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'methods' && (
+          <div className="card-body">
+            <ContactMethodsManager contactId={contactId} />
+          </div>
+        )}
+
+        {state.contentView === 'attributes' && (
+          <div className="card-body">
+            <ContactAttributesManager contactId={contactId} />
           </div>
         )}
 

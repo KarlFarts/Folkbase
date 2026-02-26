@@ -1,5 +1,10 @@
 import { SCHEMA_VERSION, SHEET_NAMES } from '../config/constants';
-import { getSchemaVersion, setSchemaVersion, autoExpandHeaders } from '../utils/sheetCreation';
+import {
+  getSchemaVersion,
+  setSchemaVersion,
+  autoExpandHeaders,
+  autoCreateMissingTabs,
+} from '../utils/sheetCreation';
 import { migrateContactNames, migrateContactMethods } from './contactMigrationService';
 
 /**
@@ -54,7 +59,9 @@ export const migrateSheet = async (accessToken, sheetId, progressCallback) => {
       SHEET_NAMES.CONTACT_EDUCATION,
       SHEET_NAMES.CONTACT_EMPLOYMENT,
       SHEET_NAMES.CONTACT_DISTRICTS,
-      // Add Phase B/C/D junction tabs here
+      // Phase B junction tabs (schema v3)
+      SHEET_NAMES.CONTACT_METHODS,
+      SHEET_NAMES.CONTACT_ATTRIBUTES,
     ];
 
     let totalAdded = 0;
@@ -93,6 +100,20 @@ export const migrateSheet = async (accessToken, sheetId, progressCallback) => {
       });
 
       await migrateContactMethods(accessToken, sheetId, 'system');
+    }
+
+    if (currentVersion < 3) {
+      // Phase B migrations - create new junction tabs if missing
+      progressCallback?.({
+        step: 'data',
+        message: 'Creating Contact Methods and Attributes tabs...',
+        percent: 92,
+      });
+
+      await autoCreateMissingTabs(accessToken, sheetId, [
+        SHEET_NAMES.CONTACT_METHODS,
+        SHEET_NAMES.CONTACT_ATTRIBUTES,
+      ]);
     }
 
     // Step 5: Update schema version
