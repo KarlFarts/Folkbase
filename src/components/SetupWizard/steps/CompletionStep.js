@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, Loader, AlertCircle, Mail, Database, Folder } from 'lucide-react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { Loader, Mail, Database, Folder } from 'lucide-react';
 import { useConfig } from '../../../contexts/ConfigContext';
 import {
   createNewSheet,
@@ -7,9 +7,12 @@ import {
   autoCreateMissingTabs,
 } from '../../../utils/sheetCreation';
 import { getOrCreateTouchpointFolder, moveFileToFolder } from '../../../utils/driveFolder';
+import { useConnectionStatus } from '../../../hooks/useConnectionStatus';
+import ConnectionStatusPanel from '../../ConnectionStatusPanel';
 
 /**
- * Completion step — creates/connects the sheet, saves config, shows summary
+ * Completion step — creates/connects the sheet, saves config, shows summary.
+ * Shows a ConnectionStatusPanel tracking Account, Sheets, and Drive status.
  */
 const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
   const { saveConfig } = useConfig();
@@ -20,6 +23,12 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
   const [folderWarning, setFolderWarning] = useState(null);
   const hasStartedRef = useRef(false);
 
+  // Account and sheets are already verified from sign-in
+  const { steps, setStepStatus, resetStep } = useConnectionStatus({
+    account: { status: 'connected', error: null },
+    sheets: { status: 'connected', error: null },
+  });
+
   // Provision sheet: create/connect + organize in folder
   const provision = useCallback(async () => {
     try {
@@ -29,9 +38,14 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
       if (wizardData.sheetMethod === 'existing' && wizardData.sheetId) {
         // Connect to existing sheet
         setStatus('Validating sheet access...');
+        setStepStatus('sheets', 'checking');
         const accessCheck = await validateSheetAccess(wizardData.accessToken, wizardData.sheetId);
 
         if (!accessCheck.valid) {
+          setStepStatus('sheets', 'error', {
+            detail: accessCheck.error || 'Sheet validation failed.',
+            fix: 'Check that the sheet exists and you have edit access.',
+          });
           throw new Error(accessCheck.error);
         }
 
@@ -43,16 +57,23 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
             accessCheck.missingTabs
           );
           if (!createResult.success) {
+            setStepStatus('sheets', 'error', {
+              detail: createResult.error || 'Failed to create missing tabs.',
+              fix: 'Try again, or create a new sheet instead.',
+            });
             throw new Error(createResult.error);
           }
         }
 
+        setStepStatus('sheets', 'connected');
         sheetId = wizardData.sheetId;
         sheetTitle = accessCheck.title || 'Connected Sheet';
       } else {
         // Create new sheet
         setStatus('Creating your Google Sheet...');
+        setStepStatus('sheets', 'checking');
         const result = await createNewSheet(wizardData.accessToken, wizardData.displayName);
+        setStepStatus('sheets', 'connected');
 
         sheetId = result.sheetId;
         sheetTitle = result.sheetTitle;
@@ -60,6 +81,7 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
 
       // Get or create Folkbase folder
       setStatus('Organizing your files...');
+      setStepStatus('drive', 'checking');
       const folderResult = await getOrCreateTouchpointFolder(wizardData.accessToken);
 
       if (folderResult.success) {
@@ -78,9 +100,14 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
           );
         }
 
+        setStepStatus('drive', 'connected');
         setFolderId(folderResult.folderId);
       } else {
         console.warn('Failed to create/find Folkbase folder:', folderResult.error);
+        setStepStatus('drive', 'error', {
+          detail: 'Could not create the Folkbase folder.',
+          fix: 'Check Drive storage and permissions. Your sheet still works without the folder.',
+        });
         setFolderWarning(
           'Could not create Folkbase folder. Your sheet works fine, but you may want to create the folder manually in Google Drive.'
         );
@@ -96,7 +123,7 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
       setError(err.message || 'Failed to set up your sheet. Please try again.');
       setPhase('error');
     }
-  }, [wizardData, onUpdate]);
+  }, [wizardData, onUpdate, setStepStatus]);
 
   // Run provisioning on mount (once)
   useEffect(() => {
@@ -123,7 +150,8 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
     onComplete();
   };
 
-  const handleRetry = () => {
+  const handleRetry = (stepId) => {
+    resetStep(stepId);
     setError(null);
     setPhase('provisioning');
     setStatus('Retrying...');
@@ -141,6 +169,9 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
           <h2 className="wizard-step-title">Setting Things Up</h2>
           <p className="wizard-step-description">{status}</p>
         </div>
+        <div className="wizard-step-body">
+          <ConnectionStatusPanel steps={steps} onRetry={handleRetry} />
+        </div>
       </div>
     );
   }
@@ -150,15 +181,13 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
     return (
       <div className="wizard-step">
         <div className="wizard-step-header">
-          <div className="wizard-step-icon error">
-            <AlertCircle size={64} />
-          </div>
           <h2 className="wizard-step-title">Something Went Wrong</h2>
           <p className="wizard-step-description">{error}</p>
         </div>
         <div className="wizard-step-body">
+          <ConnectionStatusPanel steps={steps} onRetry={handleRetry} />
           <div className="wizard-step-actions">
-            <button type="button" onClick={handleRetry} className="btn btn-primary btn-lg">
+            <button type="button" onClick={() => handleRetry('drive')} className="btn btn-primary btn-lg">
               Try Again
             </button>
           </div>
@@ -171,14 +200,13 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
   return (
     <div className="wizard-step">
       <div className="wizard-step-header">
-        <div className="wizard-step-icon success">
-          <CheckCircle size={64} />
-        </div>
         <h2 className="wizard-step-title">You&apos;re All Set!</h2>
         <p className="wizard-step-description">Your Folkbase is ready to use.</p>
       </div>
 
       <div className="wizard-step-body">
+        <ConnectionStatusPanel steps={steps} />
+
         <div className="wizard-summary-card">
           <div className="wizard-summary-item">
             <div className="wizard-summary-label">

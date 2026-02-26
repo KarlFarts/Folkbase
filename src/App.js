@@ -6,6 +6,7 @@ import { WorkspaceProvider } from './contexts/WorkspaceContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { useApiTracking } from './hooks/useApiTracking';
 import { useCalendarSync } from './hooks/useCalendarSync';
+import { useTheme } from './hooks/useTheme';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import UniversalSearch from './components/UniversalSearch';
@@ -76,6 +77,9 @@ function AppContent() {
 
   // Initialize auto-sync for calendar
   useCalendarSync();
+
+  // Apply theme (light/dark) from localStorage or system preference
+  useTheme();
 
   // DEV MODE: Seed test data on mount
   useEffect(() => {

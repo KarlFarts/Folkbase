@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { probeSheetAccess } from '../utils/sheetCreation';
+import { useConnectionStatus } from '../hooks/useConnectionStatus';
+import { classifyAuthError } from '../utils/connectionErrors';
+import ConnectionStatusPanel from '../components/ConnectionStatusPanel';
 import './SignInPage.css';
 
 /**
@@ -14,44 +17,63 @@ const SignInPage = ({ onSignedIn, initialError }) => {
   const { signInWithGoogle } = useAuth();
   const { config } = useConfig();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { steps, setStepStatus, resetStep } = useConnectionStatus();
 
   useEffect(() => {
-    if (initialError) setError(initialError);
-  }, [initialError]);
+    if (initialError) {
+      const classified = classifyAuthError(initialError);
+      setStepStatus(classified.step, 'error', classified);
+    }
+  }, [initialError, setStepStatus]);
 
   const handleSignIn = async () => {
     setIsLoading(true);
-    setError(null);
+    resetStep('account');
+    resetStep('sheets');
+    setStepStatus('account', 'checking');
+
     try {
       const user = await signInWithGoogle();
+      setStepStatus('account', 'connected');
 
       // Returning users: verify the new token can reach their sheet
       if (config.personalSheetId) {
-        // accessToken is now stored in AuthContext — retrieve via the hook
-        // We need the raw token; pull it from localStorage (set by AuthContext on success)
-        // AuthContext writes to localStorage before resolving the promise, so this is safe.
+        setStepStatus('sheets', 'checking');
         const token = localStorage.getItem('googleAccessToken');
         if (!token) {
-          setError('Sign-in succeeded but the token could not be retrieved. Please try again.');
+          setStepStatus('sheets', 'error', {
+            detail: 'Sign-in succeeded but the token could not be retrieved.',
+            fix: 'Please try again.',
+          });
           setIsLoading(false);
           return;
         }
         const probe = await probeSheetAccess(token, config.personalSheetId);
         if (!probe.ok) {
-          setError(probe.error);
+          const classified = classifyAuthError(probe.error);
+          setStepStatus(classified.step, 'error', classified);
           setIsLoading(false);
           return;
         }
+        setStepStatus('sheets', 'connected');
       }
 
       onSignedIn(user);
     } catch (err) {
-      setError('Sign-in failed. Please try again.');
+      const classified = classifyAuthError(err);
+      setStepStatus(classified.step, 'error', classified);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleRetry = (stepId) => {
+    resetStep(stepId);
+    handleSignIn();
+  };
+
+  // Only show account and sheets steps on sign-in page
+  const visibleSteps = steps.filter((s) => s.id === 'account' || s.id === 'sheets');
 
   return (
     <div className="sign-in-page">
@@ -60,8 +82,6 @@ const SignInPage = ({ onSignedIn, initialError }) => {
         <div className="sign-in-card">
           <h1 className="sign-in-title">Welcome back</h1>
           <p className="sign-in-subtitle">Sign in to continue to Folkbase.</p>
-
-          {error && <p className="sign-in-error">{error}</p>}
 
           <button
             type="button"
@@ -89,6 +109,8 @@ const SignInPage = ({ onSignedIn, initialError }) => {
             </svg>
             {isLoading ? 'Signing in...' : 'Sign in with Google'}
           </button>
+
+          <ConnectionStatusPanel steps={visibleSteps} onRetry={handleRetry} compact />
 
           <p className="sign-in-note">First time here? It&apos;s free.</p>
         </div>

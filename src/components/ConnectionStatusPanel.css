@@ -1,0 +1,148 @@
+/* ============================================================================
+   ConnectionStatusPanel (csp-*)
+   ============================================================================ */
+
+.csp {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.csp--compact {
+  gap: 2px;
+}
+
+/* --- Step row --- */
+.csp-step {
+  border-radius: var(--radius-sm);
+  border-left: 3px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+
+.csp-step--connected {
+  border-left-color: var(--color-success);
+}
+
+.csp-step--checking {
+  border-left-color: var(--color-info);
+}
+
+.csp-step--error {
+  border-left-color: var(--color-danger);
+}
+
+/* --- Step header --- */
+.csp-step-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.csp--compact .csp-step-header {
+  padding: var(--spacing-xs) var(--spacing-sm);
+}
+
+.csp-step-header--clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.csp-step-header--clickable:hover {
+  background-color: var(--color-danger-bg);
+}
+
+/* --- Icon --- */
+.csp-step-icon {
+  flex-shrink: 0;
+}
+
+.csp-step--connected .csp-step-icon {
+  color: var(--color-success);
+}
+
+.csp-step--checking .csp-step-icon {
+  color: var(--color-info);
+}
+
+.csp-step--error .csp-step-icon {
+  color: var(--color-danger);
+}
+
+.csp-step--idle .csp-step-icon {
+  color: var(--color-text-muted);
+}
+
+/* --- Label & status text --- */
+.csp-step-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+  flex: 1;
+}
+
+.csp--compact .csp-step-label {
+  font-size: var(--font-size-xs);
+}
+
+.csp-step-badge {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  background: var(--color-bg-tertiary);
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+}
+
+.csp-step-status {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.csp-step--connected .csp-step-status {
+  color: var(--color-success);
+}
+
+.csp-step--error .csp-step-status {
+  color: var(--color-danger);
+}
+
+/* --- Expand chevron --- */
+.csp-expand-icon {
+  color: var(--color-text-muted);
+  transition: transform var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.csp-expand-icon--open {
+  transform: rotate(180deg);
+}
+
+/* --- Error detail panel --- */
+.csp-step-detail {
+  padding: var(--spacing-xs) var(--spacing-md) var(--spacing-sm) calc(var(--spacing-md) + 24px);
+}
+
+.csp--compact .csp-step-detail {
+  padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm) calc(var(--spacing-sm) + 22px);
+}
+
+.csp-detail-text {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--spacing-xs);
+}
+
+.csp-fix-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  font-style: italic;
+  margin: 0 0 var(--spacing-sm);
+}
+
+.csp-retry-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}

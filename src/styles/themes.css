@@ -85,3 +85,178 @@
   --separator-section-bg: #f0ebe4;
   --window-border-color: #e0d5c8;
 }
+
+/* ============================================================================
+   DARK THEME — Warm dark tones matching the natural aesthetic
+   [data-theme="dark"] has higher specificity than :root, so it overrides
+   both themes.css :root and index.css :root.
+   ============================================================================ */
+
+[data-theme="dark"] {
+  /* ---- Background colors ---- */
+  --color-bg-primary: #1a1816;
+  --color-bg-secondary: #222019;
+  --color-bg-tertiary: #2a2720;
+  --color-bg-elevated: #2e2b24;
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
+
+  /* ---- Gradients ---- */
+  --gradient-bg-primary: linear-gradient(135deg, #222019 0%, #2a2720 100%);
+  --gradient-bg-subtle: none;
+
+  /* ---- Text colors ---- */
+  --color-text-primary: #e8e3da;
+  --color-text-secondary: #b5ad9f;
+  --color-text-muted: #8a8174;
+  --color-text-inverse: #1a1816;
+
+  /* ---- Accent colors — slightly lighter for dark bg contrast ---- */
+  --color-accent-primary: #82aa86;
+  --color-accent-secondary: #9bbd9f;
+  --color-accent-hover: #6d9671;
+  --color-accent-active: #5a835e;
+
+  /* ---- Semantic colors ---- */
+  --color-success: #8fbe95;
+  --color-success-bg: rgba(143, 190, 149, 0.15);
+  --color-success-border: rgba(143, 190, 149, 0.25);
+
+  --color-warning: #ddb584;
+  --color-warning-bg: rgba(221, 181, 132, 0.15);
+  --color-warning-border: rgba(221, 181, 132, 0.25);
+
+  --color-danger: #d4908a;
+  --color-danger-bg: rgba(212, 144, 138, 0.15);
+  --color-danger-border: rgba(212, 144, 138, 0.25);
+
+  --color-info: #9bbd9f;
+  --color-info-bg: rgba(155, 189, 159, 0.15);
+  --color-info-border: rgba(155, 189, 159, 0.25);
+
+  /* ---- Priority colors ---- */
+  --color-priority-urgent: #f87171;
+  --color-priority-high: #fb923c;
+  --color-priority-medium: #fbbf24;
+  --color-priority-low: #4ade80;
+  --color-priority-none: #9ca3af;
+
+  /* ---- Status colors ---- */
+  --color-status-active: #34d399;
+  --color-status-inactive: #9ca3af;
+  --color-status-dnc: #f87171;
+
+  /* ---- Border & radius (color overrides only) ---- */
+  --border-color-default: #3d3a33;
+  --border-color-hover: #82aa86;
+  --border-color-focus: #6d9671;
+  --border-color-error: #d4908a;
+
+  /* ---- Semantic card palette — dark muted variants ---- */
+
+  /* Contacts - muted blue */
+  --card-bg-contacts: #1e2530;
+  --card-text-contacts: #c0cfdd;
+  --card-border-contacts: #2e3a48;
+
+  /* Events - muted amber */
+  --card-bg-events: #2a2418;
+  --card-text-events: #d4c4a8;
+  --card-border-events: #3d3428;
+
+  /* Tasks - muted rose */
+  --card-bg-tasks: #2a201e;
+  --card-text-tasks: #d4b5b0;
+  --card-border-tasks: #3d302c;
+
+  /* Organizations - muted sage */
+  --card-bg-organizations: #1e2820;
+  --card-text-organizations: #b8d0bc;
+  --card-border-organizations: #2e3e32;
+
+  /* Locations - muted teal */
+  --card-bg-locations: #1c2626;
+  --card-text-locations: #b0ccc8;
+  --card-border-locations: #2c3c3a;
+
+  /* Notes/Activity - muted lavender */
+  --card-bg-notes: #222028;
+  --card-text-notes: #c0b8d0;
+  --card-border-notes: #34303e;
+
+  /* Celebrations - muted warm gold */
+  --card-bg-celebrations: #28261c;
+  --card-text-celebrations: #d0c8a8;
+  --card-border-celebrations: #3c3828;
+
+  /* Settings/System - neutral dark */
+  --card-bg-settings: #242220;
+  --card-text-settings: #c0bab0;
+  --card-border-settings: #383430;
+
+  /* Workspaces - muted indigo */
+  --card-bg-workspaces: #1e2028;
+  --card-text-workspaces: #b8bcd0;
+  --card-border-workspaces: #2e303e;
+
+  /* ---- Shadow system — heavier for dark backgrounds ---- */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --shadow-2xl: 0 12px 32px rgba(0, 0, 0, 0.5);
+  --shadow-inner: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  --shadow-focus: 0 0 0 3px rgba(130, 170, 134, 0.3);
+  --shadow-focus-error: 0 0 0 3px rgba(212, 144, 138, 0.3);
+  --shadow-focus-success: 0 0 0 3px rgba(143, 190, 149, 0.3);
+
+  --shadow-card-resting: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.15);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-card-active: 0 4px 8px rgba(0, 0, 0, 0.35), 0 2px 4px rgba(0, 0, 0, 0.25);
+
+  /* ---- Card backgrounds ---- */
+  --color-card-bg-primary: #2e2b24;
+  --color-card-bg-hover: #36332b;
+  --color-card-text-primary: #e8e3da;
+  --color-card-text-secondary: #b5ad9f;
+
+  /* ---- Accent subtle ---- */
+  --color-accent-subtle-bg: rgba(130, 170, 134, 0.12);
+  --color-accent-subtle-border: rgba(130, 170, 134, 0.25);
+
+  /* ---- Section & window ---- */
+  --separator-section-bg: #2a2720;
+  --window-border-color: #3d3a33;
+  --window-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --modal-section-divider: 1px solid #3d3a33;
+
+  /* ---- Form tokens ---- */
+  --form-input-bg: #2a2720;
+  --form-input-border: 1px solid #3d3a33;
+  --form-input-text: #e8e3da;
+  --form-input-placeholder: #8a8174;
+  --form-focus-border: #6d9671;
+  --form-focus-shadow: 0 0 0 3px rgba(130, 170, 134, 0.25);
+  --form-error-border: #d4908a;
+  --form-error-shadow: 0 0 0 3px rgba(212, 144, 138, 0.25);
+
+  /* ---- Button tokens ---- */
+  --btn-primary-bg: #6d9671;
+  --btn-primary-text: #ffffff;
+  --btn-primary-hover: #5a835e;
+  --btn-primary-active: #4a7050;
+
+  --btn-secondary-bg: #36332b;
+  --btn-secondary-text: #e8e3da;
+  --btn-secondary-border: 1px solid #4a4640;
+  --btn-secondary-hover: #44413a;
+
+  --btn-ghost-bg: transparent;
+  --btn-ghost-text: #b5ad9f;
+  --btn-ghost-hover: #2e2b24;
+
+  /* ---- Filter section ---- */
+  --filter-section-bg: #222019;
+  --card-divider-color: #2a2720;
+}
