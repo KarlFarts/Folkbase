@@ -1,4 +1,3 @@
-import React from 'react';
 import { Check } from 'lucide-react';
 import IconMap from '../IconMap';
 import EntitySuggestionCard from './EntitySuggestionCard';

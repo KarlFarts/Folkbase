@@ -1,5 +1,3 @@
-import React from 'react';
-
 function ExportFilters({
   filters,
   onFiltersChange,
@@ -16,14 +14,9 @@ function ExportFilters({
 
   return (
     <div className="export-filters">
-      <h3 style={{ marginBottom: 'var(--spacing-md)' }}>Filters</h3>
+      <h3 className="ef-heading">Filters</h3>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: 'var(--spacing-md)',
-        marginBottom: 'var(--spacing-md)'
-      }}>
+      <div className="ef-grid">
         {/* Search */}
         <div>
           <label htmlFor="filter-search" className="form-label">

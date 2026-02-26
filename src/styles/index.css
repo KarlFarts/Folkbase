@@ -11424,3 +11424,118 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: var(--spacing-md);
 }
+
+/* ============================================================================
+   BATCH 5 — Organization managers (dm-*), Export (ef-*, fs-*)
+   ============================================================================ */
+
+/* --- DepartmentsManager / OrgContactsManager (shared dm-* namespace) --- */
+.dm-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.dm-contact-info {
+  font-size: var(--font-size-sm);
+}
+
+.dm-action-btns {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.dm-name-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.dm-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.dm-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.dm-checkbox-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.dm-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+/* --- ExportFilters (ef-*) --- */
+.ef-heading {
+  margin-bottom: var(--spacing-md);
+}
+
+.ef-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+/* --- FieldSelector (fs-*) --- */
+.fs-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+}
+
+.fs-preset-select {
+  width: 200px;
+}
+
+.fs-btn-row {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.fs-checkboxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.fs-field-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--border-radius);
+  transition: background-color 0.2s;
+}
+
+.fs-field-label:hover {
+  background-color: var(--color-background-hover);
+}
+
+.fs-field-checkbox {
+  cursor: pointer;
+}
+
+.fs-count {
+  margin-top: var(--spacing-sm);
+  font-size: 0.9em;
+}

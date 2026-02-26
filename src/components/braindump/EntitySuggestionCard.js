@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pin, Check } from 'lucide-react';
 import IconMap from '../IconMap';
 import { getEntityIcon, getConfidenceColorClass } from '../../services/entityDetector';

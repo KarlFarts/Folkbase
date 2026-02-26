@@ -56,7 +56,8 @@
 - [x] **OrganizationProfile** (`/organizations/:id`) — reused `cp-tab-bar`/`cp-linked-card`; all inline styles → `op-*` classes; corrected accent color token
 - [x] **AddOrganization** (`/organizations/add`) — 16 inline styles → `add-form-*` classes; removed React import
 - [x] **OrganizationCard** — already clean, no inline styles
-- [ ] **DepartmentsManager, OrgContactsManager** — not yet implemented
+- [x] **DepartmentsManager** — 6 inline styles → `dm-*` classes; removed React import
+- [x] **OrgContactsManager** — 9 inline styles → `dm-*` classes (shared namespace); removed React import
 
 ## Location System
 - [x] **LocationList** (`/locations`) — 13 inline styles → reused `cl-*` classes; removed React import; deleted inline @keyframes spin
@@ -99,7 +100,8 @@
 - [x] **BulkCommitModal** — 9 static styles → `bcm-*` classes; dynamic progress bar width stays inline; removed React import
 - [x] **LinkEntitiesModal** — 13 static styles → `lem-*` classes; dynamic entity selection bg stays inline; removed React import
 - [x] **QuickCommitButton** — static wrapper/toast styles → `qcb-*` classes; dynamic cursor/bg states stay inline; removed React import
-- [ ] **EntitySuggestionsPanel, EntitySuggestionCard** — not yet implemented
+- [x] **EntitySuggestionsPanel** — 0 inline styles; removed React import
+- [x] **EntitySuggestionCard** — 0 inline styles; removed React import
 
 ## Relationships
 - [x] **RelationshipManager** — 11 inline styles → `rm-*` classes; removed React import; `React.useCallback` → `useCallback`
@@ -118,8 +120,9 @@
 - [x] **DataCorrectionTable** — 0 inline styles; removed React import
 - [x] **BatchActionsToolbar** — 0 inline styles; removed React import
 - [x] **DuplicateReviewPanel** — 0 inline styles; removed React import
-- [ ] **ExportFilters, FieldSelector** — not yet implemented
-- [ ] **QuickSync components** — ContactFileDropzone, NewContactCard, QuickEnrichmentForm, SyncSummary — not yet implemented
+- [x] **ExportFilters** — 2 inline styles → `ef-*` classes; removed React import
+- [x] **FieldSelector** — 7 inline styles → `fs-*` classes; removed React import; hover via CSS instead of onMouseEnter/Leave
+- [x] **QuickSync components** — ContactFileDropzone, NewContactCard, QuickEnrichmentForm, SyncSummary — 0 inline styles; have own CSS files
 
 ## Call & Meeting Modes
 - [x] **CallMode** (`/call-mode/:contactId`) — 14 inline styles → `focus-mode-*` classes
@@ -167,14 +170,15 @@
 
 ## Shared Stylesheets
 
-- [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*`, `add-form-*`, `focus-mode-*`, `lp-*`, `export-*`, `ws-*`, `dm-*`, `sp-*`, `tp-*`, `lm-*`, `skeleton-*`, `tm-*`, `bem-*`, `timeline-dot-icon`, `info-box`, `br-*`, `us-*`, `arm-*`, `rl-*`, `cm-*`, `rm-*`, `rg-*`, `tem-*`, `ccm-*`, `timer-*`, `lc-*`, `qab-*`, `us-count-badge`, `uc-*`, `itw-*`, `ub-*`, `ue-*`, `ra-*`, `pcw-*`, `sb-*`, `sw-*`, `ph-*`, `pt-*`, `ca-*`, `soc-*`, `edu-*`, `emp-*`, `dis-*`, `tpm-*`, `cam-*`, `cmm-*`, `bcm2-*`, `cf-*`, `cnm-*`, `bcm-*`, `lem-*`, `qcb-*`, `led-*`, `ec-*`, `cv-*`, `tv-*`, `atm-*`, `ats-*`, `agm-*`, `resm-*`, `iem-*`, `scm-*`, `iss-*`, `ltm-*`, `ltqm-*` sections added; breadcrumbs updated
+- [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*`, `add-form-*`, `focus-mode-*`, `lp-*`, `export-*`, `ws-*`, `dm-*`, `sp-*`, `tp-*`, `lm-*`, `skeleton-*`, `tm-*`, `bem-*`, `timeline-dot-icon`, `info-box`, `br-*`, `us-*`, `arm-*`, `rl-*`, `cm-*`, `rm-*`, `rg-*`, `tem-*`, `ccm-*`, `timer-*`, `lc-*`, `qab-*`, `us-count-badge`, `uc-*`, `itw-*`, `ub-*`, `ue-*`, `ra-*`, `pcw-*`, `sb-*`, `sw-*`, `ph-*`, `pt-*`, `ca-*`, `soc-*`, `edu-*`, `emp-*`, `dis-*`, `tpm-*`, `cam-*`, `cmm-*`, `bcm2-*`, `cf-*`, `cnm-*`, `bcm-*`, `lem-*`, `qcb-*`, `led-*`, `ec-*`, `cv-*`, `tv-*`, `atm-*`, `ats-*`, `agm-*`, `resm-*`, `iem-*`, `scm-*`, `iss-*`, `ltm-*`, `ltqm-*`, `dm-*` (org), `ef-*`, `fs-*` sections added; breadcrumbs updated
 - [x] **Dashboard.css** — HeroWelcome alias, hero-top scoping
 - [ ] **themes.css** — color palette/tokens (`src/styles/themes.css`)
 
 ## Stats
 
 - **31 pages** | **116+ components** | **34 CSS files** | **677+ inline style occurrences**
-- **Batches 1–4 complete:** All existing components processed
-- **Remaining:** `themes.css` (not yet implemented); `DepartmentsManager`, `OrgContactsManager` (not yet built); `EntitySuggestionsPanel`, `EntitySuggestionCard` (not yet built); `ExportFilters`, `FieldSelector`, QuickSync sub-components (not yet built); `Login/OAuth flow` (not yet built)
+- **Batches 1–5 complete:** All existing components processed
+- **Remaining:** `themes.css` (exists, not reviewed); `Login/OAuth flow` (not yet built)
 - Done (batches 1–3): UniversalSearch, AddLocation, BackupRestorePage, BillingPanel, TaskProfile, ListManager, SkeletonLoader, TagManager, BatchEditModal, TimelineItem, MigrationBanner, InstallPrompt, WorkspaceInvitationGenerator, Avatar, AvatarPicker, AddRelationshipModal, RelationshipList, ChecklistManager, RelationshipManager, RelationshipGraph, TimeEntryManager, CopyContactModal, Timer, LocationCard, ProgressTracker + all zero-style components checked off
 - Done (batch 4): All dashboard widgets, contact/ managers, notes/ components, events/ components, import/ components, remaining top-level components
+- Done (batch 5): DepartmentsManager, OrgContactsManager, ExportFilters, FieldSelector, EntitySuggestionsPanel, EntitySuggestionCard
