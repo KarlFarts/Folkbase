@@ -49,11 +49,9 @@ import NotificationContainer from './components/NotificationToast';
 import KeyboardShortcutHandler from './components/KeyboardShortcutHandler';
 import BraindumpFAB from './components/BraindumpFAB';
 import InstallPrompt from './components/InstallPrompt';
-import { DevToolsPanel } from './components/DevToolsPanel';
 import { NotificationProvider } from './contexts/NotificationContext';
 import { MonitoringProvider } from './contexts/MonitoringContext';
 import { MonitoringPanel } from './components/MonitoringPanel';
-import { seedTestData } from './__tests__/fixtures/seedTestData';
 import { needsMigration } from './services/migrationService';
 import MigrationBanner from './components/MigrationBanner';
 import { useActiveSheetId } from './utils/sheetResolver';
@@ -80,13 +78,6 @@ function AppContent() {
 
   // Apply theme (light/dark) from localStorage or system preference
   useTheme();
-
-  // DEV MODE: Seed test data on mount
-  useEffect(() => {
-    if (import.meta.env.VITE_DEV_MODE === 'true') {
-      seedTestData();
-    }
-  }, []);
 
   // Check if migration is needed
   useEffect(() => {
@@ -363,7 +354,6 @@ function AppContent() {
           </main>
           <BraindumpFAB />
           <InstallPrompt />
-          {import.meta.env.VITE_DEV_MODE === 'true' && <DevToolsPanel />}
           {import.meta.env.VITE_DEV_MODE === 'true' && <MonitoringPanel />}
           {showSearch && (
             <UniversalSearch onNavigate={navigateTo} onClose={() => setShowSearch(false)} />

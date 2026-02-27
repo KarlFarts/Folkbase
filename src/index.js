@@ -9,7 +9,6 @@ import { validateProductionEnv, renderEnvErrorScreen } from './utils/validateEnv
 import { initErrorReporting } from './utils/errorReporting';
 import { GOOGLE_CLIENT_ID } from './googleAuth';
 import { isDevMode } from './__tests__/mocks/mockAuth';
-import { seedTestRelationships } from './utils/seedRelationships';
 
 // Validate environment variables before starting the app
 const envValidation = validateProductionEnv();
@@ -24,12 +23,6 @@ if (!envValidation.valid) {
 if (envValidation.mode === 'development') {
   // eslint-disable-next-line no-console
   console.log('[DEV] Running in DEVELOPMENT mode');
-  // Make seed function available globally in dev mode
-  window.seedTestRelationships = seedTestRelationships;
-  // eslint-disable-next-line no-console
-  console.log(
-    '[DEV] 💡 Run window.seedTestRelationships() in console to add test relationship data'
-  );
 } else {
   // eslint-disable-next-line no-console
   console.log('[INFO] Running in PRODUCTION mode');
