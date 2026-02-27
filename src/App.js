@@ -223,6 +223,12 @@ function AppContent() {
       case 'backup':
         navigate('/backup');
         break;
+      case 'workspaces':
+        navigate('/workspaces');
+        break;
+      case 'create-workspace':
+        navigate('/workspaces/create');
+        break;
       default:
         navigate('/');
     }
@@ -293,7 +299,7 @@ function AppContent() {
                   path="/duplicates"
                   element={
                     <PremiumGate feature={PREMIUM_FEATURES.DUPLICATE_DETECTION}>
-                      <DuplicateManager />
+                      <DuplicateManager onNavigate={navigateTo} />
                     </PremiumGate>
                   }
                 />
@@ -325,7 +331,7 @@ function AppContent() {
                   path="/workspaces"
                   element={
                     <PremiumGate feature={PREMIUM_FEATURES.WORKSPACES}>
-                      <WorkspaceDashboard />
+                      <WorkspaceDashboard onNavigate={navigateTo} />
                     </PremiumGate>
                   }
                 />

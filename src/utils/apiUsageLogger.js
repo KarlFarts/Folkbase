@@ -442,16 +442,16 @@ function getStoredData() {
 /**
  * Save data to localStorage
  */
-function saveStoredData(data) {
+function saveStoredData(data, isRetry = false) {
   try {
     const json = JSON.stringify(data);
     localStorage.setItem(STORAGE_KEY, json);
   } catch (error) {
-    if (error.name === 'QuotaExceededError') {
+    if (error.name === 'QuotaExceededError' && !isRetry) {
       warn('localStorage quota exceeded, running cleanup');
       // If quota exceeded, run aggressive cleanup
       cleanupOldData(data, 7); // Keep only 7 days
-      saveStoredData(data);
+      saveStoredData(data, true);
     } else {
       warn('Failed to save to localStorage:', error.message);
     }

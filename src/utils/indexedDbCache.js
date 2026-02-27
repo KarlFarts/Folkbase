@@ -61,14 +61,18 @@ export async function initializeCache() {
           db.createObjectStore('_syncMeta');
         }
       },
+    }).catch((error) => {
+      console.error('[IndexedDB] Failed to initialize cache:', error);
+      dbPromise = null;
+      return null;
     });
-
-    return dbPromise;
   } catch (error) {
     console.error('[IndexedDB] Failed to initialize cache:', error);
     dbPromise = null;
     return null;
   }
+
+  return dbPromise;
 }
 
 /**

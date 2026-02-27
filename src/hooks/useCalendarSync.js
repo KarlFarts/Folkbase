@@ -5,11 +5,21 @@
  * Reads settings from localStorage and runs syncEvents() on the configured interval.
  */
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { syncEvents } from '../utils/syncEngine';
+
+function readCalendarSettings() {
+  try {
+    const stored = localStorage.getItem('touchpoint_calendar_settings');
+    if (!stored) return null;
+    return JSON.parse(stored);
+  } catch {
+    return null;
+  }
+}
 
 export function useCalendarSync() {
   const { accessToken } = useAuth();
@@ -17,18 +27,29 @@ export function useCalendarSync() {
   const { notify } = useNotification();
   const syncingRef = useRef(false);
   const intervalRef = useRef(null);
+  const [settings, setSettings] = useState(readCalendarSettings);
+
+  // Re-read settings periodically and on storage changes
+  const refreshSettings = useCallback(() => {
+    const newSettings = readCalendarSettings();
+    setSettings((prev) => {
+      const prevStr = JSON.stringify(prev);
+      const newStr = JSON.stringify(newSettings);
+      return prevStr === newStr ? prev : newSettings;
+    });
+  }, []);
 
   useEffect(() => {
-    // Read calendar settings from localStorage
-    const getSettings = () => {
-      try {
-        const stored = localStorage.getItem('touchpoint_calendar_settings');
-        if (!stored) return null;
-        return JSON.parse(stored);
-      } catch {
-        return null;
-      }
+    window.addEventListener('storage', refreshSettings);
+    // Poll every 10s for same-tab changes (localStorage events only fire cross-tab)
+    const poll = setInterval(refreshSettings, 10000);
+    return () => {
+      window.removeEventListener('storage', refreshSettings);
+      clearInterval(poll);
     };
+  }, [refreshSettings]);
+
+  useEffect(() => {
 
     // Perform sync
     const performSync = async () => {
@@ -91,8 +112,6 @@ export function useCalendarSync() {
     };
 
     // Set up interval based on settings
-    const settings = getSettings();
-
     if (settings?.enabled && settings?.autoSync && accessToken && sheetId) {
       // Convert interval from minutes to milliseconds
       const intervalMs = (settings.autoSyncInterval || 30) * 60 * 1000;
@@ -122,7 +141,7 @@ export function useCalendarSync() {
         intervalRef.current = null;
       }
     }
-  }, [accessToken, sheetId, notify]);
+  }, [accessToken, sheetId, notify, settings]);
 
   return null; // This hook doesn't return anything, it just runs in the background
 }

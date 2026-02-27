@@ -128,6 +128,12 @@ function SettingsPage({ onShowSetup, onNavigate }) {
   // Check Google Sheets API connection with real token validation
   useEffect(() => {
     const checkSheetsConnection = async () => {
+      // In dev mode, localStorage is the backend — skip real API checks
+      if (import.meta.env.VITE_DEV_MODE === 'true') {
+        setSheetsStatus({ loading: false, connected: true, error: null, sheetTitle: 'Dev Mode (localStorage)' });
+        return;
+      }
+
       if (!accessToken || !config.personalSheetId) {
         setSheetsStatus({
           loading: false,

@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
@@ -15,8 +14,7 @@ import { readSheetData } from '../utils/devModeWrapper';
 import { SHEET_NAMES } from '../config/constants';
 import { findTouchpointFolder } from '../utils/driveFolder';
 
-const WorkspaceDashboard = () => {
-  const navigate = useNavigate();
+const WorkspaceDashboard = ({ onNavigate }) => {
   const { user, accessToken } = useAuth();
   const { config } = useConfig();
   const { notify } = useNotification();
@@ -88,7 +86,7 @@ const WorkspaceDashboard = () => {
 
   const handleViewWorkspace = (workspace) => {
     switchToWorkspace(workspace);
-    navigate('/contacts');
+    onNavigate('contacts');
   };
 
   const handleManageWorkspace = (workspace) => {
@@ -292,7 +290,7 @@ const WorkspaceDashboard = () => {
     <div className="page-container">
       <div className="page-header">
         <h1>Workspaces</h1>
-        <button onClick={() => navigate('/workspaces/create')} className="btn btn-primary">
+        <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
           + Create Workspace
         </button>
       </div>
@@ -312,7 +310,7 @@ const WorkspaceDashboard = () => {
               Create a workspace to collaborate with your team on contact management.
             </p>
             <div className="empty-state-actions">
-              <button onClick={() => navigate('/workspaces/create')} className="btn btn-primary">
+              <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
                 Create Your First Workspace
               </button>
             </div>

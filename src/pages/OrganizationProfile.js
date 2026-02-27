@@ -542,7 +542,7 @@ function OrganizationProfile({ onNavigate }) {
                   <div
                     key={event['Event ID']}
                     className="card cp-linked-card"
-                    onClick={() => onNavigate('event-details', { id: event['Event ID'] })}
+                    onClick={() => onNavigate('event-details', event['Event ID'])}
                   >
                     <div className="cp-linked-card-inner">
                       <div>

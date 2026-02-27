@@ -32,7 +32,7 @@ function AddEvent({ onNavigate }) {
   });
 
   const loadContacts = useCallback(async () => {
-    if (!accessToken || !config.personalSheetId) {
+    if (!accessToken || !sheetId) {
       setLoadingContacts(false);
       return;
     }
@@ -40,7 +40,7 @@ function AddEvent({ onNavigate }) {
     try {
       const result = await readSheetData(
         accessToken,
-        config.personalSheetId,
+        sheetId,
         SHEETS.CONTACTS,
         refreshAccessToken
       );
@@ -50,7 +50,7 @@ function AddEvent({ onNavigate }) {
     } finally {
       setLoadingContacts(false);
     }
-  }, [accessToken, config.personalSheetId, refreshAccessToken]);
+  }, [accessToken, sheetId, refreshAccessToken]);
 
   useEffect(() => {
     loadContacts();
@@ -126,7 +126,7 @@ function AddEvent({ onNavigate }) {
         }
       }
 
-      await addEvent(accessToken, config.personalSheetId, sanitizedEventData, refreshAccessToken);
+      await addEvent(accessToken, sheetId, sanitizedEventData, refreshAccessToken);
 
       setSuccess(true);
 

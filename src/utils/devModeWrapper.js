@@ -1124,7 +1124,7 @@ export async function updateEvent(accessToken, sheetId, eventId, eventData) {
   });
 
   const startTime = Date.now();
-  await sheetsModule.updateRow(accessToken, 'Events', rowIndex, values);
+  await sheetsModule.updateRow(accessToken, sheetId, 'Events', rowIndex, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.EVENTS, duration);
   await invalidateCache(SHEET_NAMES.EVENTS);
@@ -1769,7 +1769,7 @@ export async function updateNote(accessToken, sheetId, noteId, noteData) {
   });
 
   const startTime = Date.now();
-  await sheetsModule.updateRow(accessToken, 'Notes', rowIndex, values);
+  await sheetsModule.updateRow(accessToken, sheetId, 'Notes', rowIndex, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.NOTES, duration);
   await invalidateCache(SHEET_NAMES.NOTES);
@@ -1786,24 +1786,40 @@ export async function deleteNote(accessToken, sheetId, noteId) {
 
     const notes = getLocalNotes();
     const contactNotes = getLocalContactNotes();
+    const eventNotes = getLocalEventNotes();
+    const listNotes = getLocalListNotes();
+    const taskNotes = getLocalTaskNotes();
 
     const filteredNotes = notes.filter((n) => n['Note ID'] !== noteId);
-    const filteredMappings = contactNotes.filter((cn) => cn['Note ID'] !== noteId);
+    const filteredContactNotes = contactNotes.filter((cn) => cn['Note ID'] !== noteId);
+    const filteredEventNotes = eventNotes.filter((en) => en['Note ID'] !== noteId);
+    const filteredListNotes = listNotes.filter((ln) => ln['Note ID'] !== noteId);
+    const filteredTaskNotes = taskNotes.filter((tn) => tn['Note ID'] !== noteId);
 
     saveLocalNotes(filteredNotes);
-    saveLocalContactNotes(filteredMappings);
+    saveLocalContactNotes(filteredContactNotes);
+    saveLocalEventNotes(filteredEventNotes);
+    saveLocalListNotes(filteredListNotes);
+    saveLocalTaskNotes(filteredTaskNotes);
 
     return { success: true, noteId };
   }
 
   // Production mode: Delete from Google Sheets
   const startTime = Date.now();
-  const { data: notes } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
-  const { data: contactNotes } = await sheetsModule.readSheetData(
-    accessToken,
-    sheetId,
-    'Contact Notes'
-  );
+  const [
+    { data: notes },
+    { data: contactNotes },
+    { data: eventNotes },
+    { data: listNotes },
+    { data: taskNotes },
+  ] = await Promise.all([
+    sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES),
+    sheetsModule.readSheetData(accessToken, sheetId, 'Contact Notes'),
+    sheetsModule.readSheetData(accessToken, sheetId, 'Event Notes'),
+    sheetsModule.readSheetData(accessToken, sheetId, 'List Notes'),
+    sheetsModule.readSheetData(accessToken, sheetId, 'Task Notes'),
+  ]);
 
   // Find the note
   const note = notes.find((n) => n['Note ID'] === noteId);
@@ -1812,17 +1828,19 @@ export async function deleteNote(accessToken, sheetId, noteId) {
   const rowIndex = note._rowIndex;
 
   // Get internal sheet IDs dynamically
-  const notesSheetId = await sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.NOTES);
-  const contactNotesSheetId = await sheetsModule.getSheetIdByName(
-    accessToken,
-    sheetId,
-    'Contact Notes'
-  );
+  const [notesInternalId, contactNotesInternalId, eventNotesInternalId, listNotesInternalId, taskNotesInternalId] =
+    await Promise.all([
+      sheetsModule.getSheetIdByName(accessToken, sheetId, SHEET_NAMES.NOTES),
+      sheetsModule.getSheetIdByName(accessToken, sheetId, 'Contact Notes'),
+      sheetsModule.getSheetIdByName(accessToken, sheetId, 'Event Notes'),
+      sheetsModule.getSheetIdByName(accessToken, sheetId, 'List Notes'),
+      sheetsModule.getSheetIdByName(accessToken, sheetId, 'Task Notes'),
+    ]);
 
-  // Delete the note row
   const axios = (await import('axios')).default;
   const { API_CONFIG } = await import('../config/constants');
 
+  // Delete the note row
   await axios.post(
     `${API_CONFIG.SHEETS_API_BASE}/${sheetId}:batchUpdate`,
     {
@@ -1830,7 +1848,7 @@ export async function deleteNote(accessToken, sheetId, noteId) {
         {
           deleteDimension: {
             range: {
-              sheetId: notesSheetId,
+              sheetId: notesInternalId,
               dimension: 'ROWS',
               startIndex: rowIndex - 1,
               endIndex: rowIndex,
@@ -1847,42 +1865,47 @@ export async function deleteNote(accessToken, sheetId, noteId) {
     }
   );
 
-  // Delete associated contact-note mappings in a single batch request
-  const mappingsToDelete = contactNotes.filter((cn) => cn['Note ID'] === noteId);
+  // Delete associated mappings from all junction tables
+  const junctionTables = [
+    { data: contactNotes, internalId: contactNotesInternalId, cacheName: SHEET_NAMES.CONTACT_NOTES },
+    { data: eventNotes, internalId: eventNotesInternalId, cacheName: SHEET_NAMES.EVENT_NOTES },
+    { data: listNotes, internalId: listNotesInternalId, cacheName: SHEET_NAMES.LIST_NOTES },
+    { data: taskNotes, internalId: taskNotesInternalId, cacheName: SHEET_NAMES.TASK_NOTES },
+  ];
 
-  if (mappingsToDelete.length > 0) {
-    // Sort by row index descending to delete from bottom up (prevents index shifting issues)
-    const sortedMappings = mappingsToDelete.sort((a, b) => b._rowIndex - a._rowIndex);
-
-    const deleteRequests = sortedMappings.map((mapping) => ({
-      deleteDimension: {
-        range: {
-          sheetId: contactNotesSheetId,
-          dimension: 'ROWS',
-          startIndex: mapping._rowIndex - 1,
-          endIndex: mapping._rowIndex,
+  for (const table of junctionTables) {
+    const mappingsToDelete = table.data.filter((row) => row['Note ID'] === noteId);
+    if (mappingsToDelete.length > 0) {
+      // Sort by row index descending to delete from bottom up (prevents index shifting issues)
+      const sortedMappings = mappingsToDelete.sort((a, b) => b._rowIndex - a._rowIndex);
+      const deleteRequests = sortedMappings.map((mapping) => ({
+        deleteDimension: {
+          range: {
+            sheetId: table.internalId,
+            dimension: 'ROWS',
+            startIndex: mapping._rowIndex - 1,
+            endIndex: mapping._rowIndex,
+          },
         },
-      },
-    }));
+      }));
 
-    await axios.post(
-      `${API_CONFIG.SHEETS_API_BASE}/${sheetId}:batchUpdate`,
-      {
-        requests: deleteRequests,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+      await axios.post(
+        `${API_CONFIG.SHEETS_API_BASE}/${sheetId}:batchUpdate`,
+        { requests: deleteRequests },
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      await invalidateCache(table.cacheName);
+    }
   }
 
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('delete', SHEET_NAMES.NOTES, duration);
   await invalidateCache(SHEET_NAMES.NOTES);
-  await invalidateCache(SHEET_NAMES.CONTACT_NOTES);
   return { success: true, noteId };
 }
 
@@ -2814,7 +2837,7 @@ export async function updateTask(accessToken, sheetId, taskId, taskData) {
   });
 
   const startTime = Date.now();
-  await sheetsModule.updateRow(accessToken, 'Tasks', rowIndex, values);
+  await sheetsModule.updateRow(accessToken, sheetId, 'Tasks', rowIndex, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.TASKS, duration);
   await invalidateCache(SHEET_NAMES.TASKS);

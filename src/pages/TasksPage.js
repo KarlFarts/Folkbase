@@ -10,13 +10,13 @@ import {
   readSheetData,
   SHEETS,
 } from '../utils/devModeWrapper';
-import { getLocalWorkspaces } from '../__tests__/fixtures/seedTestData';
+import { getUserWorkspaces } from '../utils/devModeWrapper';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 import ConfirmDialog from '../components/ConfirmDialog';
 import WindowTemplate from '../components/WindowTemplate';
 
 function TasksPage({ onNavigate }) {
-  const { accessToken } = useAuth();
+  const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
 
@@ -60,15 +60,15 @@ function TasksPage({ onNavigate }) {
       const contactsResult = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
       setContacts(contactsResult.data || []);
 
-      // Load workspaces (from localStorage in dev mode)
-      const workspacesData = getLocalWorkspaces();
-      setWorkspaces(workspacesData);
+      // Load workspaces
+      const workspacesData = await getUserWorkspaces(accessToken, sheetId, user?.email);
+      setWorkspaces(workspacesData || []);
     } catch {
       setError('Failed to load tasks. Please try again.');
     } finally {
       setLoading(false);
     }
-  }, [accessToken, sheetId]);
+  }, [accessToken, sheetId, user?.email]);
 
   useEffect(() => {
     loadData();

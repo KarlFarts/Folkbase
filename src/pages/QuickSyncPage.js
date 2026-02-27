@@ -1,9 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { parseFile } from '../utils/importParsers';
 import { readSheetData, addContact, SHEETS } from '../utils/devModeWrapper';
+import { useActiveSheetId } from '../utils/sheetResolver';
 import { isDuplicate, CONFIDENCE } from '../services/duplicateDetector';
 import { isAlreadySynced, markAsSynced } from '../services/syncHashService';
 import ContactFileDropzone from '../components/quicksync/ContactFileDropzone';
@@ -22,6 +23,7 @@ const STATES = {
 function QuickSyncPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
   const { config } = useConfig();
+  const sheetId = useActiveSheetId();
   const { notify } = useNotification();
 
   const [state, setState] = useState(STATES.IDLE);
@@ -55,7 +57,7 @@ function QuickSyncPage({ onNavigate }) {
         // Get existing contacts from Folkbase
         const { data: existingContacts } = await readSheetData(
           accessToken,
-          config.personalSheetId,
+          sheetId,
           SHEETS.CONTACTS
         );
 
@@ -112,7 +114,7 @@ function QuickSyncPage({ onNavigate }) {
         setState(STATES.IDLE);
       }
     },
-    [accessToken, config.personalSheetId]
+    [accessToken, sheetId]
   );
 
   const handleAddContact = useCallback(
@@ -132,7 +134,7 @@ function QuickSyncPage({ onNavigate }) {
         // Add to Folkbase
         const result = await addContact(
           accessToken,
-          config.personalSheetId,
+          sheetId,
           enrichedContact,
           user?.email
         );
@@ -150,7 +152,7 @@ function QuickSyncPage({ onNavigate }) {
         setAddingContactId(null);
       }
     },
-    [accessToken, config.personalSheetId, user?.email]
+    [accessToken, sheetId, user?.email]
   );
 
   const handleSkipContact = useCallback((contact) => {
@@ -184,7 +186,7 @@ function QuickSyncPage({ onNavigate }) {
   }, [onNavigate]);
 
   // Check if all contacts have been processed
-  React.useEffect(() => {
+  useEffect(() => {
     if (state === STATES.REVIEWING && newContacts.length === 0) {
       setState(STATES.COMPLETE);
     }

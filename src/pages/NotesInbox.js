@@ -199,7 +199,7 @@ function NotesInbox({ onNavigate }) {
         autoRefreshServiceRef.current.stop();
       }
     };
-  }, [accessToken, sheetId, user.email]); // Removed editingNoteIds - using ref instead
+  }, [accessToken, sheetId, user?.email]); // Removed editingNoteIds - using ref instead
 
   const handleAddNote = async () => {
     if (!noteForm.Content.trim()) {

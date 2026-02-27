@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useConfig } from '../../contexts/ConfigContext';
 import { useNotification } from '../../contexts/NotificationContext';
+import { useActiveSheetId } from '../../utils/sheetResolver';
 import { listTemplates, loadTemplate, saveTemplate } from '../../services/importConfigService';
 
 // Folkbase expected fields
@@ -46,6 +47,7 @@ function FieldMappingPreview({
 }) {
   const { accessToken, user } = useAuth();
   const { config } = useConfig();
+  const sheetId = useActiveSheetId();
   const { notify } = useNotification();
 
   // Template state
@@ -85,11 +87,11 @@ function FieldMappingPreview({
   // Load available templates on mount
   useEffect(() => {
     const fetchTemplates = async () => {
-      if (!accessToken || !config.personalSheetId) return;
+      if (!accessToken || !sheetId) return;
 
       setLoadingTemplates(true);
       try {
-        const templates = await listTemplates(accessToken, config.personalSheetId);
+        const templates = await listTemplates(accessToken, sheetId);
         // Filter by file type
         const filtered = templates.filter((t) => t.fileType === fileType);
         setAvailableTemplates(filtered);
@@ -101,7 +103,7 @@ function FieldMappingPreview({
     };
 
     fetchTemplates();
-  }, [accessToken, config.personalSheetId, fileType]);
+  }, [accessToken, sheetId, fileType]);
 
   const handleTemplateSelect = async (templateName) => {
     if (!templateName) {
@@ -112,7 +114,7 @@ function FieldMappingPreview({
     setSelectedTemplate(templateName);
 
     try {
-      const template = await loadTemplate(accessToken, config.personalSheetId, templateName);
+      const template = await loadTemplate(accessToken, sheetId, templateName);
 
       // Apply template mappings
       setFieldMapping((prev) => {
@@ -161,7 +163,7 @@ function FieldMappingPreview({
     // Save template if requested
     if (saveAsTemplate && templateName.trim()) {
       try {
-        await saveTemplate(accessToken, config.personalSheetId, {
+        await saveTemplate(accessToken, sheetId, {
           templateName: templateName.trim(),
           sourceSystem: sourceSystem.trim() || 'Unknown',
           fileType,

@@ -14,6 +14,7 @@ import {
   deleteCalendarEvent,
   SHEETS,
 } from '../utils/devModeWrapper';
+import { useActiveSheetId } from '../utils/sheetResolver';
 import { crmEventToGoogleEvent } from '../utils/eventTransformers';
 import ContactCard from '../components/ContactCard';
 import NotesDisplaySection from '../components/notes/NotesDisplaySection';
@@ -23,6 +24,7 @@ function EventDetails({ onNavigate }) {
   const { id } = useParams();
   const { accessToken, refreshAccessToken, user } = useAuth();
   const { config } = useConfig();
+  const sheetId = useActiveSheetId();
   const { notify } = useNotification();
   const [event, setEvent] = useState(null);
   const [attendeeContacts, setAttendeeContacts] = useState([]);
@@ -53,7 +55,7 @@ function EventDetails({ onNavigate }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const loadEventDetails = useCallback(async () => {
-    if (!accessToken || !config.personalSheetId) {
+    if (!accessToken || !sheetId) {
       setError('Please sign in to access your data.');
       setNeedsReauth(true);
       setLoading(false);
@@ -65,10 +67,10 @@ function EventDetails({ onNavigate }) {
       setError('');
 
       const [eventsResult, contactsResult, orgsResult, eventNotesData] = await Promise.all([
-        readSheetData(accessToken, config.personalSheetId, SHEETS.EVENTS, refreshAccessToken),
-        readSheetData(accessToken, config.personalSheetId, SHEETS.CONTACTS, refreshAccessToken),
-        readSheetData(accessToken, config.personalSheetId, SHEETS.ORGANIZATIONS, refreshAccessToken),
-        getEventNotes(accessToken, config.personalSheetId, id, user?.email),
+        readSheetData(accessToken, sheetId, SHEETS.EVENTS, refreshAccessToken),
+        readSheetData(accessToken, sheetId, SHEETS.CONTACTS, refreshAccessToken),
+        readSheetData(accessToken, sheetId, SHEETS.ORGANIZATIONS, refreshAccessToken),
+        getEventNotes(accessToken, sheetId, id, user?.email),
       ]);
 
       const foundEvent = eventsResult.data.find((e) => e['Event ID'] === id);
@@ -110,7 +112,7 @@ function EventDetails({ onNavigate }) {
     } finally {
       setLoading(false);
     }
-  }, [id, accessToken, config.personalSheetId, refreshAccessToken, user?.email]);
+  }, [id, accessToken, sheetId, refreshAccessToken, user?.email]);
 
   useEffect(() => {
     loadEventDetails();
@@ -151,7 +153,7 @@ function EventDetails({ onNavigate }) {
           'Follow-up Date': '',
           'Event ID': event['Event ID'],
         };
-        await addTouchpoint(accessToken, config.personalSheetId, touchpointData, refreshAccessToken);
+        await addTouchpoint(accessToken, sheetId, touchpointData, refreshAccessToken);
       }
 
       setShowBulkTouchpointModal(false);
@@ -173,7 +175,7 @@ function EventDetails({ onNavigate }) {
     try {
       await addNote(
         accessToken,
-        config.personalSheetId,
+        sheetId,
         {
           Content: noteForm.Content,
           'Note Type': noteForm['Note Type'],
@@ -208,14 +210,14 @@ function EventDetails({ onNavigate }) {
   const handleSaveEdit = async () => {
     try {
       setSaving(true);
-      const updated = await updateEvent(accessToken, config.personalSheetId, id, editData);
+      const updated = await updateEvent(accessToken, sheetId, id, editData);
 
       if (event['Google Calendar ID'] && event['Sync Source'] === 'CRM') {
         try {
           const updatedEventData = { ...event, ...updated };
           const googleEvent = crmEventToGoogleEvent(updatedEventData, allContacts);
           await updateCalendarEvent(accessToken, event['Google Calendar ID'], googleEvent);
-          await updateEvent(accessToken, config.personalSheetId, id, {
+          await updateEvent(accessToken, sheetId, id, {
             'Last Synced At': new Date().toISOString(),
           });
         } catch {
@@ -245,7 +247,7 @@ function EventDetails({ onNavigate }) {
         }
       }
 
-      await deleteEvent(accessToken, config.personalSheetId, id);
+      await deleteEvent(accessToken, sheetId, id);
       notify.success('Event deleted successfully!');
       onNavigate('events');
     } catch {

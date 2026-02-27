@@ -17,13 +17,16 @@ vi.mock('../../utils/sheetResolver', () => ({
 }));
 
 vi.mock('../../utils/devModeWrapper', () => ({
-  readSheetData: vi.fn().mockResolvedValue([
-    {
-      'Contact ID': 'C001',
-      Name: 'John Doe',
-      Organization: 'Acme Corp',
-    },
-  ]),
+  readSheetData: vi.fn().mockResolvedValue({
+    data: [
+      {
+        'Contact ID': 'C001',
+        Name: 'John Doe',
+        Organization: 'Acme Corp',
+      },
+    ],
+    headers: [],
+  }),
   addTouchpoint: vi.fn().mockResolvedValue({ touchpointId: 'T001' }),
   logActivity: vi.fn().mockResolvedValue({}),
   ACTIVITY_TYPES: { TOUCHPOINT_LOGGED: 'touchpoint_logged' },

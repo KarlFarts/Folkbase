@@ -29,7 +29,7 @@ export default function CallMode({ onNavigate }) {
   useEffect(() => {
     const loadContact = async () => {
       try {
-        const contacts = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
+        const { data: contacts } = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
         const foundContact = contacts.find((c) => c['Contact ID'] === contactId);
         setContact(foundContact);
       } catch {

@@ -27,7 +27,7 @@ export default function TaskProfile({ onNavigate }) {
   const loadTask = async () => {
     try {
       setLoading(true);
-      const tasksData = await readSheetData(accessToken, activeSheetId, SHEETS.TASKS);
+      const { data: tasksData } = await readSheetData(accessToken, activeSheetId, SHEETS.TASKS);
       const taskData = tasksData.find((t) => t['Task ID'] === id);
 
       if (!taskData) {
