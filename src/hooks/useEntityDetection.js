@@ -19,9 +19,17 @@ export function useEntityDetection(text, context, debounceDelay = 300) {
   // Debounce text input
   const debouncedText = useDebounce(text, debounceDelay);
 
-  // Cache key for memoization
+  // Cache key for memoization — include first/last IDs to detect content changes at same length
   const cacheKey = useMemo(() => {
-    return `${debouncedText}_${context?.contacts?.length || 0}_${context?.events?.length || 0}`;
+    const contacts = context?.contacts || [];
+    const events = context?.events || [];
+    const contactSig = contacts.length > 0
+      ? `${contacts[0]?.['Contact ID']}_${contacts[contacts.length - 1]?.['Contact ID']}`
+      : '';
+    const eventSig = events.length > 0
+      ? `${events[0]?.['Event ID']}_${events[events.length - 1]?.['Event ID']}`
+      : '';
+    return `${debouncedText}_${contacts.length}_${contactSig}_${events.length}_${eventSig}`;
   }, [debouncedText, context]);
 
   useEffect(() => {

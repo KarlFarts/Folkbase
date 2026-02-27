@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -16,7 +16,7 @@ function Breadcrumbs() {
   const [entityName, setEntityName] = useState(null);
 
   // Extract entity ID from URL for contact or event profile pages
-  const getEntityInfo = () => {
+  const getEntityInfo = useCallback(() => {
     const pathname = location.pathname;
     const contactMatch = pathname.match(/^\/contacts\/([^/]+)$/);
     const eventMatch = pathname.match(/^\/events\/([^/]+)$/);
@@ -28,7 +28,7 @@ function Breadcrumbs() {
       return { type: 'event', id: eventMatch[1] };
     }
     return null;
-  };
+  }, [location.pathname]);
 
   // Fetch entity name when on a profile page
   useEffect(() => {

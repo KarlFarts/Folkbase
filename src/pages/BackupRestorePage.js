@@ -15,7 +15,7 @@ import WindowTemplate from '../components/WindowTemplate';
 
 function BackupRestorePage() {
   const { accessToken } = useAuth();
-  const notify = useNotification();
+  const { notify } = useNotification();
   const sheetId = useActiveSheetId();
 
   // Backup state

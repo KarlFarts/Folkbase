@@ -154,10 +154,9 @@ export function EditTouchpointModal({
         <label className="form-label">Contact</label>
         <input
           type="text"
-          className="form-input"
+          className="form-input tpm-disabled-input"
           value={touchpoint['Contact Name'] || ''}
           disabled
-          className="tpm-disabled-input"
         />
       </div>
 

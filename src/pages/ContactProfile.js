@@ -650,7 +650,7 @@ function ContactProfile({ onNavigate }) {
                     key={event['Event ID']}
                     event={event}
                     contacts={allContacts}
-                    onClick={() => onNavigate('event-details', { id: event['Event ID'] })}
+                    onClick={() => onNavigate('event-details', event['Event ID'])}
                   />
                 ))}
               </div>

@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import MergePreview from '../components/MergePreview';
 import { findDuplicatesInList } from '../services/duplicateDetector';
 import { readSheetData, updateContact, SHEETS } from '../utils/devModeWrapper';
 
-function DuplicateManager() {
-  const navigate = useNavigate();
-  const { accessToken } = useAuth();
+function DuplicateManager({ onNavigate }) {
+  const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const [contacts, setContacts] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
@@ -88,8 +86,8 @@ function DuplicateManager() {
       };
 
       // Apply updates
-      await updateContact(contact1Id, updated1);
-      await updateContact(contact2Id, updated2);
+      await updateContact(accessToken, sheetId, contact1Id, contact1, updated1, user?.email);
+      await updateContact(accessToken, sheetId, contact2Id, contact2, updated2, user?.email);
 
       // Record the linked pair
       setLinkedPairs([
@@ -138,8 +136,8 @@ function DuplicateManager() {
       delete updated2.DuplicateLinkedTo;
 
       // Apply updates
-      await updateContact(contact1Id, updated1);
-      await updateContact(contact2Id, updated2);
+      await updateContact(accessToken, sheetId, contact1Id, contact1, updated1, user?.email);
+      await updateContact(accessToken, sheetId, contact2Id, contact2, updated2, user?.email);
 
       // Remove from linked pairs
       setLinkedPairs(
@@ -167,7 +165,7 @@ function DuplicateManager() {
           <h1>Duplicate Manager</h1>
           <p className="text-muted">Find and link duplicate contacts</p>
         </div>
-        <button className="btn btn-primary" onClick={() => navigate('/contacts')}>
+        <button className="btn btn-primary" onClick={() => onNavigate('contacts')}>
           Back to Contacts
         </button>
       </div>

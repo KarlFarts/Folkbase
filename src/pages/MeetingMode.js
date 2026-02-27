@@ -29,8 +29,8 @@ export default function MeetingMode({ onNavigate }) {
   useEffect(() => {
     const loadContacts = async () => {
       try {
-        const data = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
-        setContacts(data || []);
+        const { data: contactsData } = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
+        setContacts(contactsData || []);
       } catch {
         // Silent failure expected
       } finally {

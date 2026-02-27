@@ -289,6 +289,7 @@ function ContactList({ onNavigate }) {
   const [statusFilter, setStatusFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
   const [collectionFilter, setCollectionFilter] = useState(null);
+  const [contactListMappings, setContactListMappings] = useState([]);
   const [sortBy, setSortBy] = useState('name');
 
   // View mode and sorting
@@ -317,13 +318,15 @@ function ContactList({ onNavigate }) {
       }
       setError('');
 
-      const [dataResult, metaResult] = await Promise.all([
+      const [dataResult, metaResult, listMappingsResult] = await Promise.all([
         readSheetData(accessToken, sheetId, SHEETS.CONTACTS),
         readSheetMetadata(accessToken, sheetId, SHEETS.CONTACTS),
+        readSheetData(accessToken, sheetId, SHEETS.CONTACT_LISTS),
       ]);
 
       setContacts(dataResult.data);
       setMetadata(metaResult);
+      setContactListMappings(listMappingsResult.data || []);
 
       if (isManualRefresh) {
         // Show brief success notification
@@ -445,13 +448,10 @@ function ContactList({ onNavigate }) {
 
     // Collection filter
     if (collectionFilter) {
-      import('../__tests__/fixtures/seedTestData').then(({ getLocalContactCollections }) => {
-        const contactCollections = getLocalContactCollections();
-        const contactIdsInCollection = contactCollections
-          .filter((cc) => cc['Collection ID'] === collectionFilter)
-          .map((cc) => cc['Contact ID']);
-        result = result.filter((c) => contactIdsInCollection.includes(c['Contact ID']));
-      });
+      const contactIdsInCollection = contactListMappings
+        .filter((cc) => cc['List ID'] === collectionFilter)
+        .map((cc) => cc['Contact ID']);
+      result = result.filter((c) => contactIdsInCollection.includes(c['Contact ID']));
     }
 
     // Sort
@@ -521,6 +521,7 @@ function ContactList({ onNavigate }) {
     statusFilter,
     tagFilter,
     collectionFilter,
+    contactListMappings,
     sortBy,
     viewMode,
     sortConfig,
@@ -737,14 +738,13 @@ function ContactList({ onNavigate }) {
           setBulkActionProgress(((i + 1) / selectedContacts.length) * 100);
         }
 
-        notify(
-          `Copied ${successCount} of ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''} to ${targetWorkspace.name}`,
-          'success'
+        notify.success(
+          `Copied ${successCount} of ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''} to ${targetWorkspace.name}`
         );
         setSelectedIds(new Set());
         setShowBulkCopyModal(false);
       } catch {
-        notify('Failed to copy contacts', 'error');
+        notify.error('Failed to copy contacts');
       } finally {
         setBulkActionInProgress(false);
         setBulkActionProgress(0);
