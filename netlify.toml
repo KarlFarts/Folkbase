@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA fallback — also handled by public/_redirects, but this is more explicit
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

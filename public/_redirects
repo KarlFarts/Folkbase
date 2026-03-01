@@ -1,0 +1,3 @@
+# SPA fallback — serve index.html for all routes
+# Without this, refreshing any page other than / returns a 404
+/*    /index.html   200

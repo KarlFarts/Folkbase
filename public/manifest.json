@@ -4,8 +4,8 @@
   "description": "Your personal relationship manager",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f1419",
-  "theme_color": "#1a1a2e",
+  "background_color": "#1a1a2e",
+  "theme_color": "#c2703e",
   "orientation": "portrait-primary",
   "categories": ["productivity", "business"],
   "icons": [
