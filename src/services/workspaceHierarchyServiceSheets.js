@@ -484,12 +484,13 @@ export async function addWorkspaceMember(
   workspaceId,
   memberEmail,
   role,
-  userEmail
+  userEmail,
+  overrides = ''
 ) {
   const memberId = await generateMemberID(accessToken, sheetId);
   const addedDate = new Date().toISOString();
 
-  const values = [memberId, workspaceId, memberEmail, role, addedDate, userEmail];
+  const values = [memberId, workspaceId, memberEmail, role, addedDate, userEmail, overrides];
 
   await appendRow(accessToken, sheetId, SHEET_NAMES.WORKSPACE_MEMBERS, values);
 
@@ -525,6 +526,65 @@ export async function getWorkspaceMembers(accessToken, sheetId, workspaceId) {
 }
 
 /**
+ * Update a workspace member's role and/or overrides.
+ */
+export async function updateWorkspaceMember(accessToken, sheetId, memberId, updates) {
+  const { data, rowMap } = await readSheetData(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.WORKSPACE_MEMBERS
+  );
+  const member = data.find((m) => m['Member ID'] === memberId);
+  if (!member) throw new Error(`Member ${memberId} not found`);
+
+  const rowIndex = rowMap?.[memberId];
+  if (!rowIndex) throw new Error(`Row index for member ${memberId} not found`);
+
+  const updatedValues = [
+    member['Member ID'],
+    member['Workspace ID'],
+    member['Member Email'],
+    updates.role !== undefined ? updates.role : member['Role'],
+    member['Added Date'],
+    member['Added By'],
+    updates.overrides !== undefined ? updates.overrides : (member['Overrides'] || ''),
+  ];
+
+  await updateRow(accessToken, sheetId, SHEET_NAMES.WORKSPACE_MEMBERS, rowIndex, updatedValues);
+  return { ...member, Role: updatedValues[3], Overrides: updatedValues[6] };
+}
+
+/**
+ * Remove a workspace member by clearing their row (sets role to empty).
+ */
+export async function removeWorkspaceMember(accessToken, sheetId, memberId) {
+  const { data, rowMap } = await readSheetData(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.WORKSPACE_MEMBERS
+  );
+  const member = data.find((m) => m['Member ID'] === memberId);
+  if (!member) throw new Error(`Member ${memberId} not found`);
+
+  const rowIndex = rowMap?.[memberId];
+  if (!rowIndex) throw new Error(`Row index for member ${memberId} not found`);
+
+  // Clear role to mark as removed
+  const clearedValues = [
+    member['Member ID'],
+    member['Workspace ID'],
+    member['Member Email'],
+    '', // Role cleared
+    member['Added Date'],
+    member['Added By'],
+    '',
+  ];
+
+  await updateRow(accessToken, sheetId, SHEET_NAMES.WORKSPACE_MEMBERS, rowIndex, clearedValues);
+  return { success: true };
+}
+
+/**
  * Get all workspaces a user is a member of
  * @param {string} accessToken - Google access token
  * @param {string} sheetId - Google Sheet ID
@@ -546,6 +606,7 @@ export async function getUserWorkspaces(accessToken, sheetId, userEmail) {
     return {
       ...workspace,
       memberRole: membership['Role'],
+      memberOverrides: membership['Overrides'] || '',
     };
   });
 }
@@ -609,8 +670,9 @@ export async function createWorkspaceInvitation(
     expiresAt.toISOString(),
     options.maxUses || '', // Empty = unlimited
     '0', // Current uses starts at 0
-    options.role || 'member',
+    options.role || 'editor',
     'TRUE', // Is Active
+    options.defaultOverrides || '',
   ];
 
   await appendRow(accessToken, sheetId, SHEET_NAMES.WORKSPACE_INVITATIONS, values);
@@ -748,14 +810,15 @@ export async function joinWorkspaceViaInvitation(accessToken, sheetId, token, us
 
   const { invitation, workspace } = validation;
 
-  // Add user as workspace member
+  // Add user as workspace member (carry over default overrides from invitation)
   await addWorkspaceMember(
     accessToken,
     sheetId,
     invitation.workspace_id,
     userEmail,
     invitation.role,
-    userEmail // Added by themselves via invitation
+    userEmail, // Added by themselves via invitation
+    invitation['Default Overrides'] || ''
   );
 
   // Increment invitation uses

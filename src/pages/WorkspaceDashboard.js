@@ -9,10 +9,13 @@ import {
   getWorkspaceMembers,
   createWorkspaceInvitation,
   getWorkspaceInvitations,
+  updateWorkspaceMember,
+  removeWorkspaceMember,
 } from '../services/workspaceHierarchyServiceSheets';
 import { readSheetData } from '../utils/devModeWrapper';
-import { SHEET_NAMES } from '../config/constants';
+import { SHEET_NAMES, WORKSPACE_ROLES, PERMISSION_FEATURES } from '../config/constants';
 import { findTouchpointFolder } from '../utils/driveFolder';
+import { shareFileWithUser } from '../utils/driveSharing';
 
 const WorkspaceDashboard = ({ onNavigate }) => {
   const { user, accessToken } = useAuth();
@@ -25,6 +28,8 @@ const WorkspaceDashboard = ({ onNavigate }) => {
   const [invitationToken, setInvitationToken] = useState('');
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [creatingInvitation, setCreatingInvitation] = useState(false);
+  const [sharingSheet, setSharingSheet] = useState(false);
+  const [editingMember, setEditingMember] = useState(null); // { id, role, overrides }
 
   useEffect(() => {
     if (selectedWorkspace) {
@@ -120,6 +125,92 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     }
   };
 
+  const handleShareSheetWithMembers = async () => {
+    if (!selectedWorkspace || !accessToken) return;
+
+    const sheetId = selectedWorkspace.sheet_id || selectedWorkspace['Sheet ID'];
+    if (!sheetId) {
+      notify.error('No sheet ID found for this workspace.');
+      return;
+    }
+
+    const emails = workspaceMembers
+      .map((m) => m['Member Email'] || m.member_email)
+      .filter((e) => e && e !== user?.email);
+
+    if (emails.length === 0) {
+      notify.warning('No other members to share with.');
+      return;
+    }
+
+    setSharingSheet(true);
+    let succeeded = 0;
+    let failed = 0;
+
+    for (const email of emails) {
+      try {
+        await shareFileWithUser(accessToken, sheetId, email, 'writer');
+        succeeded++;
+      } catch (err) {
+        console.error(`Failed to share with ${email}:`, err);
+        failed++;
+      }
+    }
+
+    setSharingSheet(false);
+
+    if (failed === 0) {
+      notify.success(`Sheet shared with ${succeeded} member${succeeded !== 1 ? 's' : ''}.`);
+    } else {
+      notify.warning(
+        `Shared with ${succeeded} member${succeeded !== 1 ? 's' : ''}. ${failed} failed — check console for details.`
+      );
+    }
+  };
+
+  const handleSaveMember = async () => {
+    if (!editingMember || !selectedWorkspace?.sheet_id) return;
+    try {
+      const overridesStr =
+        editingMember.role === WORKSPACE_ROLES.VIEWER
+          ? (editingMember.overrides || []).map((f) => `${f}:write`).join(',')
+          : '';
+      await updateWorkspaceMember(accessToken, selectedWorkspace.sheet_id, editingMember.id, {
+        role: editingMember.role,
+        overrides: overridesStr,
+      });
+      setWorkspaceMembers((prev) =>
+        prev.map((m) =>
+          m['Member ID'] === editingMember.id || m.id === editingMember.id
+            ? { ...m, Role: editingMember.role, role: editingMember.role, Overrides: overridesStr }
+            : m
+        )
+      );
+      setEditingMember(null);
+      notify.success('Member updated.');
+    } catch (err) {
+      console.error('Failed to update member:', err);
+      notify.error(`Failed to update member: ${err.message}`);
+    }
+  };
+
+  const handleRemoveMember = async (member) => {
+    const memberId = member['Member ID'] || member.id;
+    const email = member['Member Email'] || member.member_email;
+    if (!memberId || !selectedWorkspace?.sheet_id) return;
+    if (!window.confirm(`Remove ${email} from this workspace?`)) return;
+    try {
+      await removeWorkspaceMember(accessToken, selectedWorkspace.sheet_id, memberId);
+      setWorkspaceMembers((prev) =>
+        prev.filter((m) => (m['Member ID'] || m.id) !== memberId)
+      );
+      notify.success(`${email} removed from workspace.`);
+    } catch (err) {
+      console.error('Failed to remove member:', err);
+      notify.error(`Failed to remove member: ${err.message}`);
+    }
+  };
+
   const handleShareFolder = async () => {
     if (!accessToken) {
       notify.error('Please sign in first');
@@ -201,20 +292,105 @@ const WorkspaceDashboard = ({ onNavigate }) => {
               <div className="workspace-members-section">
                 <h2>Team Members</h2>
                 <div className="members-list">
-                  {workspaceMembers.map((member) => (
-                    <div key={member.id} className="member-card">
-                      <div className="member-info">
-                        <strong>{member.member_email}</strong>
-                        <span className="member-role">{member.role}</span>
+                  {workspaceMembers.map((member) => {
+                    const memberId = member['Member ID'] || member.id;
+                    const email = member['Member Email'] || member.member_email;
+                    const role = member['Role'] || member.role || '';
+                    const isEditing = editingMember?.id === memberId;
+                    const isOwnerRow = email === selectedWorkspace?.owner_email;
+
+                    return (
+                      <div key={memberId} className="member-card">
+                        <div className="member-info">
+                          <strong>{email}</strong>
+                          {isOwnerRow ? (
+                            <span className="member-role member-role--owner">owner</span>
+                          ) : (
+                            <span className="member-role">{role}</span>
+                          )}
+                        </div>
+                        <div className="member-meta">
+                          Joined{' '}
+                          {member['Added Date']
+                            ? new Date(member['Added Date']).toLocaleDateString()
+                            : 'N/A'}
+                        </div>
+
+                        {isOwnerOrAdmin(selectedWorkspace) && !isOwnerRow && (
+                          <>
+                            {isEditing ? (
+                              <div className="member-edit-form">
+                                <div className="member-edit-row">
+                                  <label className="member-edit-label">Role</label>
+                                  <select
+                                    className="member-edit-select"
+                                    value={editingMember.role}
+                                    onChange={(e) =>
+                                      setEditingMember((prev) => ({ ...prev, role: e.target.value, overrides: [] }))
+                                    }
+                                  >
+                                    <option value={WORKSPACE_ROLES.EDITOR}>Editor</option>
+                                    <option value={WORKSPACE_ROLES.VIEWER}>Viewer</option>
+                                  </select>
+                                </div>
+                                {editingMember.role === WORKSPACE_ROLES.VIEWER && (
+                                  <div className="member-edit-overrides">
+                                    <label className="member-edit-label">Write access for:</label>
+                                    <div className="wizard-overrides-checks">
+                                      {PERMISSION_FEATURES.map((feat) => (
+                                        <label key={feat} className="wizard-override-check">
+                                          <input
+                                            type="checkbox"
+                                            checked={(editingMember.overrides || []).includes(feat)}
+                                            onChange={(e) => {
+                                              const next = e.target.checked
+                                                ? [...(editingMember.overrides || []), feat]
+                                                : (editingMember.overrides || []).filter((f) => f !== feat);
+                                              setEditingMember((prev) => ({ ...prev, overrides: next }));
+                                            }}
+                                          />
+                                          {feat}
+                                        </label>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="member-edit-actions">
+                                  <button className="btn btn-primary btn-sm" onClick={handleSaveMember}>
+                                    Save
+                                  </button>
+                                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingMember(null)}>
+                                    Cancel
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="member-card-actions">
+                                <button
+                                  className="btn btn-secondary btn-sm"
+                                  onClick={() => {
+                                    const currentOverrides = (member['Overrides'] || member.memberOverrides || '')
+                                      .split(',')
+                                      .map((s) => s.replace(':write', '').trim())
+                                      .filter(Boolean);
+                                    setEditingMember({ id: memberId, role, overrides: currentOverrides });
+                                  }}
+                                >
+                                  Edit Role
+                                </button>
+                                <button
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleRemoveMember(member)}
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
                       </div>
-                      <div className="member-meta">
-                        Joined{' '}
-                        {member['Added Date']
-                          ? new Date(member['Added Date']).toLocaleDateString()
-                          : 'N/A'}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
@@ -226,6 +402,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
                       <WorkspaceInvitationGenerator
                         workspace={selectedWorkspace}
                         token={invitationToken}
+                        sheetId={config.personalSheetId || config.sheetId}
                       />
                     ) : (
                       <div className="create-invitation-prompt">
@@ -244,29 +421,39 @@ const WorkspaceDashboard = ({ onNavigate }) => {
                   <div className="workspace-folder-section">
                     <h2>Collaborate with Google Drive</h2>
                     <p className="text-muted ws-folder-desc">
-                      Share the Folkbase folder with workspace members to give them access to
-                      the shared sheet and files.
+                      Share the workspace sheet directly with members so they can access it, or
+                      open the Folkbase folder to manage sharing manually.
                     </p>
-                    <button
-                      onClick={handleShareFolder}
-                      className="btn btn-secondary ws-folder-btn"
-                    >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
+                    <div className="ws-folder-actions">
+                      <button
+                        onClick={handleShareSheetWithMembers}
+                        className="btn btn-primary ws-folder-btn"
+                        disabled={sharingSheet || workspaceMembers.length <= 1}
+                        title="Grant all workspace members write access to the sheet via Drive API"
                       >
-                        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
-                        <line x1="12" y1="11" x2="12" y2="17" />
-                        <line x1="9" y1="14" x2="15" y2="14" />
-                      </svg>
-                      Open Folkbase Folder
-                    </button>
+                        {sharingSheet ? 'Sharing...' : 'Share Sheet with All Members'}
+                      </button>
+                      <button
+                        onClick={handleShareFolder}
+                        className="btn btn-secondary ws-folder-btn"
+                      >
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                          <line x1="12" y1="11" x2="12" y2="17" />
+                          <line x1="9" y1="14" x2="15" y2="14" />
+                        </svg>
+                        Open Folkbase Folder
+                      </button>
+                    </div>
                   </div>
                 </>
               )}

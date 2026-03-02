@@ -2,7 +2,7 @@ import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useConfig } from './contexts/ConfigContext';
-import { WorkspaceProvider } from './contexts/WorkspaceContext';
+import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { useApiTracking } from './hooks/useApiTracking';
 import { useCalendarSync } from './hooks/useCalendarSync';
@@ -59,10 +59,12 @@ import { useActiveSheetId } from './utils/sheetResolver';
 // Lazy load setup wizard (only loaded when needed)
 const SetupWizard = lazy(() => import('./components/SetupWizard/SetupWizard'));
 const SignInPage = lazy(() => import('./pages/SignInPage'));
+const NoWorkspaceLandingPage = lazy(() => import('./pages/NoWorkspaceLandingPage'));
 
 function AppContent() {
   const { user, accessToken, loading } = useAuth();
   const { config } = useConfig();
+  const { userWorkspaces } = useWorkspace();
   const navigate = useNavigate();
   const [showSetup, setShowSetup] = useState(false);
   const [signInError, setSignInError] = useState(null);
@@ -120,18 +122,34 @@ function AppContent() {
     );
   }
 
-  // Step 2: Signed in but no sheet configured → show setup wizard (new users)
-  const needsSetup = !isDevMode && !config.personalSheetId;
+  // Step 2: Signed in but no sheet configured — check if they can skip setup
+  // Allow /join route through so invited users aren't blocked
+  const isPendingJoin = window.location.pathname === '/join';
 
-  if (needsSetup || showSetup) {
+  // Also check localStorage cache for known workspaces (collaborator-only users)
+  const knownWorkspaces = JSON.parse(localStorage.getItem('folkbase_known_workspaces') || '[]');
+  const hasWorkspaceAccess = userWorkspaces.length > 0 || knownWorkspaces.length > 0;
+
+  // Only block if no personal sheet AND no workspace access AND not in the middle of joining
+  const needsSetup = !isDevMode && !config.personalSheetId && !hasWorkspaceAccess && !isPendingJoin;
+
+  if (showSetup) {
     return (
       <Suspense fallback={<div className="loading-container"><div className="loading-spinner"></div></div>}>
         <SetupWizard
-          isInitialSetup={needsSetup}
+          isInitialSetup={false}
           onComplete={() => {
             setShowSetup(false);
           }}
         />
+      </Suspense>
+    );
+  }
+
+  if (needsSetup) {
+    return (
+      <Suspense fallback={<div className="loading-container"><div className="loading-spinner"></div></div>}>
+        <NoWorkspaceLandingPage onSetup={() => setShowSetup(true)} />
       </Suspense>
     );
   }

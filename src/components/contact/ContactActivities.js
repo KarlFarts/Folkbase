@@ -13,6 +13,7 @@ export function TouchpointHistoryCard({
   onLogTouchpoint,
   onTouchpointClick,
   maxHeight,
+  canLog = true,
 }) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -78,9 +79,11 @@ export function TouchpointHistoryCard({
         {touchpoints.length === 0 ? (
           <div className="ca-empty-state">
             <p className="text-muted ca-empty-text">No touchpoints logged yet</p>
-            <button className="btn btn-primary btn-sm" onClick={onLogTouchpoint}>
-              Log First Touchpoint
-            </button>
+            {canLog && (
+              <button className="btn btn-primary btn-sm" onClick={onLogTouchpoint}>
+                Log First Touchpoint
+              </button>
+            )}
           </div>
         ) : filtered.length === 0 ? (
           <p className="text-muted ca-empty-text">No results match your filter.</p>
@@ -100,7 +103,7 @@ export function TouchpointHistoryCard({
  * NotesCard - Displays linked notes for a contact
  * Now uses NotesDisplaySection for consistent display across the app
  */
-export function NotesCard({ notes, contactId, onAddNote, onNavigate }) {
+export function NotesCard({ notes, contactId, onAddNote, onNavigate, canEdit = true }) {
   const handleAddNote = onAddNote || (() => onNavigate('notes'));
 
   return (
@@ -111,8 +114,8 @@ export function NotesCard({ notes, contactId, onAddNote, onNavigate }) {
           entityType="contact"
           entityId={contactId}
           onAddNote={handleAddNote}
-          canEdit={true}
-          showAddButton={true}
+          canEdit={canEdit}
+          showAddButton={canEdit}
           showLinkedEntities={true}
         />
       </div>

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { useNotification } from '../contexts/NotificationContext';
 
-const WorkspaceInvitationGenerator = ({ workspace, token }) => {
+const WorkspaceInvitationGenerator = ({ workspace, token, sheetId }) => {
   const { notify } = useNotification();
   const [copied, setCopied] = useState(false);
   const [emailForm, setEmailForm] = useState({
@@ -11,7 +11,8 @@ const WorkspaceInvitationGenerator = ({ workspace, token }) => {
   });
   const [sendingEmails, setSendingEmails] = useState(false);
 
-  const invitationUrl = `${window.location.origin}/join?token=${token}`;
+  const sheetParam = sheetId ? `&sheet=${sheetId}` : '';
+  const invitationUrl = `${window.location.origin}/join?token=${token}${sheetParam}`;
 
   const defaultMessage = `You're invited to join the workspace "${workspace.name}"!
 

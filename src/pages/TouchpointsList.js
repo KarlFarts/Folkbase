@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { Pencil, Trash2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
+import { usePermissions } from '../hooks/usePermissions';
 import { readSheetData, addTouchpoint, updateTouchpoint, SHEETS } from '../utils/devModeWrapper';
 import ContactSelector from '../components/ContactSelector';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
@@ -9,6 +10,7 @@ import { ListPageSkeleton } from '../components/SkeletonLoader';
 function TouchpointsList({ onNavigate }) {
   const { accessToken, refreshAccessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
+  const { canWrite } = usePermissions();
   const [touchpoints, setTouchpoints] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -434,9 +436,11 @@ function TouchpointsList({ onNavigate }) {
           <h1>Touchpoints</h1>
           <p className="text-muted">History of all contact interactions</p>
         </div>
-        <button className="btn btn-primary" onClick={handleOpenAddModal}>
-          Add Touchpoint
-        </button>
+        {canWrite('touchpoints') && (
+          <button className="btn btn-primary" onClick={handleOpenAddModal}>
+            Add Touchpoint
+          </button>
+        )}
       </div>
 
       {/* Filter Bar */}
@@ -597,9 +601,11 @@ function TouchpointsList({ onNavigate }) {
           </svg>
           <h3 className="empty-state-title">No Touchpoints Yet</h3>
           <p>Log your first interaction with a contact to get started</p>
-          <button className="btn btn-primary mt-md" onClick={handleOpenAddModal}>
-            Add Touchpoint
-          </button>
+          {canWrite('touchpoints') && (
+            <button className="btn btn-primary mt-md" onClick={handleOpenAddModal}>
+              Add Touchpoint
+            </button>
+          )}
         </div>
       ) : filteredTouchpoints.length === 0 ? (
         <div className="empty-state">

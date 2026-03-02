@@ -11,11 +11,13 @@ import ImportEventModal from '../components/events/ImportEventModal';
 import SyncConflictModal from '../components/events/SyncConflictModal';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 
 function EventsList({ onNavigate }) {
   const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -274,9 +276,11 @@ function EventsList({ onNavigate }) {
           <h1>Events</h1>
           <p className="text-muted">Manage your personal events and meetings</p>
         </div>
-        <button className="btn btn-primary" onClick={() => onNavigate('add-event')}>
-          + Create Event
-        </button>
+        {canWrite('events') && (
+          <button className="btn btn-primary" onClick={() => onNavigate('add-event')}>
+            + Create Event
+          </button>
+        )}
       </div>
 
       {/* View Switcher + Sync + Search */}

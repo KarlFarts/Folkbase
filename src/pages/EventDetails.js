@@ -16,6 +16,7 @@ import {
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   addNote,
@@ -38,6 +39,7 @@ function EventDetails({ onNavigate }) {
   const { config } = useConfig();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [event, setEvent] = useState(null);
   const [attendeeContacts, setAttendeeContacts] = useState([]);
   const [allContacts, setAllContacts] = useState([]);
@@ -397,24 +399,26 @@ function EventDetails({ onNavigate }) {
           </div>
         </div>
         <div className="ed-header-actions">
-          {isEditing ? (
-            <>
-              <button className="btn btn-primary btn-sm" onClick={handleSaveEdit} disabled={saving} title="Save changes">
-                <Check size={16} /> {saving ? 'Saving...' : 'Save'}
-              </button>
-              <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(false)} disabled={saving} title="Cancel editing">
-                <X size={16} /> Cancel
-              </button>
-            </>
-          ) : (
-            <>
-              <button className="btn btn-ghost btn-sm" onClick={handleStartEdit} title="Edit event">
-                <Edit size={16} />
-              </button>
-              <button className="btn btn-ghost btn-sm ed-delete-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete event">
-                <Trash2 size={16} />
-              </button>
-            </>
+          {canWrite('events') && (
+            isEditing ? (
+              <>
+                <button className="btn btn-primary btn-sm" onClick={handleSaveEdit} disabled={saving} title="Save changes">
+                  <Check size={16} /> {saving ? 'Saving...' : 'Save'}
+                </button>
+                <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(false)} disabled={saving} title="Cancel editing">
+                  <X size={16} /> Cancel
+                </button>
+              </>
+            ) : (
+              <>
+                <button className="btn btn-ghost btn-sm" onClick={handleStartEdit} title="Edit event">
+                  <Edit size={16} />
+                </button>
+                <button className="btn btn-ghost btn-sm ed-delete-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete event">
+                  <Trash2 size={16} />
+                </button>
+              </>
+            )
           )}
         </div>
       </div>

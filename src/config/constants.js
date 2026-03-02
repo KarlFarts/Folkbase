@@ -189,6 +189,12 @@ export const AUTO_FIELDS = {
 export const SCHEMA_VERSION = 3; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory, v3 = expanded contact profile)
 export const SCHEMA_STORAGE_KEY = '_folkbase_schema_version'; // localStorage key for dev mode
 
+// Workspace Roles
+export const WORKSPACE_ROLES = { OWNER: 'owner', EDITOR: 'editor', VIEWER: 'viewer' };
+
+// Permission Features (used for per-feature write overrides)
+export const PERMISSION_FEATURES = ['contacts', 'touchpoints', 'notes', 'events', 'tasks'];
+
 // Business Logic Thresholds
 export const THRESHOLDS = {
   FOLLOW_UP_DAYS: 30, // Days before contact needs follow-up
@@ -604,6 +610,7 @@ export const SHEET_HEADERS = {
     'Role',
     'Added Date',
     'Added By',
+    'Overrides',
   ],
   [SHEET_NAMES.WORKSPACE_INVITATIONS]: [
     'Invitation ID',
@@ -616,6 +623,7 @@ export const SHEET_HEADERS = {
     'Current Uses',
     'Role',
     'Is Active',
+    'Default Overrides',
   ],
   [SHEET_NAMES.CONTACT_LINKS]: [
     'Link ID',

@@ -371,6 +371,25 @@ function SettingsPage({ onShowSetup, onNavigate }) {
         <p className="sp-subtitle">Manage your account, connection, and application settings.</p>
       </div>
 
+      {/* Personal sheet setup card — shown only for collaborator-only users */}
+      {!config.personalSheetId && (
+        <div className="sp-collab-setup-card">
+          <div className="sp-collab-setup-body">
+            <HardDrive size={20} className="sp-collab-setup-icon" />
+            <div>
+              <strong>No personal contact sheet</strong>
+              <p className="sp-collab-setup-desc">
+                You are currently using workspaces only. Set up your own contact sheet to manage
+                personal contacts and create workspaces.
+              </p>
+            </div>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => onShowSetup?.()}>
+            Set Up Personal Sheet
+          </button>
+        </div>
+      )}
+
       {/* Account Section */}
       <section className="sp-section">
         <h2 className="sp-section-heading">

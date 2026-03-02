@@ -3,6 +3,7 @@ import { RefreshCw, Zap, FileText } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import ConfirmDialog from '../components/ConfirmDialog';
 import WindowTemplate from '../components/WindowTemplate';
 import {
@@ -41,6 +42,7 @@ function NotesInbox({ onNavigate }) {
   const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
 
   const [notes, setNotes] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -616,9 +618,11 @@ function NotesInbox({ onNavigate }) {
           <h1>Notes</h1>
           <p className="page-subtitle">Capture ideas, meeting notes, and link them to contacts</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          + New Note
-        </button>
+        {canWrite('notes') && (
+          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            + New Note
+          </button>
+        )}
       </div>
 
       {/* Sync Status Bar */}
