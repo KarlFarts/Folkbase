@@ -5,6 +5,7 @@ import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { readSheetMetadata, addContact, detectDuplicates, SHEETS } from '../utils/devModeWrapper';
 import { sanitizeFormData, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
+import TagsInput from '../components/TagsInput';
 
 function AddContact({ onNavigate }) {
   const { user, accessToken } = useAuth();
@@ -299,73 +300,14 @@ function AddContact({ onNavigate }) {
             </div>
           </div>
 
-          <div
-            className="add-form-row"
-          >
-            <div className="form-group">
-              <label className="form-label" htmlFor="contact-priority">
-                Priority
-              </label>
-              <select
-                id="contact-priority"
-                className="form-select"
-                value={formData.Priority}
-                onChange={(e) => handleChange('Priority', e.target.value)}
-              >
-                {priorityOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label" htmlFor="contact-status">
-                Status
-              </label>
-              <select
-                id="contact-status"
-                className="form-select"
-                value={formData.Status}
-                onChange={(e) => handleChange('Status', e.target.value)}
-              >
-                {statusOptions.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
           <div className="form-group">
-            <label className="form-label" htmlFor="contact-district">
-              District
-            </label>
-            <input
-              id="contact-district"
-              type="text"
-              className="form-input"
-              value={formData.District}
-              onChange={(e) => handleChange('District', e.target.value)}
-              placeholder="District 5"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label" htmlFor="contact-tags">
-              Tags
-            </label>
-            <input
-              id="contact-tags"
-              type="text"
-              className="form-input"
+            <label className="form-label">Tags</label>
+            <TagsInput
               value={formData.Tags}
-              onChange={(e) => handleChange('Tags', e.target.value)}
-              placeholder="Labor, Endorsement, Volunteer"
+              onChange={(val) => handleChange('Tags', val)}
+              placeholder="Labor, Endorsement, Volunteer..."
+              suggestionsKey="dev_contacts"
             />
-            <small className="text-muted">Separate tags with commas</small>
           </div>
 
           <div className="form-group">

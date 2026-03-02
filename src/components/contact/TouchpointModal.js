@@ -1,16 +1,19 @@
-import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 
 /**
  * LogTouchpointModal - Modal for logging a new touchpoint
  */
 export function LogTouchpointModal({ touchpointData, setTouchpointData, onClose, onSave, saving }) {
+  const [showDetails, setShowDetails] = useState(false);
+
   return (
     <WindowTemplate
       isOpen={true}
       onClose={onClose}
       title="Log Touchpoint"
-      size="md"
+      size="lg"
       footer={
         <>
           <button className="btn btn-secondary" onClick={onClose}>
@@ -117,6 +120,56 @@ export function LogTouchpointModal({ touchpointData, setTouchpointData, onClose,
             }
           />
         </div>
+      )}
+
+      <button
+        type="button"
+        className="tpm-details-toggle"
+        onClick={() => setShowDetails((prev) => !prev)}
+      >
+        {showDetails ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        {showDetails ? 'Hide details' : 'More details'}
+      </button>
+
+      {showDetails && (
+        <>
+          <div className="form-group">
+            <label className="form-label">Attendees</label>
+            <input
+              type="text"
+              className="form-input"
+              value={touchpointData['Attendees'] || ''}
+              onChange={(e) =>
+                setTouchpointData({ ...touchpointData, Attendees: e.target.value })
+              }
+              placeholder="Names of attendees"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Location</label>
+            <input
+              type="text"
+              className="form-input"
+              value={touchpointData['Location'] || ''}
+              onChange={(e) =>
+                setTouchpointData({ ...touchpointData, Location: e.target.value })
+              }
+              placeholder="Where did this happen?"
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Linked Event ID</label>
+            <input
+              type="text"
+              className="form-input"
+              value={touchpointData['Event ID'] || ''}
+              onChange={(e) =>
+                setTouchpointData({ ...touchpointData, 'Event ID': e.target.value })
+              }
+              placeholder="e.g. EVT001"
+            />
+          </div>
+        </>
       )}
     </WindowTemplate>
   );

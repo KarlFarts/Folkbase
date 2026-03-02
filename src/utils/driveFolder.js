@@ -5,7 +5,10 @@
  * This folder contains the main database sheet plus exports, backups, imports, etc.
  */
 
-export const TOUCHPOINT_FOLDER_NAME = 'Folkbase';
+export const FOLKBASE_FOLDER_NAME = 'Folkbase';
+
+// Legacy alias for backward compatibility
+export const TOUCHPOINT_FOLDER_NAME = FOLKBASE_FOLDER_NAME;
 
 /**
  * Check if the access token has the Drive file scope
@@ -43,10 +46,10 @@ export async function hasDriveFileScope(accessToken) {
  * @param {string} accessToken - Google OAuth access token
  * @returns {Promise<{success: boolean, folder?: {id: string, name: string}, error?: string}>}
  */
-export async function findTouchpointFolder(accessToken) {
+export async function findFolkbaseFolder(accessToken) {
   try {
     const query = encodeURIComponent(
-      `name = '${TOUCHPOINT_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+      `name = '${FOLKBASE_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
     );
 
     const response = await fetch(
@@ -78,7 +81,7 @@ export async function findTouchpointFolder(accessToken) {
       folder: null,
     };
   } catch (error) {
-    console.error('Error finding Touchpoint folder:', error);
+    console.error('Error finding Folkbase folder:', error);
     return {
       success: false,
       error: error.message,
@@ -86,13 +89,25 @@ export async function findTouchpointFolder(accessToken) {
   }
 }
 
+// Legacy alias
+export const findTouchpointFolder = findFolkbaseFolder;
+
 /**
  * Create Folkbase folder in Google Drive
  * @param {string} accessToken - Google OAuth access token
  * @returns {Promise<{success: boolean, folderId?: string, error?: string}>}
  */
-export async function createTouchpointFolder(accessToken) {
+export async function createFolkbaseFolder(accessToken) {
   try {
+    // Pre-check: verify we have Drive scope before attempting
+    const hasScope = await hasDriveFileScope(accessToken);
+    if (!hasScope) {
+      return {
+        success: false,
+        error: 'Missing Google Drive scope. Please re-authorize with Drive permissions.',
+      };
+    }
+
     const response = await fetch('https://www.googleapis.com/drive/v3/files', {
       method: 'POST',
       headers: {
@@ -100,14 +115,21 @@ export async function createTouchpointFolder(accessToken) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        name: TOUCHPOINT_FOLDER_NAME,
+        name: FOLKBASE_FOLDER_NAME,
         mimeType: 'application/vnd.google-apps.folder',
       }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+      console.error('Drive API error creating folder:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorData,
+      });
+      throw new Error(
+        errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`
+      );
     }
 
     const folder = await response.json();
@@ -117,13 +139,16 @@ export async function createTouchpointFolder(accessToken) {
       folderId: folder.id,
     };
   } catch (error) {
-    console.error('Error creating Touchpoint folder:', error);
+    console.error('Error creating Folkbase folder:', error);
     return {
       success: false,
       error: error.message,
     };
   }
 }
+
+// Legacy alias
+export const createTouchpointFolder = createFolkbaseFolder;
 
 /**
  * Move a file into a folder
@@ -186,9 +211,9 @@ export async function moveFileToFolder(accessToken, fileId, folderId) {
  * @param {string} accessToken - Google OAuth access token
  * @returns {Promise<{success: boolean, folderId?: string, error?: string}>}
  */
-export async function getOrCreateTouchpointFolder(accessToken) {
+export async function getOrCreateFolkbaseFolder(accessToken) {
   // Check for existing folder
-  const findResult = await findTouchpointFolder(accessToken);
+  const findResult = await findFolkbaseFolder(accessToken);
 
   if (!findResult.success) {
     return {
@@ -205,5 +230,8 @@ export async function getOrCreateTouchpointFolder(accessToken) {
   }
 
   // No folder exists, create one
-  return await createTouchpointFolder(accessToken);
+  return await createFolkbaseFolder(accessToken);
 }
+
+// Legacy alias
+export const getOrCreateTouchpointFolder = getOrCreateFolkbaseFolder;

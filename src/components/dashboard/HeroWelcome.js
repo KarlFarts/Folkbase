@@ -4,9 +4,7 @@ import { getRandomGreeting, getTimeOfDayGreeting } from './greetingMessages';
 
 function HeroWelcome({ onNavigate }) {
   const { user } = useAuth();
-  const [greeting, setGreeting] = useState(getRandomGreeting());
-
-  const handleShuffle = () => setGreeting(getRandomGreeting());
+  const [greeting] = useState(getRandomGreeting());
 
   const formatDate = () => {
     return new Date().toLocaleDateString('en-US', {
@@ -37,9 +35,6 @@ function HeroWelcome({ onNavigate }) {
             <h1 className="dashboard-hero-message">
               {getTimeOfDayGreeting()}, {firstName}! {greeting}
             </h1>
-            <button className="dashboard-hero-shuffle" onClick={handleShuffle} title="New greeting">
-              ⟳
-            </button>
           </div>
           <div className="dashboard-hero-meta">
             <span className="dashboard-hero-date">{formatDate()}</span>

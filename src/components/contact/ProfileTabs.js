@@ -6,9 +6,11 @@ import { sanitizeUrl, buildTelUrl, buildSmsUrl, buildMailtoUrl } from '../../uti
 const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
 
 /**
- * ProfileTabs - Tab content for contact profile sections
+ * ProfileTabs - Tab content for contact profile sections.
+ * Can be driven by `group` directly (new collapsible layout)
+ * or by legacy `activeTab` prop (backward compat).
  */
-function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
+function ProfileTabs({ activeTab, group: groupProp, contact, isEditing, editData, onChange }) {
   // Map tab ID to field group (new 7-tab structure)
   const tabToGroup = {
     names: FIELD_GROUPS.NAMES,
@@ -25,9 +27,17 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
     privacy: FIELD_GROUPS.PRIVACY,
   };
 
-  const group = tabToGroup[activeTab];
+  const group = groupProp || tabToGroup[activeTab];
   // In dev mode, include pendingBackend fields; in production, only existing fields
   const fields = getFieldsByGroup(group, false, isDevMode);
+
+  // In view mode, filter out fields with no value
+  const visibleFields = isEditing
+    ? fields
+    : fields.filter((field) => {
+        const val = contact[field.key];
+        return val !== undefined && val !== null && val !== '';
+      });
 
   if (fields.length === 0) {
     return (
@@ -37,9 +47,17 @@ function ProfileTabs({ activeTab, contact, isEditing, editData, onChange }) {
     );
   }
 
+  if (!isEditing && visibleFields.length === 0) {
+    return (
+      <div className="pt-empty-state">
+        <p className="text-muted">No information added yet</p>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-fields-list">
-      {fields.map((field) => (
+      {visibleFields.map((field) => (
         <FieldRenderer
           key={field.key}
           field={field}
@@ -339,7 +357,7 @@ function DisplayField({ field, value }) {
   };
 
   if (!value) {
-    return <p className="text-muted">Not set</p>;
+    return null;
   }
 
   switch (field.type) {

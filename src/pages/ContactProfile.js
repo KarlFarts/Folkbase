@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -28,7 +28,7 @@ import ContactWorkspaceBadges from '../components/ContactWorkspaceBadges';
 import SyncConflictResolver from '../components/SyncConflictResolver';
 import ListManager from '../components/ListManager';
 import WindowTemplate from '../components/WindowTemplate';
-import { TAB_CONFIG } from '../utils/fieldDefinitions';
+import { FIELD_GROUPS, getFieldsByGroup } from '../utils/fieldDefinitions';
 
 // Imported components
 import ProfileHeader from '../components/contact/ProfileHeader';
@@ -49,22 +49,15 @@ import EmploymentManager from '../components/contact/EmploymentManager';
 import DistrictsManager from '../components/contact/DistrictsManager';
 import ContactMethodsManager from '../components/contact/ContactMethodsManager';
 import ContactAttributesManager from '../components/contact/ContactAttributesManager';
+import CollapsibleSection from '../components/contact/CollapsibleSection';
 
 const CONTENT_TABS = [
   { value: 'profile', label: 'Profile' },
   { value: 'touchpoints', label: 'Touchpoints' },
   { value: 'notes', label: 'Notes' },
   { value: 'events', label: 'Events' },
-  { value: 'organizations', label: 'Organizations' },
   { value: 'tasks', label: 'Tasks' },
   { value: 'relationships', label: 'Relationships' },
-  { value: 'lists', label: 'Lists' },
-  { value: 'socials', label: 'Socials' },
-  { value: 'education', label: 'Education' },
-  { value: 'employment', label: 'Employment' },
-  { value: 'districts', label: 'Districts' },
-  { value: 'methods', label: 'Methods' },
-  { value: 'attributes', label: 'Attributes' },
 ];
 
 function ContactProfile({ onNavigate }) {
@@ -80,6 +73,8 @@ function ContactProfile({ onNavigate }) {
   const [allContacts, setAllContacts] = React.useState([]);
   const [linkedOrganizations, setLinkedOrganizations] = React.useState([]);
   const [linkedTasks, setLinkedTasks] = React.useState([]);
+  const [showNoteExtended, setShowNoteExtended] = useState(false);
+  const [noteSearch, setNoteSearch] = useState('');
 
   const detailsCardRef = useRef(null);
 
@@ -161,7 +156,8 @@ function ContactProfile({ onNavigate }) {
       setLinkedTasks(
         filteredTasks.sort((a, b) => (b['Due Date'] || '').localeCompare(a['Due Date'] || ''))
       );
-    } catch {
+    } catch (err) {
+      console.error('Failed to load contact:', err);
       actions.setError('Failed to load contact.');
     } finally {
       actions.setLoading(false);
@@ -197,8 +193,9 @@ function ContactProfile({ onNavigate }) {
       actions.setContact({ ...state.contact, ...changedData });
       actions.setIsEditing(false);
       actions.clearDirtyFields();
-    } catch {
-      notify.error('Failed to save changes');
+    } catch (err) {
+      console.error('Save failed:', err);
+      notify.error('Failed to save: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -242,8 +239,9 @@ function ContactProfile({ onNavigate }) {
       actions.toggleLogModal(false);
       actions.resetTouchpointData();
       loadContact();
-    } catch {
-      notify.error('Failed to log touchpoint');
+    } catch (err) {
+      console.error('Failed to log touchpoint:', err);
+      notify.error('Failed to log touchpoint: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -257,14 +255,23 @@ function ContactProfile({ onNavigate }) {
 
     try {
       actions.setSaving(true);
-      const result = await addNote(accessToken, sheetId, {
-        Content: state.noteFormData.Content,
-        'Note Type': state.noteFormData['Note Type'],
-        Status: state.noteFormData.Status,
-      });
+      const result = await addNote(
+        accessToken,
+        sheetId,
+        {
+          Content: state.noteFormData.Content,
+          'Note Type': state.noteFormData['Note Type'],
+          Status: state.noteFormData.Status,
+          Tags: state.noteFormData.Tags || '',
+          Visibility: state.noteFormData.Visibility || 'Private',
+        },
+        user?.email
+      );
 
       if (result && result.noteId) {
         await linkNoteToContact(accessToken, sheetId, result.noteId, contactId);
+      } else {
+        console.error('addNote did not return a noteId:', result);
       }
 
       await logActivity(
@@ -287,9 +294,11 @@ function ContactProfile({ onNavigate }) {
 
       actions.toggleNoteModal(false);
       actions.resetNoteFormData();
+      setShowNoteExtended(false);
       notify.success('Note added successfully!');
-    } catch {
-      notify.error('Failed to add note');
+    } catch (err) {
+      console.error('Failed to add note:', err);
+      notify.error('Failed to add note: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -365,8 +374,9 @@ function ContactProfile({ onNavigate }) {
         Outcome: '',
         'Duration (min)': '',
       });
-    } catch {
-      notify.error('Failed to update touchpoint. Please try again.');
+    } catch (err) {
+      console.error('Failed to update touchpoint:', err);
+      notify.error('Failed to update touchpoint: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -389,8 +399,9 @@ function ContactProfile({ onNavigate }) {
       actions.setSelectedTouchpoint(null);
       setTouchpointToDelete(null);
       notify.success('Touchpoint deleted successfully!');
-    } catch {
-      notify.error('Failed to delete touchpoint. Please try again.');
+    } catch (err) {
+      console.error('Failed to delete touchpoint:', err);
+      notify.error('Failed to delete touchpoint: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -413,8 +424,9 @@ function ContactProfile({ onNavigate }) {
       );
       notify.success('Contact deleted (set to Inactive)');
       onNavigate('contacts');
-    } catch {
-      notify.error('Failed to delete contact. Please try again.');
+    } catch (err) {
+      console.error('Failed to delete contact:', err);
+      notify.error('Failed to delete contact: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
       setShowDeleteContactConfirm(false);
@@ -458,8 +470,9 @@ function ContactProfile({ onNavigate }) {
 
       notify.success(`Contact "${state.contact.Name}" copied to ${targetWorkspace.name}`);
       actions.toggleCopyModal(false);
-    } catch {
-      notify.error('Failed to copy contact. Please try again.');
+    } catch (err) {
+      console.error('Failed to copy contact:', err);
+      notify.error('Failed to copy contact: ' + (err.message || 'Unknown error'));
     } finally {
       actions.setSaving(false);
     }
@@ -589,23 +602,61 @@ function ContactProfile({ onNavigate }) {
       {/* Content card */}
       <div ref={detailsCardRef} className="card cp-content-card">
         {state.contentView === 'profile' && (
-          <>
-            {/* Profile sub-nav (field category sidebar) */}
-            <div className="cp-profile-layout">
-              <div className="cp-profile-sidebar">
-                {TAB_CONFIG.map((tab) => (
-                  <button
-                    key={tab.id}
-                    className={`cp-sidebar-item${state.activeTab === tab.id ? ' cp-sidebar-item--active' : ''}`}
-                    onClick={() => actions.setActiveTab(tab.id)}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-              <div className="cp-profile-content card-body">
+          <div className="cp-profile-collapsible card-body">
+            {/* Helper to render a group's fields inside a CollapsibleSection */}
+            {[
+              { title: 'Contact Info', group: FIELD_GROUPS.CONTACT },
+              { title: 'Names', group: FIELD_GROUPS.NAMES },
+              { title: 'Professional', group: FIELD_GROUPS.PROFESSIONAL },
+              { title: 'Online Presence', group: FIELD_GROUPS.ONLINE },
+              { title: 'Mailing', group: FIELD_GROUPS.MAILING },
+              { title: 'Relationships', group: FIELD_GROUPS.RELATIONSHIPS },
+              { title: 'Assets & Media', group: FIELD_GROUPS.ASSETS },
+            ].map(({ title, group }) => {
+              // Determine if section has any populated data
+              const sectionFields = getFieldsByGroup(group);
+              const hasData = sectionFields.some((f) => {
+                const val = state.contact[f.key];
+                return val !== undefined && val !== null && val !== '';
+              });
+              return (
+                <CollapsibleSection
+                  key={group}
+                  title={title}
+                  defaultOpen={hasData || state.isEditing}
+                  isEmpty={!hasData && !state.isEditing}
+                >
+                  <ProfileTabs
+                    group={group}
+                    contact={state.contact}
+                    isEditing={state.isEditing}
+                    editData={state.editData}
+                    onChange={(newEditData, changedKey) => {
+                      actions.setEditData(newEditData);
+                      if (changedKey) actions.markFieldDirty(changedKey);
+                    }}
+                  />
+                </CollapsibleSection>
+              );
+            })}
+
+            {/* More fields divider — always-collapsed demographic sections */}
+            <div className="cs-divider">More fields</div>
+
+            {[
+              { title: 'Demographics', group: FIELD_GROUPS.DEMOGRAPHICS },
+              { title: 'Contact Preferences', group: FIELD_GROUPS.CONTACT_PREFS },
+              { title: 'Community', group: FIELD_GROUPS.COMMUNITY },
+              { title: 'Donor', group: FIELD_GROUPS.DONOR },
+              { title: 'Privacy', group: FIELD_GROUPS.PRIVACY },
+            ].map(({ title, group }) => (
+              <CollapsibleSection
+                key={group}
+                title={title}
+                defaultOpen={false}
+              >
                 <ProfileTabs
-                  activeTab={state.activeTab}
+                  group={group}
                   contact={state.contact}
                   isEditing={state.isEditing}
                   editData={state.editData}
@@ -614,9 +665,74 @@ function ContactProfile({ onNavigate }) {
                     if (changedKey) actions.markFieldDirty(changedKey);
                   }}
                 />
-              </div>
-            </div>
-          </>
+              </CollapsibleSection>
+            ))}
+
+            {/* Manager sections */}
+            <CollapsibleSection title="Organizations" defaultOpen={linkedOrganizations.length > 0}>
+              {linkedOrganizations.length === 0 ? (
+                <p className="text-muted">No organizations linked via employment.</p>
+              ) : (
+                <div className="cp-card-grid">
+                  {linkedOrganizations.map((org) => (
+                    <div
+                      key={org['Organization ID']}
+                      className="card cp-linked-card"
+                      onClick={() => onNavigate('organization-profile', org['Organization ID'])}
+                    >
+                      <div className="cp-linked-card-inner">
+                        <div>
+                          <strong>{org['Display Name'] || org.Name}</strong>
+                          <div className="cp-linked-card-meta">
+                            {org.Type && <span>{org.Type}</span>}
+                            {org.Type && org.Industry && <span> · </span>}
+                            {org.Industry && <span>{org.Industry}</span>}
+                          </div>
+                        </div>
+                        <span className="badge badge-status-inactive cp-linked-card-id">
+                          {org['Organization ID']}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Employment" defaultOpen={false}>
+              <EmploymentManager contactId={contactId} />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Education" defaultOpen={false}>
+              <EducationManager contactId={contactId} />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Social Profiles" defaultOpen={false}>
+              <SocialsManager contactId={contactId} />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Lists" defaultOpen={false}>
+              <ListManager
+                contactId={contactId}
+                onClose={() => {}}
+                accessToken={accessToken}
+                sheetId={sheetId}
+                embedded={true}
+              />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Contact Methods" defaultOpen={false}>
+              <ContactMethodsManager contactId={contactId} />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Attributes" defaultOpen={false}>
+              <ContactAttributesManager contactId={contactId} />
+            </CollapsibleSection>
+
+            <CollapsibleSection title="Districts" defaultOpen={false}>
+              <DistrictsManager contactId={contactId} />
+            </CollapsibleSection>
+          </div>
         )}
 
         {state.contentView === 'touchpoints' && (
@@ -626,6 +742,36 @@ function ContactProfile({ onNavigate }) {
               onLogTouchpoint={() => actions.toggleLogModal(true)}
               onTouchpointClick={actions.setSelectedTouchpoint}
               maxHeight="600px"
+            />
+          </div>
+        )}
+
+        {state.contentView === 'notes' && (
+          <div className="card-body">
+            {state.notes.length > 0 && (
+              <div className="cp-notes-search-wrap">
+                <input
+                  type="text"
+                  className="form-input cp-notes-search-input"
+                  placeholder="Search notes..."
+                  value={noteSearch}
+                  onChange={(e) => setNoteSearch(e.target.value)}
+                />
+              </div>
+            )}
+            <NotesCard
+              notes={
+                noteSearch
+                  ? state.notes.filter((n) =>
+                      (n.Content || '').toLowerCase().includes(noteSearch.toLowerCase()) ||
+                      (n['Note Type'] || '').toLowerCase().includes(noteSearch.toLowerCase()) ||
+                      (n.Tags || '').toLowerCase().includes(noteSearch.toLowerCase())
+                    )
+                  : state.notes
+              }
+              contactId={contactId}
+              onAddNote={() => actions.toggleNoteModal(true)}
+              onNavigate={onNavigate}
             />
           </div>
         )}
@@ -652,44 +798,6 @@ function ContactProfile({ onNavigate }) {
                     contacts={allContacts}
                     onClick={() => onNavigate('event-details', event['Event ID'])}
                   />
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {state.contentView === 'organizations' && (
-          <div className="card-body">
-            {linkedOrganizations.length === 0 ? (
-              <div className="cp-empty-state">
-                <svg className="cp-empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <path d="M3 21h18M3 7v1a3 3 0 0 0 3 3h1m0-4v4m0-4h6m-6 4h6m6-4v1a3 3 0 0 1-3 3h-1m0-4v4m0 0H9m12-4h-6M3 10v11m18-11v11M9 21v-8a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v8" />
-                </svg>
-                <h3 className="cp-empty-title">No Organizations</h3>
-                <p>This contact has no employment history. Add employment to see linked organizations.</p>
-              </div>
-            ) : (
-              <div className="cp-card-grid">
-                {linkedOrganizations.map((org) => (
-                  <div
-                    key={org['Organization ID']}
-                    className="card cp-linked-card"
-                    onClick={() => onNavigate('organization-profile', org['Organization ID'])}
-                  >
-                    <div className="cp-linked-card-inner">
-                      <div>
-                        <strong>{org['Display Name'] || org.Name}</strong>
-                        <div className="cp-linked-card-meta">
-                          {org.Type && <span>{org.Type}</span>}
-                          {org.Type && org.Industry && <span> · </span>}
-                          {org.Industry && <span>{org.Industry}</span>}
-                        </div>
-                      </div>
-                      <span className="badge badge-status-inactive cp-linked-card-id">
-                        {org['Organization ID']}
-                      </span>
-                    </div>
-                  </div>
                 ))}
               </div>
             )}
@@ -735,60 +843,6 @@ function ContactProfile({ onNavigate }) {
                 ))}
               </div>
             )}
-          </div>
-        )}
-
-        {state.contentView === 'socials' && (
-          <div className="card-body">
-            <SocialsManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'education' && (
-          <div className="card-body">
-            <EducationManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'employment' && (
-          <div className="card-body">
-            <EmploymentManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'districts' && (
-          <div className="card-body">
-            <DistrictsManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'methods' && (
-          <div className="card-body">
-            <ContactMethodsManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'attributes' && (
-          <div className="card-body">
-            <ContactAttributesManager contactId={contactId} />
-          </div>
-        )}
-
-        {state.contentView === 'lists' && (
-          <div className="card-body">
-            <ListManager
-              contactId={contactId}
-              onClose={() => {}}
-              accessToken={accessToken}
-              sheetId={sheetId}
-              embedded={true}
-            />
-          </div>
-        )}
-
-        {state.contentView === 'notes' && (
-          <div className="card-body">
-            <NotesCard notes={state.notes} contactId={contactId} onNavigate={onNavigate} />
           </div>
         )}
 
@@ -898,14 +952,20 @@ function ContactProfile({ onNavigate }) {
       {state.showNoteModal && (
         <WindowTemplate
           isOpen={state.showNoteModal}
-          onClose={() => actions.toggleNoteModal(false)}
+          onClose={() => {
+            actions.toggleNoteModal(false);
+            setShowNoteExtended(false);
+          }}
           title={`Write Note for ${state.contact?.Name}`}
-          size="md"
+          size="lg"
           footer={
             <>
               <button
                 className="btn btn-secondary"
-                onClick={() => actions.toggleNoteModal(false)}
+                onClick={() => {
+                  actions.toggleNoteModal(false);
+                  setShowNoteExtended(false);
+                }}
                 disabled={state.saving}
               >
                 Cancel
@@ -950,7 +1010,7 @@ function ContactProfile({ onNavigate }) {
                   actions.setNoteFormData({ ...state.noteFormData, Content: e.target.value })
                 }
                 placeholder="Enter your note..."
-                rows="8"
+                rows="12"
               />
             </div>
 
@@ -968,6 +1028,48 @@ function ContactProfile({ onNavigate }) {
                 <option value="Archived">Archived</option>
               </select>
             </div>
+
+            <button
+              type="button"
+              className="cp-note-extended-toggle"
+              onClick={() => setShowNoteExtended((prev) => !prev)}
+            >
+              {showNoteExtended ? '- Hide options' : '+ More options'}
+            </button>
+
+            {showNoteExtended && (
+              <>
+                <div>
+                  <label className="form-label">Tags</label>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={state.noteFormData.Tags || ''}
+                    onChange={(e) =>
+                      actions.setNoteFormData({ ...state.noteFormData, Tags: e.target.value })
+                    }
+                    placeholder="Comma-separated tags"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Visibility</label>
+                  <select
+                    className="form-input"
+                    value={state.noteFormData.Visibility || 'Private'}
+                    onChange={(e) =>
+                      actions.setNoteFormData({
+                        ...state.noteFormData,
+                        Visibility: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="Private">Private</option>
+                    <option value="Workspace">Workspace</option>
+                    <option value="Public">Public</option>
+                  </select>
+                </div>
+              </>
+            )}
           </div>
         </WindowTemplate>
       )}

@@ -15,7 +15,9 @@ function InstallPrompt() {
 
   useEffect(() => {
     // Check if user has already dismissed the prompt
-    const dismissed = localStorage.getItem('touchpoint_install_prompt_dismissed');
+    const dismissed =
+      localStorage.getItem('folkbase_install_prompt_dismissed') ||
+      localStorage.getItem('touchpoint_install_prompt_dismissed');
     if (dismissed === 'true') {
       return;
     }
@@ -32,14 +34,19 @@ function InstallPrompt() {
 
     // For iOS, show manual install instructions after a few uses
     if (iOS) {
-      const visitCount = parseInt(localStorage.getItem('touchpoint_visit_count') || '0', 10);
-      localStorage.setItem('touchpoint_visit_count', (visitCount + 1).toString());
+      const visitCount = parseInt(
+        localStorage.getItem('folkbase_visit_count') ||
+          localStorage.getItem('touchpoint_visit_count') ||
+          '0',
+        10,
+      );
+      localStorage.setItem('folkbase_visit_count', (visitCount + 1).toString());
 
-      // Show after 3 visits
-      if (visitCount >= 2) {
+      // Show after 5 visits (not on first few)
+      if (visitCount >= 4) {
         setTimeout(() => {
           setShowPrompt(true);
-        }, 3000); // Show after 3 seconds
+        }, 3000);
       }
       return;
     }
@@ -50,10 +57,16 @@ function InstallPrompt() {
       setDeferredPrompt(e);
 
       // Show prompt after a delay (not immediately on first visit)
-      const visitCount = parseInt(localStorage.getItem('touchpoint_visit_count') || '0', 10);
-      localStorage.setItem('touchpoint_visit_count', (visitCount + 1).toString());
+      const visitCount = parseInt(
+        localStorage.getItem('folkbase_visit_count') ||
+          localStorage.getItem('touchpoint_visit_count') ||
+          '0',
+        10,
+      );
+      localStorage.setItem('folkbase_visit_count', (visitCount + 1).toString());
 
-      if (visitCount >= 2) {
+      // Show after 5 visits (not on first few)
+      if (visitCount >= 4) {
         setTimeout(() => {
           setShowPrompt(true);
         }, 3000);
@@ -89,7 +102,7 @@ function InstallPrompt() {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('touchpoint_install_prompt_dismissed', 'true');
+    localStorage.setItem('folkbase_install_prompt_dismissed', 'true');
   };
 
   if (!showPrompt) {

@@ -1,6 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { X, Edit, Trash2, Check, Calendar as CalendarIcon, RefreshCw } from 'lucide-react';
+import {
+  X,
+  Edit,
+  Trash2,
+  Check,
+  Calendar as CalendarIcon,
+  RefreshCw,
+  Clock,
+  Link as LinkIcon,
+  Target,
+  UserPlus,
+  Search,
+} from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
@@ -53,6 +65,8 @@ function EventDetails({ onNavigate }) {
   const [editData, setEditData] = useState({});
   const [saving, setSaving] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showAddAttendeeModal, setShowAddAttendeeModal] = useState(false);
+  const [attendeeSearchQuery, setAttendeeSearchQuery] = useState('');
 
   const loadEventDetails = useCallback(async () => {
     if (!accessToken || !sheetId) {
@@ -200,11 +214,46 @@ function EventDetails({ onNavigate }) {
     setEditData({
       'Event Name': event['Event Name'] || '',
       'Event Date': event['Event Date'] || '',
+      'Start Time': event['Start Time'] || '',
+      'End Time': event['End Time'] || '',
       'Event Location': event['Event Location'] || '',
       'Event Type': event['Event Type'] || '',
+      Status: event['Status'] || '',
       Description: event['Description'] || '',
+      'Virtual Meeting Link': event['Virtual Meeting Link'] || '',
+      'Goals/Objectives': event['Goals/Objectives'] || '',
     });
     setIsEditing(true);
+  };
+
+  const handleAddAttendee = async (contactId) => {
+    try {
+      const currentAttendees = event['Attendees'] || '';
+      const ids = currentAttendees
+        .split(',')
+        .map((i) => i.trim())
+        .filter(Boolean);
+      if (ids.includes(contactId)) {
+        notify.warning('This contact is already an attendee');
+        return;
+      }
+      ids.push(contactId);
+      await updateEvent(accessToken, sheetId, id, { Attendees: ids.join(', ') });
+      notify.success('Attendee added!');
+      setShowAddAttendeeModal(false);
+      setAttendeeSearchQuery('');
+      loadEventDetails();
+    } catch {
+      notify.error('Failed to add attendee');
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'confirmed') return 'ed-status-badge ed-status-badge--confirmed';
+    if (s === 'completed') return 'ed-status-badge ed-status-badge--completed';
+    if (s === 'cancelled') return 'ed-status-badge ed-status-badge--cancelled';
+    return 'ed-status-badge ed-status-badge--planned';
   };
 
   const handleSaveEdit = async () => {
@@ -413,6 +462,42 @@ function EventDetails({ onNavigate }) {
                 )}
               </div>
 
+              {/* Start / End Time */}
+              {(isEditing || event['Start Time'] || event['End Time']) && (
+                <div>
+                  <div className="ed-field-label">
+                    <Clock size={18} />
+                    <strong>Time</strong>
+                  </div>
+                  {isEditing ? (
+                    <div className="ed-time-row ed-field-indented">
+                      <input
+                        type="time"
+                        className="form-input"
+                        value={editData['Start Time']}
+                        onChange={(e) =>
+                          setEditData({ ...editData, 'Start Time': e.target.value })
+                        }
+                      />
+                      <span className="ed-time-separator">to</span>
+                      <input
+                        type="time"
+                        className="form-input"
+                        value={editData['End Time']}
+                        onChange={(e) =>
+                          setEditData({ ...editData, 'End Time': e.target.value })
+                        }
+                      />
+                    </div>
+                  ) : (
+                    <p className="text-muted ed-field-indented">
+                      {event['Start Time']}
+                      {event['End Time'] ? ` \u2013 ${event['End Time']}` : ''}
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Event Type */}
               {isEditing ? (
                 <div>
@@ -491,10 +576,31 @@ function EventDetails({ onNavigate }) {
                 </div>
               )}
 
+              {/* Status */}
               <div>
-                <span className={`badge ${isPastEvent ? 'badge-status-inactive' : 'badge-status-active'}`}>
-                  {isPastEvent ? 'Past Event' : 'Upcoming Event'}
-                </span>
+                {isEditing ? (
+                  <>
+                    <strong>Status</strong>
+                    <select
+                      className="form-select ed-field-input"
+                      value={editData['Status']}
+                      onChange={(e) =>
+                        setEditData({ ...editData, Status: e.target.value })
+                      }
+                    >
+                      <option value="">Auto (based on date)</option>
+                      <option value="Planned">Planned</option>
+                      <option value="Confirmed">Confirmed</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Cancelled">Cancelled</option>
+                    </select>
+                  </>
+                ) : (
+                  <span className={getStatusBadgeClass(event['Status'])}>
+                    {event['Status'] ||
+                      (isPastEvent ? 'Past Event' : 'Upcoming Event')}
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -504,7 +610,16 @@ function EventDetails({ onNavigate }) {
         <div className="card">
           <div className="card-header">
             <h3>Attendees</h3>
-            <span className="badge badge-priority-medium">{attendeeContacts.length}</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--spacing-sm)' }}>
+              <span className="badge badge-priority-medium">{attendeeContacts.length}</span>
+              <button
+                className="btn btn-ghost btn-sm ed-add-attendee-btn"
+                onClick={() => setShowAddAttendeeModal(true)}
+                title="Add attendee"
+              >
+                <UserPlus size={16} />
+              </button>
+            </div>
           </div>
           <div className="card-body">
             {attendeeContacts.length === 0 ? (
@@ -585,6 +700,81 @@ function EventDetails({ onNavigate }) {
             />
           </div>
         </div>
+
+        {/* Meeting Prep Card */}
+        {(isEditing ||
+          event['Virtual Meeting Link'] ||
+          event['Goals/Objectives']) && (
+          <div className="card ed-prep-card">
+            <div className="card-header">
+              <h3>Meeting Prep</h3>
+            </div>
+            <div className="card-body">
+              <div className="ed-field-stack">
+                {/* Agenda / Meeting Link */}
+                {(isEditing || event['Virtual Meeting Link']) && (
+                  <div>
+                    <div className="ed-field-label">
+                      <LinkIcon size={18} />
+                      <strong>Meeting Link / Agenda</strong>
+                    </div>
+                    {isEditing ? (
+                      <input
+                        type="url"
+                        className="form-input ed-field-indented"
+                        placeholder="https://docs.google.com/... or Zoom link"
+                        value={editData['Virtual Meeting Link']}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            'Virtual Meeting Link': e.target.value,
+                          })
+                        }
+                      />
+                    ) : (
+                      <a
+                        href={event['Virtual Meeting Link']}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ed-prep-link ed-field-indented"
+                      >
+                        {event['Virtual Meeting Link']}
+                      </a>
+                    )}
+                  </div>
+                )}
+
+                {/* Goals / Objectives */}
+                {(isEditing || event['Goals/Objectives']) && (
+                  <div>
+                    <div className="ed-field-label">
+                      <Target size={18} />
+                      <strong>Goals / Objectives</strong>
+                    </div>
+                    {isEditing ? (
+                      <textarea
+                        className="form-textarea ed-field-indented"
+                        value={editData['Goals/Objectives']}
+                        onChange={(e) =>
+                          setEditData({
+                            ...editData,
+                            'Goals/Objectives': e.target.value,
+                          })
+                        }
+                        rows={4}
+                        placeholder="What should be accomplished at this event?"
+                      />
+                    ) : (
+                      <p className="ed-prep-objectives ed-field-indented">
+                        {event['Goals/Objectives']}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Note Modal */}
@@ -739,6 +929,80 @@ function EventDetails({ onNavigate }) {
                 >
                   {savingBulkTouchpoints ? 'Saving...' : `Save (${bulkTouchpointData.selectedAttendees.size})`}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Attendee Modal */}
+      {showAddAttendeeModal && (
+        <div className="ed-modal-overlay">
+          <div className="card ed-modal-card">
+            <div className="card-header">
+              <h3>Add Attendee</h3>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => {
+                  setShowAddAttendeeModal(false);
+                  setAttendeeSearchQuery('');
+                }}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="card-body">
+              <div className="ed-attendee-search">
+                <div style={{ position: 'relative' }}>
+                  <Search
+                    size={16}
+                    style={{
+                      position: 'absolute',
+                      left: '12px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      color: 'var(--color-text-muted)',
+                    }}
+                  />
+                  <input
+                    type="text"
+                    className="ed-attendee-search-input"
+                    style={{ paddingLeft: '36px' }}
+                    placeholder="Search contacts..."
+                    value={attendeeSearchQuery}
+                    onChange={(e) => setAttendeeSearchQuery(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              </div>
+              <div className="ed-attendee-search-results">
+                {allContacts
+                  .filter((c) => {
+                    const name =
+                      `${c['First Name'] || ''} ${c['Last Name'] || ''}`.toLowerCase();
+                    const alreadyAttending = attendeeContacts.some(
+                      (a) => a['Contact ID'] === c['Contact ID'],
+                    );
+                    return (
+                      !alreadyAttending &&
+                      name.includes(attendeeSearchQuery.toLowerCase())
+                    );
+                  })
+                  .slice(0, 20)
+                  .map((contact) => (
+                    <div
+                      key={contact['Contact ID']}
+                      className="ed-attendee-search-item"
+                      onClick={() => handleAddAttendee(contact['Contact ID'])}
+                    >
+                      <span>
+                        {contact['First Name']} {contact['Last Name']}
+                      </span>
+                      <span className="text-muted" style={{ fontSize: 'var(--font-size-xs)' }}>
+                        {contact['Organization'] || ''}
+                      </span>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>

@@ -6,6 +6,7 @@ import ContactsDropdown from './ContactsDropdown';
 import Breadcrumbs from './Breadcrumbs';
 import { DevModeRoleSwitcher } from './DevModeRoleSwitcher';
 import { ApiUsageIndicator } from './ApiUsageIndicator';
+import UserMenuDropdown from './UserMenuDropdown';
 
 function Navbar({ onNavigate }) {
   const { logout } = useAuth();
@@ -27,10 +28,7 @@ function Navbar({ onNavigate }) {
     <>
       <nav className="navbar" aria-label="Main navigation">
         <div className="navbar-left">
-          <div
-            className="navbar-brand"
-            onClick={() => onNavigate('dashboard')}
-          >
+          <div className="navbar-brand" onClick={() => onNavigate('dashboard')}>
             <img src="/logo.svg" alt="Folkbase Logo" className="navbar-logo" />
             FOLKBASE
           </div>
@@ -47,13 +45,7 @@ function Navbar({ onNavigate }) {
         </button>
 
         <div className={`navbar-nav ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-          <Link
-            to="/"
-            className={`nav-link ${isActive('/') ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Home
-          </Link>
+          <ContactsDropdown mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
           <Link
             to="/touchpoints"
             className={`nav-link ${isActive('/touchpoints') ? 'active' : ''}`}
@@ -61,7 +53,6 @@ function Navbar({ onNavigate }) {
           >
             Touchpoints
           </Link>
-          <ContactsDropdown mobileMenuOpen={mobileMenuOpen} setMobileMenuOpen={setMobileMenuOpen} />
           <Link
             to="/events"
             className={`nav-link ${isActive('/events') ? 'active' : ''}`}
@@ -92,6 +83,7 @@ function Navbar({ onNavigate }) {
             onShowSettings={() => navigate('/settings')}
             onLogout={handleLogout}
           />
+          <UserMenuDropdown />
         </div>
       </nav>
       <Breadcrumbs />

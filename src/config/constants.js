@@ -187,7 +187,7 @@ export const AUTO_FIELDS = {
 
 // Schema Version Tracking
 export const SCHEMA_VERSION = 3; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory, v3 = expanded contact profile)
-export const SCHEMA_STORAGE_KEY = '_touchpoint_schema_version'; // localStorage key for dev mode
+export const SCHEMA_STORAGE_KEY = '_folkbase_schema_version'; // localStorage key for dev mode
 
 // Business Logic Thresholds
 export const THRESHOLDS = {
@@ -298,7 +298,22 @@ export const SHEET_HEADERS = {
     'Phone',
     'Email',
   ],
-  [SHEET_NAMES.TOUCHPOINTS]: ['Touchpoint ID', 'Contact ID', 'Type', 'Date', 'Notes', 'Status'],
+  [SHEET_NAMES.TOUCHPOINTS]: [
+    'Touchpoint ID',
+    'Contact ID',
+    'Contact Name',
+    'Type',
+    'Date',
+    'Notes',
+    'Status',
+    'Outcome',
+    'Follow-up Needed',
+    'Follow-up Date',
+    'Duration (min)',
+    'Attendees',
+    'Location',
+    'Event ID',
+  ],
   [SHEET_NAMES.EVENTS]: [
     // System (3)
     'Event ID',

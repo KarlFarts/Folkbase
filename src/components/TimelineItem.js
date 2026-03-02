@@ -1,5 +1,5 @@
 import { useState, memo } from 'react';
-import { Phone, Mail, MessageSquare, Calendar, Zap, FileText } from 'lucide-react';
+import { Phone, Mail, MessageSquare, Calendar, Zap, FileText, ChevronDown, ChevronUp, Pencil } from 'lucide-react';
 
 /**
  * TimelineItem Component - Phase 3
@@ -33,8 +33,8 @@ const OUTCOME_CLASSES = {
   'Not Interested': 'error',
 };
 
-const TimelineItem = memo(function TimelineItem({ touchpoint, isClickable, onClick }) {
-  const [_hovering, _setHovering] = useState(false);
+const TimelineItem = memo(function TimelineItem({ touchpoint, isClickable, onClick, onEdit }) {
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const type = touchpoint['Type'] || 'Other';
   const typeConfig = TOUCHPOINT_TYPES[type] || TOUCHPOINT_TYPES['Other'];
@@ -53,15 +53,20 @@ const TimelineItem = memo(function TimelineItem({ touchpoint, isClickable, onCli
   const hasFollowUp = touchpoint['Follow-up Needed'] === 'Yes';
   const duration = touchpoint['Duration (min)'];
   const notes = touchpoint['Notes'];
+  const attendees = touchpoint['Attendees'];
+  const location = touchpoint['Location'];
+  const followUpDate = touchpoint['Follow-up Date'];
+
+  const handleHeaderClick = () => {
+    if (isClickable && onClick) {
+      onClick();
+    } else {
+      setIsExpanded((prev) => !prev);
+    }
+  };
 
   return (
-    <div
-      className={`timeline-item ${isClickable ? 'timeline-item-interactive' : ''}`}
-      onClick={isClickable && onClick ? onClick : undefined}
-      onMouseEnter={() => _setHovering(true)}
-      onMouseLeave={() => _setHovering(false)}
-      style={{ cursor: isClickable && onClick ? 'pointer' : 'default' }}
-    >
+    <div className="timeline-item">
       {/* Timeline Marker: Dot and connecting line */}
       <div className="timeline-marker">
         <div
@@ -74,21 +79,79 @@ const TimelineItem = memo(function TimelineItem({ touchpoint, isClickable, onCli
 
       {/* Timeline Content */}
       <div className="timeline-content">
-        {/* Header: Type, Date, and Status Badges */}
-        <div className="timeline-header">
+        {/* Header: Type, Date, and Status Badges — click to expand */}
+        <div
+          className="timeline-header timeline-header-clickable"
+          onClick={handleHeaderClick}
+          style={{ cursor: 'pointer' }}
+        >
           <span className="timeline-type">{type}</span>
           <span className="timeline-date">{date}</span>
 
           {outcome && <span className={`timeline-outcome ${outcomeClass || ''}`}>{outcome}</span>}
 
-          {hasFollowUp && <span className="timeline-followup">Follow-up Needed</span>}
+          {hasFollowUp && <span className="timeline-followup">Follow-up</span>}
+
+          <span className="timeline-expand-icon">
+            {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+          </span>
         </div>
 
-        {/* Notes - Displayed inline with moderate detail */}
-        {notes && <div className="timeline-notes">{notes}</div>}
+        {/* Collapsed preview: truncated notes */}
+        {!isExpanded && notes && (
+          <div className="timeline-notes timeline-notes-preview">{notes}</div>
+        )}
 
-        {/* Duration indicator if present */}
-        {duration && <div className="timeline-duration">Duration: {duration} min</div>}
+        {/* Expanded detail */}
+        {isExpanded && (
+          <div className="timeline-expanded">
+            {notes && (
+              <div className="timeline-expanded-row">
+                <span className="timeline-expanded-label">Notes</span>
+                <p className="timeline-expanded-notes">{notes}</p>
+              </div>
+            )}
+            {duration && (
+              <div className="timeline-expanded-row">
+                <span className="timeline-expanded-label">Duration</span>
+                <span>{duration} min</span>
+              </div>
+            )}
+            {attendees && (
+              <div className="timeline-expanded-row">
+                <span className="timeline-expanded-label">Attendees</span>
+                <span>{attendees}</span>
+              </div>
+            )}
+            {location && (
+              <div className="timeline-expanded-row">
+                <span className="timeline-expanded-label">Location</span>
+                <span>{location}</span>
+              </div>
+            )}
+            {hasFollowUp && (
+              <div className="timeline-expanded-row">
+                <span className="timeline-expanded-label">Follow-up</span>
+                <span className="timeline-followup">
+                  {followUpDate ? `by ${followUpDate}` : 'Needed'}
+                </span>
+              </div>
+            )}
+            {onEdit && (
+              <button
+                type="button"
+                className="btn btn-ghost btn-sm timeline-edit-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(touchpoint);
+                }}
+              >
+                <Pencil size={12} />
+                Edit
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

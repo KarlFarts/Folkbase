@@ -42,7 +42,8 @@ function TokenExpiryNotifier() {
           try {
             await refreshAccessToken();
             notify.success('Session refreshed successfully');
-          } catch {
+          } catch (err) {
+            console.error('Token refresh failed:', err);
             notify.error('Failed to refresh session. Please sign in again.');
           }
         };

@@ -153,50 +153,50 @@
 
   /* ---- Semantic card palette — dark muted variants ---- */
 
-  /* Contacts - muted blue */
-  --card-bg-contacts: #1e2530;
+  /* Contacts - muted blue (semi-transparent for glassmorphism) */
+  --card-bg-contacts: rgba(30, 37, 48, 0.75);
   --card-text-contacts: #c0cfdd;
-  --card-border-contacts: #2e3a48;
+  --card-border-contacts: rgba(46, 58, 72, 0.6);
 
   /* Events - muted amber */
-  --card-bg-events: #2a2418;
+  --card-bg-events: rgba(42, 36, 24, 0.75);
   --card-text-events: #d4c4a8;
-  --card-border-events: #3d3428;
+  --card-border-events: rgba(61, 52, 40, 0.6);
 
   /* Tasks - muted rose */
-  --card-bg-tasks: #2a201e;
+  --card-bg-tasks: rgba(42, 32, 30, 0.75);
   --card-text-tasks: #d4b5b0;
-  --card-border-tasks: #3d302c;
+  --card-border-tasks: rgba(61, 48, 44, 0.6);
 
   /* Organizations - muted sage */
-  --card-bg-organizations: #1e2820;
+  --card-bg-organizations: rgba(30, 40, 32, 0.75);
   --card-text-organizations: #b8d0bc;
-  --card-border-organizations: #2e3e32;
+  --card-border-organizations: rgba(46, 62, 50, 0.6);
 
   /* Locations - muted teal */
-  --card-bg-locations: #1c2626;
+  --card-bg-locations: rgba(28, 38, 38, 0.75);
   --card-text-locations: #b0ccc8;
-  --card-border-locations: #2c3c3a;
+  --card-border-locations: rgba(44, 60, 58, 0.6);
 
   /* Notes/Activity - muted lavender */
-  --card-bg-notes: #222028;
+  --card-bg-notes: rgba(34, 32, 40, 0.75);
   --card-text-notes: #c0b8d0;
-  --card-border-notes: #34303e;
+  --card-border-notes: rgba(52, 48, 62, 0.6);
 
   /* Celebrations - muted warm gold */
-  --card-bg-celebrations: #28261c;
+  --card-bg-celebrations: rgba(40, 38, 28, 0.75);
   --card-text-celebrations: #d0c8a8;
-  --card-border-celebrations: #3c3828;
+  --card-border-celebrations: rgba(60, 56, 40, 0.6);
 
   /* Settings/System - neutral dark */
-  --card-bg-settings: #242220;
+  --card-bg-settings: rgba(36, 34, 32, 0.75);
   --card-text-settings: #c0bab0;
-  --card-border-settings: #383430;
+  --card-border-settings: rgba(56, 52, 48, 0.6);
 
   /* Workspaces - muted indigo */
-  --card-bg-workspaces: #1e2028;
+  --card-bg-workspaces: rgba(30, 32, 40, 0.75);
   --card-text-workspaces: #b8bcd0;
-  --card-border-workspaces: #2e303e;
+  --card-border-workspaces: rgba(46, 48, 62, 0.6);
 
   /* ---- Shadow system — heavier for dark backgrounds ---- */
   --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);

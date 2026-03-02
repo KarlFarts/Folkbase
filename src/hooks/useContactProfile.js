@@ -101,6 +101,8 @@ const initialState = {
     Content: '',
     'Note Type': 'General',
     Status: 'Unprocessed',
+    Tags: '',
+    Visibility: 'Private',
   },
 
   // Misc
@@ -213,6 +215,8 @@ function contactProfileReducer(state, action) {
           Content: '',
           'Note Type': 'General',
           Status: 'Unprocessed',
+          Tags: '',
+          Visibility: 'Private',
         },
       };
 

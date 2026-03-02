@@ -139,6 +139,7 @@ export function AuthProvider({ children }) {
     },
     scope: GOOGLE_SCOPES,
     flow: 'implicit',
+    ux_mode: 'popup',
     // NOTE: Implicit flow is deprecated for apps with backends, but is the correct
     // choice for client-only apps like Folkbase. Auth code flow requires a
     // backend to securely exchange the code for tokens using client_secret.
