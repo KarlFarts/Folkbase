@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   readSheetMetadata,
@@ -66,6 +67,7 @@ function ContactProfile({ onNavigate }) {
   const sheetId = useActiveSheetId();
   const { mode, userWorkspaces, activeWorkspace } = useWorkspace();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
 
   const { state, actions } = useContactProfile();
 
@@ -535,28 +537,34 @@ function ContactProfile({ onNavigate }) {
           </div>
 
           <div className="cp-header-actions">
-            <button className="btn btn-primary cp-action-btn" onClick={() => actions.toggleLogModal(true)}>
-              Log Touchpoint
-            </button>
-            <button className="btn btn-secondary cp-action-btn" onClick={() => actions.toggleNoteModal(true)}>
-              Write Note
-            </button>
+            {canWrite('touchpoints') && (
+              <button className="btn btn-primary cp-action-btn" onClick={() => actions.toggleLogModal(true)}>
+                Log Touchpoint
+              </button>
+            )}
+            {canWrite('notes') && (
+              <button className="btn btn-secondary cp-action-btn" onClick={() => actions.toggleNoteModal(true)}>
+                Write Note
+              </button>
+            )}
             <button className="btn btn-secondary cp-action-btn" onClick={() => actions.toggleCollectionsModal(true)}>
               Lists
             </button>
-            <button
-              className="btn btn-secondary cp-action-btn"
-              onClick={() => {
-                if (state.isEditing) {
-                  actions.cancelEdit();
-                } else {
-                  actions.setIsEditing(true);
-                }
-              }}
-            >
-              {state.isEditing ? 'Cancel Edit' : 'Edit Contact'}
-            </button>
-            {state.isEditing && (
+            {canWrite('contacts') && (
+              <button
+                className="btn btn-secondary cp-action-btn"
+                onClick={() => {
+                  if (state.isEditing) {
+                    actions.cancelEdit();
+                  } else {
+                    actions.setIsEditing(true);
+                  }
+                }}
+              >
+                {state.isEditing ? 'Cancel Edit' : 'Edit Contact'}
+              </button>
+            )}
+            {state.isEditing && canWrite('contacts') && (
               <button
                 className="btn btn-primary cp-action-btn"
                 onClick={handleSaveEdit}
@@ -565,12 +573,14 @@ function ContactProfile({ onNavigate }) {
                 {state.saving ? 'Saving...' : 'Save Changes'}
               </button>
             )}
-            <button
-              className="btn btn-ghost cp-action-btn cp-action-btn--danger"
-              onClick={() => setShowDeleteContactConfirm(true)}
-            >
-              Delete
-            </button>
+            {canWrite('contacts') && (
+              <button
+                className="btn btn-ghost cp-action-btn cp-action-btn--danger"
+                onClick={() => setShowDeleteContactConfirm(true)}
+              >
+                Delete
+              </button>
+            )}
           </div>
         </div>
 
@@ -742,6 +752,7 @@ function ContactProfile({ onNavigate }) {
               onLogTouchpoint={() => actions.toggleLogModal(true)}
               onTouchpointClick={actions.setSelectedTouchpoint}
               maxHeight="600px"
+              canLog={canWrite('touchpoints')}
             />
           </div>
         )}
@@ -772,6 +783,7 @@ function ContactProfile({ onNavigate }) {
               contactId={contactId}
               onAddNote={() => actions.toggleNoteModal(true)}
               onNavigate={onNavigate}
+              canEdit={canWrite('notes')}
             />
           </div>
         )}

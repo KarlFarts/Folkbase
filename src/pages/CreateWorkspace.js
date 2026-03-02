@@ -37,7 +37,8 @@ const CreateWorkspace = () => {
     description: '',
     sheetOption: 'new',
     existingSheetId: '',
-    defaultRole: 'member',
+    defaultRole: 'editor',
+    defaultOverrides: [],
     invitationExpiry: '30',
     importContacts: false,
     selectedContacts: [],
@@ -160,6 +161,7 @@ const CreateWorkspace = () => {
         sheet_id: formData.sheetOption === 'new' ? '' : formData.existingSheetId,
         status: 'active',
         default_role: formData.defaultRole,
+        default_overrides: formData.defaultRole === 'viewer' ? formData.defaultOverrides.map((f) => `${f}:write`).join(',') : '',
         invitation_expiry_days: parseInt(formData.invitationExpiry),
       };
 
@@ -677,31 +679,56 @@ const CreateWorkspace = () => {
                 </label>
                 <div className="wizard-card-options wizard-card-options-small">
                   <div
-                    className={`wizard-card-option wizard-card-option-compact ${formData.defaultRole === 'member' ? 'selected' : ''}`}
-                    onClick={() => setFormData((prev) => ({ ...prev, defaultRole: 'member' }))}
+                    className={`wizard-card-option wizard-card-option-compact ${formData.defaultRole === 'editor' ? 'selected' : ''}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, defaultRole: 'editor', defaultOverrides: [] }))}
                   >
                     <div className="wizard-card-option-header">
                       <span className="wizard-card-option-icon">
                         <User size={16} />
                       </span>
                     </div>
-                    <h4>Member</h4>
-                    <p>Can view and edit contacts</p>
+                    <h4>Editor</h4>
+                    <p>Can view and edit all content</p>
                   </div>
 
                   <div
-                    className={`wizard-card-option wizard-card-option-compact ${formData.defaultRole === 'admin' ? 'selected' : ''}`}
-                    onClick={() => setFormData((prev) => ({ ...prev, defaultRole: 'admin' }))}
+                    className={`wizard-card-option wizard-card-option-compact ${formData.defaultRole === 'viewer' ? 'selected' : ''}`}
+                    onClick={() => setFormData((prev) => ({ ...prev, defaultRole: 'viewer' }))}
                   >
                     <div className="wizard-card-option-header">
                       <span className="wizard-card-option-icon">
                         <Shield size={16} />
                       </span>
                     </div>
-                    <h4>Admin</h4>
-                    <p>Can manage members and settings</p>
+                    <h4>Viewer</h4>
+                    <p>Read-only access (override per feature below)</p>
                   </div>
                 </div>
+
+                {formData.defaultRole === 'viewer' && (
+                  <div className="wizard-overrides-section">
+                    <p className="wizard-overrides-label">Allow viewers to write to:</p>
+                    <div className="wizard-overrides-checks">
+                      {['contacts', 'touchpoints', 'notes', 'events', 'tasks'].map((feature) => (
+                        <label key={feature} className="wizard-override-check">
+                          <input
+                            type="checkbox"
+                            checked={formData.defaultOverrides.includes(feature)}
+                            onChange={(e) => {
+                              setFormData((prev) => ({
+                                ...prev,
+                                defaultOverrides: e.target.checked
+                                  ? [...prev.defaultOverrides, feature]
+                                  : prev.defaultOverrides.filter((f) => f !== feature),
+                              }));
+                            }}
+                          />
+                          {feature.charAt(0).toUpperCase() + feature.slice(1)}
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="form-group">
@@ -853,6 +880,7 @@ const CreateWorkspace = () => {
                 <WorkspaceInvitationGenerator
                   workspace={createdWorkspace}
                   token={createdWorkspace.invitation_token}
+                  sheetId={config.personalSheetId}
                 />
               )}
             </div>

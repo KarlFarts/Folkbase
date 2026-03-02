@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { useWorkspace } from '../contexts/WorkspaceContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   readSheetMetadata,
@@ -267,6 +268,7 @@ function ContactList({ onNavigate }) {
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
   const { userWorkspaces, mode, activeWorkspace } = useWorkspace();
+  const { canWrite } = usePermissions();
   const [contacts, setContacts] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -937,9 +939,11 @@ function ContactList({ onNavigate }) {
           >
             Find Duplicates
           </button>
-          <button className="btn btn-primary" onClick={() => onNavigate('add-contact')}>
-            + Add Contact
-          </button>
+          {canWrite('contacts') && (
+            <button className="btn btn-primary" onClick={() => onNavigate('add-contact')}>
+              + Add Contact
+            </button>
+          )}
         </div>
       </div>
 
@@ -1044,7 +1048,7 @@ function ContactList({ onNavigate }) {
               ? 'Add your first contact to get started'
               : 'Try adjusting your search or filters'}
           </p>
-          {contacts.length === 0 && (
+          {contacts.length === 0 && canWrite('contacts') && (
             <button className="btn btn-primary mt-md" onClick={() => onNavigate('add-contact')}>
               + Add Contact
             </button>

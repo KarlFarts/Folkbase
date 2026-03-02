@@ -5588,8 +5588,8 @@ input[type="checkbox"] {
 
 .member-card {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
   padding: var(--spacing-md, 16px);
   background: var(--color-bg-tertiary);
   border: 1px solid var(--color-border-primary);
@@ -5625,6 +5625,55 @@ input[type="checkbox"] {
 .member-meta {
   color: var(--color-text-muted);
   font-size: var(--font-size-sm, 0.875rem);
+}
+
+.member-role--owner {
+  background: var(--color-accent-secondary, #6c757d);
+}
+
+.member-card-actions {
+  display: flex;
+  gap: var(--spacing-xs, 4px);
+}
+
+.member-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+  padding-top: var(--spacing-xs, 4px);
+  border-top: 1px solid var(--color-border-primary);
+}
+
+.member-edit-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.member-edit-label {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary);
+  min-width: 60px;
+}
+
+.member-edit-select {
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-sm, 4px);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.member-edit-overrides {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+}
+
+.member-edit-actions {
+  display: flex;
+  gap: var(--spacing-xs, 4px);
 }
 
 .button-group {
@@ -8541,6 +8590,36 @@ body {
 .sp-subtitle {
   color: var(--color-text-secondary);
   font-size: var(--font-size-base);
+}
+
+.sp-collab-setup-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  background: var(--color-accent-primary-subtle, rgba(var(--color-accent-rgb, 59 130 246) / 0.08));
+  border: 1px solid var(--color-accent-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-md) var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.sp-collab-setup-body {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+}
+
+.sp-collab-setup-icon {
+  flex-shrink: 0;
+  color: var(--color-accent-primary);
+  margin-top: 2px;
+}
+
+.sp-collab-setup-desc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin: var(--spacing-xs) 0 0;
 }
 
 .sp-section {
@@ -12165,4 +12244,142 @@ body {
 [data-theme="dark"] .sync-status-bar {
   background: rgba(42, 39, 32, 0.6);
   border-color: rgba(61, 58, 51, 0.6);
+}
+
+/* ========================================
+   NoWorkspaceLandingPage
+   ======================================== */
+
+.nwlp-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl);
+}
+
+.nwlp-inner {
+  max-width: 800px;
+  width: 100%;
+  text-align: center;
+}
+
+.nwlp-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
+}
+
+.nwlp-subtitle {
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-xl);
+}
+
+.nwlp-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-lg);
+}
+
+@media (max-width: 600px) {
+  .nwlp-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.nwlp-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-align: center;
+}
+
+.nwlp-card-icon {
+  color: var(--color-primary);
+}
+
+.nwlp-card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.nwlp-card p {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.nwlp-join-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.nwlp-invite-input {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  background: var(--color-background);
+  color: var(--color-text);
+}
+
+.nwlp-error {
+  color: var(--color-error, #c0392b);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.nwlp-hint {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ========================================
+   Workspace Invitation Overrides (CreateWorkspace step 4)
+   ======================================== */
+
+.wizard-overrides-section {
+  margin-top: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.wizard-overrides-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.wizard-overrides-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm) var(--spacing-lg);
+}
+
+.wizard-override-check {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.ws-folder-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }

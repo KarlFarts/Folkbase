@@ -3207,7 +3207,8 @@ export async function addWorkspaceMember(
   workspaceId,
   memberEmail,
   role,
-  userEmail
+  userEmail,
+  overrides = ''
 ) {
   if (isDevMode()) {
     log('[DEV MODE] Adding workspace member:', memberEmail, 'to', workspaceId);
@@ -3222,6 +3223,7 @@ export async function addWorkspaceMember(
       Role: role,
       'Added Date': addedDate,
       'Added By': userEmail,
+      Overrides: overrides,
     };
 
     members.push(newMember);
@@ -3234,10 +3236,11 @@ export async function addWorkspaceMember(
       role: role,
       added_date: addedDate,
       added_by: userEmail,
+      overrides,
     };
   }
   const { addWorkspaceMember } = await import('../services/workspaceHierarchyServiceSheets');
-  return addWorkspaceMember(accessToken, sheetId, workspaceId, memberEmail, role, userEmail);
+  return addWorkspaceMember(accessToken, sheetId, workspaceId, memberEmail, role, userEmail, overrides);
 }
 
 /**
@@ -3270,6 +3273,7 @@ export async function getUserWorkspaces(accessToken, sheetId, userEmail) {
       return {
         ...workspace,
         memberRole: membership['Role'],
+        memberOverrides: membership['Overrides'] || '',
       };
     });
   }
@@ -3312,8 +3316,9 @@ export async function createWorkspaceInvitation(
       'Expires At': expiresAt.toISOString(),
       'Max Uses': options.maxUses || '',
       'Current Uses': '0',
-      Role: options.role || 'member',
+      Role: options.role || 'editor',
       'Is Active': 'TRUE',
+      'Default Overrides': options.defaultOverrides || '',
     };
 
     invitations.push(newInvitation);
@@ -3328,12 +3333,48 @@ export async function createWorkspaceInvitation(
       expires_at: expiresAt.toISOString(),
       max_uses: options.maxUses || null,
       current_uses: 0,
-      role: options.role || 'member',
+      role: options.role || 'editor',
       is_active: true,
+      default_overrides: options.defaultOverrides || '',
     };
   }
   const { createWorkspaceInvitation } = await import('../services/workspaceHierarchyServiceSheets');
   return createWorkspaceInvitation(accessToken, sheetId, workspaceId, options, createdBy);
+}
+
+/**
+ * WRAPPER: updateWorkspaceMember
+ * Updates a workspace member's role and/or overrides
+ */
+export async function updateWorkspaceMember(accessToken, sheetId, memberId, updates) {
+  if (isDevMode()) {
+    log('[DEV MODE] Updating workspace member:', memberId, updates);
+    const members = getLocalWorkspaceMembers();
+    const idx = members.findIndex((m) => m['Member ID'] === memberId);
+    if (idx === -1) throw new Error(`Member ${memberId} not found`);
+    if (updates.role !== undefined) members[idx]['Role'] = updates.role;
+    if (updates.overrides !== undefined) members[idx]['Overrides'] = updates.overrides;
+    saveLocalWorkspaceMembers(members);
+    return { ...members[idx] };
+  }
+  const { updateWorkspaceMember } = await import('../services/workspaceHierarchyServiceSheets');
+  return updateWorkspaceMember(accessToken, sheetId, memberId, updates);
+}
+
+/**
+ * WRAPPER: removeWorkspaceMember
+ * Removes a member from a workspace
+ */
+export async function removeWorkspaceMember(accessToken, sheetId, memberId) {
+  if (isDevMode()) {
+    log('[DEV MODE] Removing workspace member:', memberId);
+    const members = getLocalWorkspaceMembers();
+    const filtered = members.filter((m) => m['Member ID'] !== memberId);
+    saveLocalWorkspaceMembers(filtered);
+    return { success: true };
+  }
+  const { removeWorkspaceMember } = await import('../services/workspaceHierarchyServiceSheets');
+  return removeWorkspaceMember(accessToken, sheetId, memberId);
 }
 
 /**

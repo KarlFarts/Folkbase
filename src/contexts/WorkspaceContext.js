@@ -27,10 +27,10 @@ export const WorkspaceProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [mode, setMode] = useState('personal'); // 'personal' or 'workspace'
 
-  // Load user's workspaces from Google Sheets
+  // Load user's workspaces from Google Sheets (or from localStorage cache for collaborator-only users)
   useEffect(() => {
     const loadUserWorkspaces = async () => {
-      if (!user || !accessToken || !config.personalSheetId) {
+      if (!user || !accessToken) {
         setUserWorkspaces([]);
         setLoading(false);
         return;
@@ -39,8 +39,24 @@ export const WorkspaceProvider = ({ children }) => {
       try {
         setLoading(true);
 
-        // Get workspaces from Google Sheets where user is a member
-        const workspaces = await getUserWorkspaces(accessToken, config.personalSheetId, user.email);
+        let workspaces = [];
+
+        if (config.personalSheetId) {
+          // Normal path: user has their own personal sheet
+          workspaces = await getUserWorkspaces(accessToken, config.personalSheetId, user.email);
+        } else {
+          // Collaborator-only path: load from known workspaces stored in localStorage
+          const known = JSON.parse(localStorage.getItem('folkbase_known_workspaces') || '[]');
+          for (const entry of known) {
+            try {
+              const ws = await getUserWorkspaces(accessToken, entry.sheetId, user.email);
+              workspaces.push(...ws);
+            } catch (err) {
+              // User may have been removed from this workspace — skip silently
+              console.error('Failed to load workspace from known entry:', entry.workspaceId, err);
+            }
+          }
+        }
 
         setUserWorkspaces(workspaces);
 
@@ -83,10 +99,24 @@ export const WorkspaceProvider = ({ children }) => {
   }, []);
 
   const reloadWorkspaces = useCallback(async () => {
-    if (!user || !accessToken || !config.personalSheetId) return;
+    if (!user || !accessToken) return;
 
     try {
-      const workspaces = await getUserWorkspaces(accessToken, config.personalSheetId, user.email);
+      let workspaces = [];
+
+      if (config.personalSheetId) {
+        workspaces = await getUserWorkspaces(accessToken, config.personalSheetId, user.email);
+      } else {
+        const known = JSON.parse(localStorage.getItem('folkbase_known_workspaces') || '[]');
+        for (const entry of known) {
+          try {
+            const ws = await getUserWorkspaces(accessToken, entry.sheetId, user.email);
+            workspaces.push(...ws);
+          } catch (err) {
+            console.error('Failed to reload workspace from known entry:', entry.workspaceId, err);
+          }
+        }
+      }
 
       setUserWorkspaces(workspaces);
 

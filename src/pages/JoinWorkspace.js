@@ -7,6 +7,7 @@ import {
   validateInvitationToken,
   joinWorkspaceViaInvitation,
 } from '../services/workspaceHierarchyServiceSheets';
+import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 
 const JoinWorkspace = () => {
   const navigate = useNavigate();
@@ -21,6 +22,8 @@ const JoinWorkspace = () => {
   const [error, setError] = useState('');
 
   const token = searchParams.get('token');
+  // sheet param carries the workspace owner's sheet ID so joiners don't need their own personal sheet
+  const ownerSheetId = searchParams.get('sheet') || config?.sheetId;
   const hasValidated = useRef(false);
 
   // Validate token on mount and when dependencies change
@@ -48,9 +51,11 @@ const JoinWorkspace = () => {
         return;
       }
 
-      if (!accessToken || !config?.sheetId) {
+      if (!accessToken || !ownerSheetId) {
         setStatus('error');
-        setError('Please complete setup before joining a workspace');
+        setError(
+          'Unable to locate the workspace. Please use the full invite link (with ?sheet=...).'
+        );
         return;
       }
 
@@ -59,7 +64,7 @@ const JoinWorkspace = () => {
       try {
         const result = await validateInvitationToken(
           accessToken,
-          config.sheetId,
+          ownerSheetId,
           token,
           user.email
         );
@@ -85,10 +90,10 @@ const JoinWorkspace = () => {
     };
 
     validate();
-  }, [token, user, accessToken, config]);
+  }, [token, user, accessToken, ownerSheetId]);
 
   const handleJoinWorkspace = async () => {
-    if (!user || !workspace || !invitation || !accessToken || !config?.sheetId) return;
+    if (!user || !workspace || !invitation || !accessToken || !ownerSheetId) return;
 
     setStatus('joining');
     setError('');
@@ -96,7 +101,7 @@ const JoinWorkspace = () => {
     try {
       const result = await joinWorkspaceViaInvitation(
         accessToken,
-        config.sheetId,
+        ownerSheetId,
         token,
         user.email
       );
@@ -107,9 +112,35 @@ const JoinWorkspace = () => {
         return;
       }
 
+      // Save workspace reference to localStorage so collaborator-only users can find it later
+      const known = JSON.parse(localStorage.getItem('folkbase_known_workspaces') || '[]');
+      const workspaceId = result.workspace?.['Workspace ID'] || result.workspace?.id;
+      if (workspaceId && !known.find((k) => k.workspaceId === workspaceId)) {
+        known.push({
+          workspaceId,
+          sheetId: ownerSheetId,
+          name: result.workspace?.['Workspace Name'] || result.workspace?.name || '',
+          role: invitation?.role || '',
+        });
+        localStorage.setItem('folkbase_known_workspaces', JSON.stringify(known));
+      }
+
       await reloadWorkspaces();
       switchToWorkspace(result.workspace);
-      setStatus('joined');
+
+      // Probe the workspace sheet — if 403, owner hasn't shared it yet
+      const workspaceSheetId =
+        result.workspace?.['Sheet ID'] || result.workspace?.sheet_id || ownerSheetId;
+      try {
+        await readSheetData(accessToken, workspaceSheetId, SHEETS.CONTACTS);
+        setStatus('joined');
+      } catch (probeErr) {
+        if (probeErr?.status === 403 || String(probeErr?.message).includes('403')) {
+          setStatus('needs_sharing');
+        } else {
+          setStatus('joined');
+        }
+      }
     } catch {
       setStatus('error');
       setError('Failed to join workspace. Please try again.');
@@ -191,6 +222,24 @@ const JoinWorkspace = () => {
             <h2>Successfully Joined!</h2>
             <p>
               You're now a member of <strong>{workspace.name}</strong>.
+            </p>
+            <button onClick={() => navigate('/workspaces')} className="button-primary">
+              Go to Workspace Dashboard
+            </button>
+          </div>
+        );
+
+      case 'needs_sharing':
+        return (
+          <div className="join-workspace-message">
+            <h2>Almost there!</h2>
+            <p>
+              You've been added as a member of <strong>{workspace?.name}</strong>. However, the
+              workspace owner hasn't shared the sheet with you yet, so you can't access the data.
+            </p>
+            <p>
+              <strong>Next step:</strong> Ask the workspace owner to open the Workspace Dashboard
+              and click "Share Sheet with All Members".
             </p>
             <button onClick={() => navigate('/workspaces')} className="button-primary">
               Go to Workspace Dashboard
