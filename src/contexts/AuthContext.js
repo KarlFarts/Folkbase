@@ -182,9 +182,90 @@ export function AuthProvider({ children }) {
   );
 
   const refreshAccessToken = useCallback(async () => {
-    // Force re-authentication to get a fresh token
-    return signInWithGoogle(true);
-  }, [signInWithGoogle]);
+    if (isDevMode()) {
+      return signInWithGoogle(false);
+    }
+
+    // Try silent re-auth first using a hidden iframe.
+    // If the user still has an active Google session (very common), this
+    // returns a fresh token without any popup or user interaction.
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+    const params = new URLSearchParams({
+      client_id: clientId,
+      redirect_uri: window.location.origin,
+      response_type: 'token',
+      scope: GOOGLE_SCOPES,
+      prompt: 'none',
+      include_granted_scopes: 'true',
+    });
+
+    const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+
+    return new Promise((resolve, reject) => {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      let settled = false;
+      const cleanup = () => {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+      };
+
+      // Timeout after 8 seconds -- fall back to full popup
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        cleanup();
+        log('Silent refresh timed out, falling back to popup');
+        signInWithGoogle(true).then(resolve, reject);
+      }, 8000);
+
+      // Listen for the redirect with token in the hash
+      const checkIframe = () => {
+        try {
+          const iframeUrl = iframe.contentWindow?.location?.href;
+          if (iframeUrl && iframeUrl.startsWith(window.location.origin)) {
+            const hash = iframe.contentWindow.location.hash;
+            if (hash) {
+              const hashParams = new URLSearchParams(hash.substring(1));
+              const token = hashParams.get('access_token');
+              const expiresIn = hashParams.get('expires_in');
+
+              if (token) {
+                settled = true;
+                clearTimeout(timeout);
+                cleanup();
+
+                // Update auth state with the new token
+                setAccessToken(token);
+                const expiresAt = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
+                localStorage.setItem('googleAccessToken', token);
+                localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+
+                log('Token refreshed silently');
+                resolve(user);
+                return;
+              }
+            }
+
+            // Redirect happened but no token (error) -- fall back to popup
+            if (!settled) {
+              settled = true;
+              clearTimeout(timeout);
+              cleanup();
+              log('Silent refresh failed, falling back to popup');
+              signInWithGoogle(true).then(resolve, reject);
+            }
+          }
+        } catch {
+          // Cross-origin error means Google hasn't redirected yet -- keep waiting
+        }
+      };
+
+      iframe.addEventListener('load', checkIframe);
+      iframe.src = authUrl;
+    });
+  }, [signInWithGoogle, user]);
 
   async function logout() {
     const startTime = Date.now();
