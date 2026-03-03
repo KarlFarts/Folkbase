@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Zap, Settings as SettingsIcon, X } from 'lucide-react';
+import { StickyNote, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { addNote } from '../utils/devModeWrapper';
-import { getUIPreferences, updateUIPreferences } from '../services/braindumpPreferences';
+import { getUIPreferences } from '../services/braindumpPreferences';
 import './BraindumpFAB.css';
 
 /**
@@ -126,16 +126,6 @@ function BraindumpFAB() {
     navigate('/braindump');
   };
 
-  const toggleVisibility = () => {
-    const newVisibility = !isVisible;
-    setIsVisible(newVisibility);
-    updateUIPreferences({ showFAB: newVisibility });
-
-    if (!newVisibility) {
-      setIsExpanded(false);
-    }
-  };
-
   // Don't show on braindump page
   if (location.pathname === '/braindump') {
     return null;
@@ -143,15 +133,7 @@ function BraindumpFAB() {
 
   // Don't show if user disabled
   if (!isVisible) {
-    return (
-      <button
-        className="braindump-fab-toggle"
-        onClick={toggleVisibility}
-        title="Show braindump button"
-      >
-        <Zap size={16} />
-      </button>
-    );
+    return null;
   }
 
   return (
@@ -163,7 +145,7 @@ function BraindumpFAB() {
             onClick={() => setIsExpanded(true)}
             title="Quick braindump (Ctrl/Cmd+B)"
           >
-            <Zap size={16} />
+            <StickyNote size={16} />
           </button>
         ) : (
           <div className="fab-expanded-content">
@@ -209,14 +191,6 @@ function BraindumpFAB() {
         )}
       </div>
 
-      {/* Settings toggle (always visible) */}
-      <button
-        className="braindump-fab-settings"
-        onClick={toggleVisibility}
-        title="Hide braindump button"
-      >
-        <SettingsIcon size={16} />
-      </button>
     </>
   );
 }

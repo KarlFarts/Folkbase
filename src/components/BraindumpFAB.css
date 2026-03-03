@@ -1,6 +1,6 @@
 .braindump-fab {
   position: fixed;
-  bottom: 80px;
+  bottom: 20px;
   right: 20px;
   z-index: 998;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -139,55 +139,6 @@
   gap: var(--spacing-xs);
 }
 
-/* FAB Settings Button */
-.braindump-fab-settings {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 997;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 0.9rem;
-  cursor: pointer;
-  opacity: 0.6;
-  transition: all 0.2s ease;
-}
-
-.braindump-fab-settings:hover {
-  opacity: 1;
-  background: var(--color-bg-primary);
-  border-color: var(--color-primary);
-}
-
-/* FAB Toggle (when hidden) */
-.braindump-fab-toggle {
-  position: fixed;
-  bottom: 80px;
-  right: 20px;
-  z-index: 998;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--color-bg-secondary);
-  border: 1px solid var(--color-border);
-  color: var(--color-text-secondary);
-  font-size: 1.2rem;
-  cursor: pointer;
-  opacity: 0.5;
-  transition: all 0.2s ease;
-}
-
-.braindump-fab-toggle:hover {
-  opacity: 1;
-  transform: scale(1.1);
-  background: var(--color-bg-primary);
-  border-color: var(--color-primary);
-}
-
 /* Mobile responsive */
 @media (max-width: 768px) {
   .braindump-fab {
@@ -206,8 +157,4 @@
     right: 16px;
   }
 
-  .braindump-fab-settings {
-    bottom: 16px;
-    right: 16px;
-  }
 }
