@@ -21,7 +21,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
   const { user, accessToken } = useAuth();
   const { config } = useConfig();
   const { notify } = useNotification();
-  const { userWorkspaces, loading, switchToWorkspace, switchToPersonal } = useWorkspace();
+  const { userWorkspaces, loading, switchToWorkspace } = useWorkspace();
   const [selectedWorkspace, setSelectedWorkspace] = useState(null);
   const [workspaceMembers, setWorkspaceMembers] = useState([]);
   const [workspaceStats, setWorkspaceStats] = useState(null);
@@ -477,79 +477,61 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     <div className="page-container">
       <div className="page-header">
         <h1>Workspaces</h1>
-        <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
+        <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary btn-sm">
           + Create Workspace
         </button>
       </div>
 
-      <div className="workspace-mode-tabs">
-        <button onClick={switchToPersonal} className="tab-button">
-          Personal Contacts
-        </button>
-        <button className="tab-button active">Workspaces</button>
-      </div>
+      {userWorkspaces.length === 0 ? (
+        <div className="workspace-empty-state">
+          <h2>No Workspaces Yet</h2>
+          <p>
+            Workspaces let you collaborate with your team on shared contacts. Create one to get
+            started, or ask a teammate to invite you.
+          </p>
+          <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
+            Create Your First Workspace
+          </button>
+        </div>
+      ) : (
+        <div className="workspaces-grid">
+          {userWorkspaces.map((workspace) => (
+            <div key={workspace.id} className="workspace-card">
+              <div className="workspace-card-header">
+                <h3>{workspace.name}</h3>
+                <span className="workspace-type-badge">{workspace.type}</span>
+              </div>
 
-      <div className="workspaces-list">
-        {userWorkspaces.length === 0 ? (
-          <div className="empty-state">
-            <h2 className="empty-state-title">No Workspaces Yet</h2>
-            <p className="empty-state-description">
-              Create a workspace to collaborate with your team on contact management.
-            </p>
-            <div className="empty-state-actions">
-              <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
-                Create Your First Workspace
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="workspaces-grid">
-            {userWorkspaces.map((workspace) => (
-              <div key={workspace.id} className="workspace-card">
-                <div className="workspace-card-header">
-                  <h3>{workspace.name}</h3>
-                  <span className="workspace-type-badge">{workspace.type}</span>
-                </div>
+              {workspace.description && (
+                <p className="workspace-card-description">{workspace.description}</p>
+              )}
 
-                {workspace.description && (
-                  <p className="workspace-card-description">{workspace.description}</p>
-                )}
-
-                <div className="workspace-card-stats">
-                  <div className="stat">
-                    <strong>Owner:</strong> {workspace.owner_email}
-                  </div>
-                </div>
-
-                <div className="workspace-card-actions">
-                  <button
-                    onClick={() => handleViewWorkspace(workspace)}
-                    className="btn btn-primary"
-                  >
-                    View
-                  </button>
-                  {workspace.owner_email === user?.email && (
-                    <>
-                      <button
-                        onClick={() => handleManageWorkspace(workspace)}
-                        className="btn btn-secondary"
-                      >
-                        Manage
-                      </button>
-                      <button
-                        onClick={() => handleManageWorkspace(workspace)}
-                        className="btn btn-secondary"
-                      >
-                        Invite
-                      </button>
-                    </>
-                  )}
+              <div className="workspace-card-stats">
+                <div className="stat">
+                  <strong>Owner:</strong> {workspace.owner_email}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+
+              <div className="workspace-card-actions">
+                <button
+                  onClick={() => handleViewWorkspace(workspace)}
+                  className="btn btn-primary btn-sm"
+                >
+                  View
+                </button>
+                {workspace.owner_email === user?.email && (
+                  <button
+                    onClick={() => handleManageWorkspace(workspace)}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    Manage
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

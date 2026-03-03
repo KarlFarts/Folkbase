@@ -71,13 +71,6 @@ function Navbar({ onNavigate }) {
 
         <div className="navbar-nav navbar-right">
           <WorkspaceSwitcher />
-          <Link
-            to="/workspaces"
-            className={`nav-link workspaces-btn ${isActive('/workspaces') ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          >
-            Workspaces
-          </Link>
           {import.meta.env.VITE_DEV_MODE === 'true' && <ApiUsageIndicator />}
           <DevModeRoleSwitcher
             onShowSettings={() => navigate('/settings')}

@@ -5378,41 +5378,28 @@ input[type="checkbox"] {
   padding: var(--spacing-lg, 24px);
 }
 
-.workspace-mode-tabs {
-  display: flex;
-  gap: var(--spacing-sm, 8px);
-  margin-bottom: var(--spacing-xl, 32px);
-  border-bottom: 2px solid var(--color-border-primary);
+.workspace-empty-state {
+  max-width: 480px;
+  margin: var(--spacing-2xl) auto;
+  text-align: center;
+  padding: var(--spacing-2xl);
+  background: var(--color-card-bg-primary);
+  border: 1px solid var(--color-border-primary);
+  border-radius: var(--radius-lg, 12px);
 }
 
-.tab-button {
-  padding: var(--spacing-sm, 8px) var(--spacing-lg, 24px);
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm, 0.875rem);
-  font-weight: var(--font-weight-medium, 500);
-  cursor: pointer;
-  transition: all var(--transition-fast, 150ms ease);
-  margin-bottom: -2px;
-}
-
-.tab-button:hover {
+.workspace-empty-state h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
   color: var(--color-text-primary);
-  border-bottom-color: var(--color-accent-secondary);
+  margin: 0 0 var(--spacing-sm) 0;
 }
 
-.tab-button.active {
-  color: var(--color-accent-primary);
-  border-bottom-color: var(--color-accent-primary);
-}
-
-.workspaces-list {
-  background: var(--gradient-bg-primary);
-  border-radius: var(--radius-xl, 16px);
-  padding: var(--spacing-xl, 32px);
-  min-height: 400px;
+.workspace-empty-state p {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-relaxed, 1.6);
+  margin: 0 0 var(--spacing-lg) 0;
 }
 
 .workspaces-grid {
