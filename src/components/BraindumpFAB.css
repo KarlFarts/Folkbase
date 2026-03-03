@@ -7,15 +7,15 @@
 }
 
 .fab-button {
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
-  color: var(--color-text-inverse);
+  background: var(--color-accent-primary);
+  color: #fff;
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -29,23 +29,6 @@
 
 .fab-button:active {
   transform: scale(0.95);
-}
-
-/* Pulse animation for attention */
-@keyframes fab-pulse {
-  0% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 var(--color-primary);
-  }
-  50% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 10px transparent;
-  }
-  100% {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), 0 0 0 0 transparent;
-  }
-}
-
-.fab-button {
-  animation: fab-pulse 2s infinite;
 }
 
 /* Expanded state */
