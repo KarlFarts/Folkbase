@@ -60,14 +60,14 @@
  * ============================================================================
  * ID FORMATS
  * ============================================================================
- * - Contact ID:        CON001, CON002, ...
+ * - Contact ID:        C001, C002, ...
  * - Organization ID:   ORG001, ORG002, ...
  * - Location ID:       LOC001, LOC002, ...
  * - Visit ID:          VIS001, VIS002, ...
- * - Touchpoint ID:     TP001, TP002, ...
+ * - Touchpoint ID:     T001, T002, ...
  * - Event ID:          EVT001, EVT002, ...
  * - Task ID:           TSK001, TSK002, ...
- * - Note ID:           NOTE001, NOTE002, ...
+ * - Note ID:           N001, N002, ...
  * - List ID:           LST001, LST002, ...
  * - Workspace ID:      WS001, WS002, ...
  * - Member ID:         MEM001, MEM002, ...
@@ -183,6 +183,20 @@ export const AUTO_FIELDS = {
   // Relationship system fields
   'Relationship ID': 'auto-generate',
   'Last Updated': 'auto-update',
+};
+
+// Note visibility levels
+export const VISIBILITY = {
+  PRIVATE: 'Private',
+  SHARED: 'Shared',
+  CAMPAIGN_WIDE: 'Campaign-Wide',
+  WORKSPACE_WIDE: 'Workspace-Wide',
+};
+
+// Touchpoint completion status
+export const TOUCHPOINT_STATUS = {
+  COMPLETE: 'complete',
+  INCOMPLETE: 'incomplete',
 };
 
 // Schema Version Tracking
@@ -571,6 +585,7 @@ export const SHEET_HEADERS = {
   [SHEET_NAMES.AUDIT_LOG]: [
     'Timestamp',
     'Contact ID',
+    'Contact Name',
     'Field Changed',
     'Old Value',
     'New Value',

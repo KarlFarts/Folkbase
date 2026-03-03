@@ -16,7 +16,13 @@
  */
 
 import axios from 'axios';
-import { API_CONFIG, SHEET_NAMES, AUTO_FIELDS as AUTO_FIELDS_CONFIG } from '../config/constants';
+import {
+  API_CONFIG,
+  SHEET_NAMES,
+  AUTO_FIELDS as AUTO_FIELDS_CONFIG,
+  VISIBILITY,
+  TOUCHPOINT_STATUS,
+} from '../config/constants';
 import { logApiCall } from './apiUsageLogger.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
@@ -473,15 +479,19 @@ export async function addContact(accessToken, sheetId, contactData, userEmail) {
 
   await appendRow(accessToken, sheetId, SHEETS.CONTACTS, values);
 
-  // Log to audit
-  await logAuditEntry(accessToken, sheetId, {
-    contactId,
-    contactName: contactData['Name'] || '',
-    fieldChanged: 'Contact Created',
-    oldValue: '',
-    newValue: 'New contact added',
-    userEmail,
-  });
+  // Log to audit (non-blocking — don't let audit failure crash contact creation)
+  try {
+    await logAuditEntry(accessToken, sheetId, {
+      contactId,
+      contactName: contactData['Name'] || '',
+      fieldChanged: 'Contact Created',
+      oldValue: '',
+      newValue: 'New contact added',
+      userEmail,
+    });
+  } catch (auditErr) {
+    console.error('Audit log failed for addContact:', auditErr);
+  }
 
   return { contactId, ...contactData };
 }
@@ -510,18 +520,22 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
 
   await updateRow(accessToken, sheetId, SHEETS.CONTACTS, rowIndex, values);
 
-  // Log each changed field to audit
-  for (const fieldName of Object.keys(newData)) {
-    if (newData[fieldName] !== oldData[fieldName]) {
-      await logAuditEntry(accessToken, sheetId, {
-        contactId,
-        contactName: newData['Name'] || oldData['Name'] || '',
-        fieldChanged: fieldName,
-        oldValue: oldData[fieldName] || '',
-        newValue: newData[fieldName] || '[DELETED]',
-        userEmail,
-      });
+  // Log each changed field to audit (non-blocking)
+  try {
+    for (const fieldName of Object.keys(newData)) {
+      if (newData[fieldName] !== oldData[fieldName]) {
+        await logAuditEntry(accessToken, sheetId, {
+          contactId,
+          contactName: newData['Name'] || oldData['Name'] || '',
+          fieldChanged: fieldName,
+          oldValue: oldData[fieldName] || '',
+          newValue: newData[fieldName] || '[DELETED]',
+          userEmail,
+        });
+      }
     }
+  } catch (auditErr) {
+    console.error('Audit log failed for updateContact:', auditErr);
   }
 
   return { contactId, ...newData };
@@ -542,7 +556,7 @@ export async function addTouchpoint(accessToken, sheetId, touchpointData) {
     if (fieldName === 'Touchpoint ID') return touchpointId;
     // Auto-set Status based on Contact ID presence
     if (fieldName === 'Status') {
-      return touchpointData['Contact ID'] ? 'complete' : 'incomplete';
+      return touchpointData['Contact ID'] ? TOUCHPOINT_STATUS.COMPLETE : TOUCHPOINT_STATUS.INCOMPLETE;
     }
     return touchpointData[fieldName] || '';
   });
@@ -607,7 +621,7 @@ export async function updateTouchpoint(
     if (fieldName === 'Status') {
       const contactId =
         newData['Contact ID'] !== undefined ? newData['Contact ID'] : oldData['Contact ID'];
-      return contactId ? 'complete' : 'incomplete';
+      return contactId ? TOUCHPOINT_STATUS.COMPLETE : TOUCHPOINT_STATUS.INCOMPLETE;
     }
     return newData[fieldName] !== undefined ? newData[fieldName] : oldData[fieldName] || '';
   });
@@ -638,18 +652,22 @@ export async function updateTouchpoint(
     }
   }
 
-  // Log changes to audit
-  for (const fieldName of Object.keys(newData)) {
-    if (newData[fieldName] !== oldData[fieldName]) {
-      await logAuditEntry(accessToken, sheetId, {
-        contactId: oldData['Contact ID'],
-        contactName: oldData['Contact Name'] || '',
-        fieldChanged: `Touchpoint ${fieldName}`,
-        oldValue: oldData[fieldName] || '',
-        newValue: newData[fieldName] || '',
-        userEmail,
-      });
+  // Log changes to audit (non-blocking)
+  try {
+    for (const fieldName of Object.keys(newData)) {
+      if (newData[fieldName] !== oldData[fieldName]) {
+        await logAuditEntry(accessToken, sheetId, {
+          contactId: oldData['Contact ID'],
+          contactName: oldData['Contact Name'] || '',
+          fieldChanged: `Touchpoint ${fieldName}`,
+          oldValue: oldData[fieldName] || '',
+          newValue: newData[fieldName] || '',
+          userEmail,
+        });
+      }
     }
+  } catch (auditErr) {
+    console.error('Audit log failed for updateTouchpoint:', auditErr);
   }
 
   return { touchpointId, ...newData };
@@ -988,11 +1006,11 @@ export function filterNotesByVisibility(notes, userEmail) {
 
   return notes.filter((note) => {
     const createdBy = note['Created By'];
-    const visibility = note['Visibility'] || 'Workspace-Wide';
+    const visibility = note['Visibility'] || VISIBILITY.WORKSPACE_WIDE;
 
-    if (visibility === 'Private') {
+    if (visibility === VISIBILITY.PRIVATE) {
       return createdBy === userEmail;
-    } else if (visibility === 'Shared') {
+    } else if (visibility === VISIBILITY.SHARED) {
       const sharedWith = (note['Shared With'] || '')
         .split(',')
         .map((e) => e.trim())
@@ -1017,11 +1035,11 @@ export function canUserViewNote(note, userEmail) {
   }
 
   const createdBy = note['Created By'];
-  const visibility = note['Visibility'] || 'Workspace-Wide';
+  const visibility = note['Visibility'] || VISIBILITY.WORKSPACE_WIDE;
 
-  if (visibility === 'Private') {
+  if (visibility === VISIBILITY.PRIVATE) {
     return createdBy === userEmail;
-  } else if (visibility === 'Shared') {
+  } else if (visibility === VISIBILITY.SHARED) {
     const sharedWith = (note['Shared With'] || '')
       .split(',')
       .map((e) => e.trim())
@@ -1579,11 +1597,13 @@ export async function shareContactNotes(
       if (!uniqueNoteIds.includes(note['Note ID'])) return false;
 
       const createdBy = note['Created By'];
-      const visibility = note['Visibility'] || 'Workspace-Wide';
+      const visibility = note['Visibility'] || VISIBILITY.WORKSPACE_WIDE;
 
       // User can only share their own notes or notes that are already workspace-wide
       return (
-        createdBy === userEmail || visibility === 'Campaign-Wide' || visibility === 'Workspace-Wide'
+        createdBy === userEmail ||
+        visibility === VISIBILITY.CAMPAIGN_WIDE ||
+        visibility === VISIBILITY.WORKSPACE_WIDE
       );
     });
 
@@ -1596,12 +1616,12 @@ export async function shareContactNotes(
 
         if (shareStrategy === 'workspace-wide') {
           updateData = {
-            Visibility: 'Workspace-Wide',
+            Visibility: VISIBILITY.WORKSPACE_WIDE,
             'Shared With': '', // Clear shared with list for workspace-wide
           };
         } else if (shareStrategy === 'shared') {
           updateData = {
-            Visibility: 'Shared',
+            Visibility: VISIBILITY.SHARED,
             'Shared With': specificEmails.join(', '),
           };
         }
@@ -1673,7 +1693,7 @@ export async function addNoteWithLink(
     'Created By': userEmail || '',
     ...noteData,
     // Set default visibility if not provided
-    Visibility: noteData.Visibility || 'Workspace-Wide',
+    Visibility: noteData.Visibility || VISIBILITY.WORKSPACE_WIDE,
   };
 
   // Build note row
@@ -1697,9 +1717,20 @@ export async function addNoteWithLink(
 
     const mappingValues = contactNotesHeaders.map((h) => mapping[h.name] || '');
 
-    // Append both rows in sequence (Google Sheets doesn't support true batch appends)
+    // Append note first, then link. If linking fails, note is still saved.
     await appendRow(accessToken, sheetId, SHEETS.NOTES, noteValues);
-    await appendRow(accessToken, sheetId, SHEETS.CONTACT_NOTES, mappingValues);
+
+    try {
+      await appendRow(accessToken, sheetId, SHEETS.CONTACT_NOTES, mappingValues);
+    } catch (linkErr) {
+      console.error('Note saved but contact link failed:', linkErr);
+      return {
+        noteId,
+        ...newNote,
+        linked: false,
+        linkError: linkErr.message,
+      };
+    }
 
     return {
       noteId,
