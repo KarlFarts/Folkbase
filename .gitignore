@@ -33,3 +33,6 @@ eslint-output.txt
 
 # Archive/old files
 archive/
+
+# Local Netlify folder
+.netlify
