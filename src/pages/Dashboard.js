@@ -381,53 +381,48 @@ function Dashboard({ onNavigate }) {
           )}
         </div>
 
-        {/* ---- Column 3: Network ---- */}
-        <div className="dash-col">
-          <h3 className="dash-col-label">Network</h3>
+        {/* ---- Column 3: Network (hidden if empty) ---- */}
+        {(activeOrganizations > 0 || activeLocations > 0 || userWorkspaces.length > 0) && (
+          <div className="dash-col">
+            <h3 className="dash-col-label">Network</h3>
 
-          {activeOrganizations > 0 && (
-            <div
-              className="scard scard-organizations scard-clickable"
-              role="button"
-              onClick={() => onNavigate('organizations')}
-            >
-              <span className="scard-hero">{activeOrganizations}</span>
-              <span className="scard-label">Organizations</span>
-              <span className="scard-action">View all</span>
-            </div>
-          )}
+            {activeOrganizations > 0 && (
+              <div
+                className="scard scard-organizations scard-clickable"
+                role="button"
+                onClick={() => onNavigate('organizations')}
+              >
+                <span className="scard-hero">{activeOrganizations}</span>
+                <span className="scard-label">Organizations</span>
+                <span className="scard-action">View all</span>
+              </div>
+            )}
 
-          {activeLocations > 0 && (
-            <div
-              className="scard scard-locations scard-clickable"
-              role="button"
-              onClick={() => onNavigate('locations')}
-            >
-              <span className="scard-hero">{activeLocations}</span>
-              <span className="scard-label">Locations</span>
-              <span className="scard-action">View all</span>
-            </div>
-          )}
+            {activeLocations > 0 && (
+              <div
+                className="scard scard-locations scard-clickable"
+                role="button"
+                onClick={() => onNavigate('locations')}
+              >
+                <span className="scard-hero">{activeLocations}</span>
+                <span className="scard-label">Locations</span>
+                <span className="scard-action">View all</span>
+              </div>
+            )}
 
-          {userWorkspaces.length > 0 && (
-            <div
-              className="scard scard-workspaces scard-clickable"
-              role="button"
-              onClick={() => onNavigate('workspaces')}
-            >
-              <span className="scard-hero">{userWorkspaces.length}</span>
-              <span className="scard-label">Workspaces</span>
-              <span className="scard-action">Manage</span>
-            </div>
-          )}
-
-          {activeOrganizations === 0 && activeLocations === 0 && userWorkspaces.length === 0 && (
-            <div className="scard scard-settings">
-              <span className="scard-label">No network data yet</span>
-              <span className="scard-sub">Add organizations, locations, or workspaces to see them here.</span>
-            </div>
-          )}
-        </div>
+            {userWorkspaces.length > 0 && (
+              <div
+                className="scard scard-workspaces scard-clickable"
+                role="button"
+                onClick={() => onNavigate('workspaces')}
+              >
+                <span className="scard-hero">{userWorkspaces.length}</span>
+                <span className="scard-label">Workspaces</span>
+                <span className="scard-action">Manage</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* ---- Column 4: Insights ---- */}
         <div className="dash-col">
