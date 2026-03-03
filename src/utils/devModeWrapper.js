@@ -4755,6 +4755,26 @@ export const getSheetIdByName = (function () {
 })();
 
 /**
+ * WRAPPER: createWorkspaceSheetWrapped
+ * Creates a new Google Sheet for a workspace (dev mode: uses localStorage namespace)
+ */
+export async function createWorkspaceSheetWrapped(accessToken, workspaceName) {
+  if (isDevMode()) {
+    const fakeSheetId = `dev_ws_sheet_${Date.now()}`;
+    // Initialize empty data stores for this workspace
+    localStorage.setItem(`${fakeSheetId}_Contacts`, JSON.stringify([]));
+    localStorage.setItem(`${fakeSheetId}_Touchpoints`, JSON.stringify([]));
+    localStorage.setItem(`${fakeSheetId}_Events`, JSON.stringify([]));
+    localStorage.setItem(`${fakeSheetId}_Tasks`, JSON.stringify([]));
+    localStorage.setItem(`${fakeSheetId}_Notes`, JSON.stringify([]));
+    return { sheetId: fakeSheetId, title: `${workspaceName} - Folkbase` };
+  }
+
+  const { createWorkspaceSheet } = await import('./driveFolder.js');
+  return createWorkspaceSheet(accessToken, workspaceName);
+}
+
+/**
  * Re-export everything else from sheets.js as-is
  */
 export { SHEETS, AUTO_FIELDS } from './sheets';

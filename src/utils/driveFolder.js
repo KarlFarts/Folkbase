@@ -235,3 +235,98 @@ export async function getOrCreateFolkbaseFolder(accessToken) {
 
 // Legacy alias
 export const getOrCreateTouchpointFolder = getOrCreateFolkbaseFolder;
+
+/**
+ * Creates a new Google Sheet for a workspace inside the Folkbase Drive folder.
+ * Initializes it with all required tabs and column headers.
+ *
+ * @param {string} accessToken - Google OAuth token
+ * @param {string} workspaceName - Name for the sheet title
+ * @returns {Promise<{sheetId: string, title: string}>}
+ */
+export async function createWorkspaceSheet(accessToken, workspaceName) {
+  const { SHEET_NAMES, SHEET_HEADERS } = await import('../config/constants.js');
+
+  const title = `${workspaceName} - Folkbase`;
+
+  // 1. Create the spreadsheet with required tabs
+  const tabNames = [
+    SHEET_NAMES.CONTACTS,
+    SHEET_NAMES.TOUCHPOINTS,
+    SHEET_NAMES.EVENTS,
+    SHEET_NAMES.TASKS,
+    SHEET_NAMES.NOTES,
+    SHEET_NAMES.ORGANIZATIONS,
+    SHEET_NAMES.LOCATIONS,
+    SHEET_NAMES.LISTS,
+    SHEET_NAMES.CONTACT_LISTS,
+    SHEET_NAMES.CONTACT_NOTES,
+    SHEET_NAMES.AUDIT_LOG,
+    SHEET_NAMES.WORKSPACES,
+    SHEET_NAMES.WORKSPACE_MEMBERS,
+    SHEET_NAMES.WORKSPACE_INVITATIONS,
+    SHEET_NAMES.CONTACT_LINKS,
+  ];
+
+  const createResponse = await fetch('https://sheets.googleapis.com/v4/spreadsheets', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      properties: { title },
+      sheets: tabNames.map((name, index) => ({
+        properties: { sheetId: index, title: name },
+      })),
+    }),
+  });
+
+  if (!createResponse.ok) {
+    const err = await createResponse.json().catch(() => ({}));
+    throw new Error(`Failed to create sheet: ${err.error?.message || createResponse.status}`);
+  }
+
+  const spreadsheet = await createResponse.json();
+  const newSheetId = spreadsheet.spreadsheetId;
+
+  // 2. Write column headers to each tab that has them defined
+  const headerRequests = [];
+  for (const tabName of tabNames) {
+    const headers = SHEET_HEADERS[tabName];
+    if (headers && headers.length > 0) {
+      headerRequests.push({
+        range: `'${tabName}'!A1`,
+        values: [headers],
+      });
+    }
+  }
+
+  if (headerRequests.length > 0) {
+    const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values:batchUpdate`;
+    await fetch(batchUrl, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        valueInputOption: 'RAW',
+        data: headerRequests,
+      }),
+    });
+  }
+
+  // 3. Move into Folkbase folder
+  const folderResult = await getOrCreateFolkbaseFolder(accessToken);
+  if (folderResult.success && folderResult.folderId) {
+    try {
+      await moveFileToFolder(accessToken, newSheetId, folderResult.folderId);
+    } catch (err) {
+      console.error('Failed to move workspace sheet to Folkbase folder:', err);
+      // Non-fatal: sheet still works, just not in the folder
+    }
+  }
+
+  return { sheetId: newSheetId, title };
+}
