@@ -5763,7 +5763,7 @@ input[type="checkbox"] {
    ======================================== */
 
 .wizard-container {
-  max-width: 800px;
+  max-width: 700px;
   margin: 0 auto;
   padding: var(--spacing-lg);
 }
@@ -6515,6 +6515,29 @@ input[type="checkbox"] {
 .wizard-invitation-section p {
   margin: 0 0 var(--spacing-md) 0;
   color: var(--color-text-secondary);
+}
+
+/* Contact item selected state */
+.wizard-contact-item.selected {
+  background: var(--color-accent-subtle-bg);
+}
+
+/* Row layout for card options (side by side) */
+.wizard-card-options--row {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.wizard-card-options--row .wizard-card-option {
+  flex: 1;
+}
+
+/* Contact toolbar (select all + count) */
+.wizard-contact-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: var(--spacing-md) 0;
 }
 
 /* Responsive */
