@@ -4780,3 +4780,5 @@ export async function createWorkspaceSheetWrapped(accessToken, workspaceName) {
 export { SHEETS, AUTO_FIELDS } from './sheets';
 
 // Activity types are already exported at the top
+
+export { getLocalLists, getLocalContactLists };

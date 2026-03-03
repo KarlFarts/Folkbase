@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getLocalLists, getLocalContactLists } from '../__tests__/fixtures/seedTestData';
+import { getLocalLists, getLocalContactLists } from '../utils/devModeWrapper';
 import '../styles/index.css';
 
 /**

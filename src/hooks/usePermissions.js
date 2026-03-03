@@ -35,7 +35,7 @@ function parseOverrides(overridesStr) {
  */
 export function usePermissions() {
   const { mode, activeWorkspace } = useWorkspace();
-  const notify = useNotification();
+  const { notify } = useNotification();
 
   return useMemo(() => {
     // Personal mode — full access
