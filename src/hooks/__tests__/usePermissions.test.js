@@ -12,7 +12,7 @@ vi.mock('../../contexts/WorkspaceContext', () => ({
 }));
 
 vi.mock('../../contexts/NotificationContext', () => ({
-  useNotification: () => ({ warning: mockWarning }),
+  useNotification: () => ({ notify: { warning: mockWarning } }),
 }));
 
 beforeEach(() => {
