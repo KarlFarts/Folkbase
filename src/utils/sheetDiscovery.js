@@ -10,7 +10,7 @@
  * 3. Fall back to root-level search for sheets (legacy/migrated sheets)
  */
 
-import { findTouchpointFolder } from './driveFolder';
+import { findFolkbaseFolder } from './driveFolder';
 
 /**
  * Check if the access token has Drive access (file or metadata scope)
@@ -97,7 +97,7 @@ async function findSheetsInFolder(accessToken, folderId) {
 export async function findExistingSheets(accessToken) {
   try {
     // Step 1: Look for Folkbase folder
-    const folderResult = await findTouchpointFolder(accessToken);
+    const folderResult = await findFolkbaseFolder(accessToken);
 
     if (folderResult.success && folderResult.folder) {
       // Folder exists - search for sheets inside it

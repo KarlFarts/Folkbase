@@ -3,15 +3,12 @@ import { Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useConfig } from './contexts/ConfigContext';
 import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext';
-import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import { useApiTracking } from './hooks/useApiTracking';
 import { useCalendarSync } from './hooks/useCalendarSync';
 import { useTheme } from './hooks/useTheme';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import UniversalSearch from './components/UniversalSearch';
-import PremiumGate from './components/PremiumGate';
-import { PREMIUM_FEATURES } from './config/constants';
 
 // Lazy load all pages for better initial load performance
 const Dashboard = lazy(() => import('./pages/Dashboard'));
@@ -288,78 +285,25 @@ function AppContent() {
                 <Route path="/events/add" element={<AddEvent onNavigate={navigateTo} />} />
                 <Route path="/events/:id" element={<EventDetails onNavigate={navigateTo} />} />
                 <Route path="/tasks/:id" element={<TaskProfile onNavigate={navigateTo} />} />
-                <Route
-                  path="/import"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.IMPORT_EXPORT}>
-                      <ImportPage onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
-                <Route
-                  path="/export"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.IMPORT_EXPORT}>
-                      <ExportPage onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
-                <Route
-                  path="/duplicates"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.DUPLICATE_DETECTION}>
-                      <DuplicateManager onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
+                <Route path="/import" element={<ImportPage onNavigate={navigateTo} />} />
+                <Route path="/export" element={<ExportPage onNavigate={navigateTo} />} />
+                <Route path="/duplicates" element={<DuplicateManager onNavigate={navigateTo} />} />
                 <Route
                   path="/call-mode/:contactId"
                   element={<CallMode onNavigate={navigateTo} />}
                 />
                 <Route path="/meeting-mode" element={<MeetingMode onNavigate={navigateTo} />} />
                 <Route path="/notes" element={<NotesInbox onNavigate={navigateTo} />} />
-                <Route
-                  path="/braindump"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.BRAINDUMP}>
-                      <BraindumpPage onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
+                <Route path="/braindump" element={<BraindumpPage onNavigate={navigateTo} />} />
                 <Route path="/quick-sync" element={<QuickSyncPage onNavigate={navigateTo} />} />
                 <Route path="/tasks" element={<TasksPage onNavigate={navigateTo} />} />
-                <Route
-                  path="/backup"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.BACKUP_RESTORE}>
-                      <BackupRestorePage onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
-                <Route
-                  path="/workspaces"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.WORKSPACES}>
-                      <WorkspaceDashboard onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
-                />
+                <Route path="/backup" element={<BackupRestorePage onNavigate={navigateTo} />} />
+                <Route path="/workspaces" element={<WorkspaceDashboard onNavigate={navigateTo} />} />
                 <Route
                   path="/workspaces/create"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.WORKSPACES}>
-                      <CreateWorkspace onNavigate={navigateTo} />
-                    </PremiumGate>
-                  }
+                  element={<CreateWorkspace onNavigate={navigateTo} />}
                 />
-                <Route
-                  path="/join"
-                  element={
-                    <PremiumGate feature={PREMIUM_FEATURES.WORKSPACES}>
-                      <JoinWorkspace />
-                    </PremiumGate>
-                  }
-                />
+                <Route path="/join" element={<JoinWorkspace />} />
                 <Route
                   path="/settings"
                   element={
@@ -394,11 +338,9 @@ function App() {
   return (
     <AuthProvider>
       <NotificationProvider>
-        <SubscriptionProvider>
-          <WorkspaceProvider>
-            {isDevMode ? <MonitoringProvider>{content}</MonitoringProvider> : content}
-          </WorkspaceProvider>
-        </SubscriptionProvider>
+        <WorkspaceProvider>
+          {isDevMode ? <MonitoringProvider>{content}</MonitoringProvider> : content}
+        </WorkspaceProvider>
       </NotificationProvider>
     </AuthProvider>
   );

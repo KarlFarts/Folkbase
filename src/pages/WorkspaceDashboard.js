@@ -14,7 +14,7 @@ import {
 } from '../services/workspaceHierarchyServiceSheets';
 import { readSheetData } from '../utils/devModeWrapper';
 import { SHEET_NAMES, WORKSPACE_ROLES, PERMISSION_FEATURES } from '../config/constants';
-import { findTouchpointFolder } from '../utils/driveFolder';
+import { findFolkbaseFolder } from '../utils/driveFolder';
 import { shareFileWithUser } from '../utils/driveSharing';
 
 const WorkspaceDashboard = ({ onNavigate }) => {
@@ -218,7 +218,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     }
 
     try {
-      const folderResult = await findTouchpointFolder(accessToken);
+      const folderResult = await findFolkbaseFolder(accessToken);
 
       if (folderResult.success && folderResult.folder) {
         // Open Google Drive sharing dialog for the folder

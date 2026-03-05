@@ -23,10 +23,8 @@ import { getAllServices, getRateLimitStatus } from '../utils/apiUsageLogger';
 import { getDataHealth } from '../services/dataHealthService';
 import { CacheConfigSection } from '../components/CacheConfigSection';
 import ConfirmDialog from '../components/ConfirmDialog';
-import PremiumGate from '../components/PremiumGate';
-import { PREMIUM_FEATURES } from '../config/constants';
 import { findExistingSheets } from '../utils/sheetDiscovery';
-import { getOrCreateTouchpointFolder, moveFileToFolder } from '../utils/driveFolder';
+import { getOrCreateFolkbaseFolder, moveFileToFolder } from '../utils/driveFolder';
 import axios from 'axios';
 import { useTheme } from '../hooks/useTheme';
 
@@ -272,7 +270,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
 
     try {
       // Get or create folder
-      const folderResult = await getOrCreateTouchpointFolder(accessToken);
+      const folderResult = await getOrCreateFolkbaseFolder(accessToken);
 
       if (!folderResult.success) {
         throw new Error(folderResult.error || 'Failed to create/find folder');

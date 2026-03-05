@@ -861,112 +861,6 @@ export const API_QUOTAS = {
     documentationUrl: 'https://developers.google.com/sheets/api/limits',
   },
 
-  // ============================================================================
-  // TEMPLATES FOR COMMON API TYPES
-  // ============================================================================
-  // Uncomment and modify these templates when adding new APIs.
-  // Or use: npm run add-api for an interactive setup.
-
-  /*
-   * TEMPLATE: API with daily limit (most common)
-   * Example: OpenWeatherMap, ExchangeRate-API
-   */
-  // WEATHER_API: {
-  //   name: 'OpenWeatherMap',
-  //   cost: 'FREE (1000 calls/day)',
-  //   enabled: true,
-  //   quotas: [
-  //     {
-  //       type: 'per-day',
-  //       limit: 1000,
-  //       window: 86400,
-  //       description: 'Free tier daily limit',
-  //     },
-  //   ],
-  //   documentationUrl: 'https://openweathermap.org/api',
-  // },
-
-  /*
-   * TEMPLATE: API with per-second limit (strict rate limiting)
-   * Example: Nominatim geocoding
-   */
-  // NOMINATIM: {
-  //   name: 'OpenStreetMap Nominatim',
-  //   cost: 'FREE (no key required)',
-  //   enabled: true,
-  //   quotas: [
-  //     {
-  //       type: 'per-second',
-  //       limit: 1,
-  //       window: 1,
-  //       description: 'Max 1 request per second (strictly enforced)',
-  //     },
-  //   ],
-  //   documentationUrl: 'https://nominatim.org/release-docs/latest/',
-  // },
-
-  /*
-   * TEMPLATE: API with monthly limit
-   * Example: ExchangeRate-API, Abstract API
-   */
-  // CURRENCY_API: {
-  //   name: 'ExchangeRate-API',
-  //   cost: 'FREE (1500 calls/month)',
-  //   enabled: true,
-  //   quotas: [
-  //     {
-  //       type: 'per-month',
-  //       limit: 1500,
-  //       window: 2592000,
-  //       description: 'Free tier monthly limit',
-  //     },
-  //   ],
-  //   documentationUrl: 'https://www.exchangerate-api.com/',
-  // },
-
-  /*
-   * TEMPLATE: API with no rate limits (self-impose reasonable limits)
-   * Example: REST Countries
-   */
-  // REST_COUNTRIES: {
-  //   name: 'REST Countries',
-  //   cost: 'FREE (no limits)',
-  //   enabled: true,
-  //   quotas: [
-  //     {
-  //       type: 'per-minute',
-  //       limit: 100,
-  //       window: 60,
-  //       description: 'Self-imposed reasonable limit',
-  //     },
-  //   ],
-  //   documentationUrl: 'https://restcountries.com/',
-  // },
-
-  /*
-   * TEMPLATE: API with multiple rate limits
-   * Example: APIs with both per-minute and per-day limits
-   */
-  // MULTI_LIMIT_API: {
-  //   name: 'Multi-Limit API',
-  //   cost: 'FREE (60/min, 1000/day)',
-  //   enabled: true,
-  //   quotas: [
-  //     {
-  //       type: 'per-minute',
-  //       limit: 60,
-  //       window: 60,
-  //       description: 'Rate limit per minute',
-  //     },
-  //     {
-  //       type: 'per-day',
-  //       limit: 1000,
-  //       window: 86400,
-  //       description: 'Daily quota',
-  //     },
-  //   ],
-  //   documentationUrl: 'https://example.com/api-docs',
-  // },
 };
 
 // API Usage Tracking Configuration
@@ -994,24 +888,6 @@ export const CACHE_CONFIG = {
   MAX_CACHE_SIZE_MB: 50, // Maximum cache size (not enforced yet)
 };
 
-// Premium Features - Features that require a paid subscription
-export const PREMIUM_FEATURES = {
-  WORKSPACES: 'workspaces',
-  CALENDAR_SYNC: 'calendar_sync',
-  IMPORT_EXPORT: 'import_export',
-  DUPLICATE_DETECTION: 'duplicate_detection',
-  BACKUP_RESTORE: 'backup_restore',
-  BRAINDUMP: 'braindump',
-};
-
-// Subscription Status - User subscription states
-export const SUBSCRIPTION_STATUS = {
-  FREE: 'free',
-  ACTIVE: 'active',
-  PAST_DUE: 'past_due',
-  CANCELED: 'canceled',
-  TRIALING: 'trialing',
-};
 
 export default {
   SHEET_NAMES,
@@ -1023,6 +899,4 @@ export default {
   TRACKING_CONFIG,
   API_WARNINGS,
   CACHE_CONFIG,
-  PREMIUM_FEATURES,
-  SUBSCRIPTION_STATUS,
 };

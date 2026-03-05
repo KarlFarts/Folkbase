@@ -95,6 +95,9 @@ export { ACTIVITY_TYPES };
 
 export const isDevMode = () => import.meta.env.VITE_DEV_MODE === 'true';
 
+const today = () => new Date().toISOString().split('T')[0];
+const nowIso = () => new Date().toISOString();
+
 /**
  * Generic helper: Generate ID for production mode
  * Finds the highest existing ID and increments it
@@ -307,7 +310,7 @@ export const addContact = (function () {
 
       const contacts = getLocalContacts();
       const contactId = await generateContactID(accessToken, sheetId);
-      const dateAdded = new Date().toISOString().split('T')[0];
+      const dateAdded = today();
 
       const newContact = {
         'Contact ID': contactId,
@@ -421,7 +424,7 @@ export const addOrganization = async function addOrganization(
 
     const organizations = getLocalOrganizations();
     const organizationId = await generateOrganizationID(accessToken, sheetId);
-    const dateAdded = new Date().toISOString().split('T')[0];
+    const dateAdded = today();
 
     const newOrganization = {
       'Organization ID': organizationId,
@@ -468,7 +471,7 @@ export const updateOrganization = async function updateOrganization(
       throw new Error('Organization not found');
     }
 
-    const lastUpdated = new Date().toISOString().split('T')[0];
+    const lastUpdated = today();
 
     organizations[index] = {
       ...organizations[index],
@@ -562,7 +565,7 @@ export const addLocation = async function addLocation(
 
     const locations = getLocalLocations();
     const locationId = await generateLocationID(accessToken, sheetId);
-    const dateAdded = new Date().toISOString().split('T')[0];
+    const dateAdded = today();
 
     const newLocation = {
       'Location ID': locationId,
@@ -608,7 +611,7 @@ export const updateLocation = async function updateLocation(
       throw new Error('Location not found');
     }
 
-    const lastUpdated = new Date().toISOString().split('T')[0];
+    const lastUpdated = today();
 
     locations[index] = {
       ...locations[index],
@@ -681,7 +684,7 @@ export const logLocationVisit = async function logLocationVisit(
       return Math.max(max, num);
     }, 0);
     const visitId = `VIS${String(maxId + 1).padStart(3, '0')}`;
-    const createdDate = new Date().toISOString().split('T')[0];
+    const createdDate = today();
 
     const newVisit = {
       'Visit ID': visitId,
@@ -776,7 +779,7 @@ export const addTouchpoint = (function () {
       const newTouchpoint = {
         'Touchpoint ID': touchpointId,
         ...touchpointData,
-        Date: touchpointData['Date'] || new Date().toISOString().split('T')[0],
+        Date: touchpointData['Date'] || today(),
       };
 
       touchpoints.push(newTouchpoint);
@@ -1071,7 +1074,7 @@ export const addEvent = (function () {
 
       const events = getLocalEvents();
       const eventId = await generateEventID(accessToken, sheetId);
-      const eventCreatedDate = new Date().toISOString().split('T')[0];
+      const eventCreatedDate = today();
 
       const newEvent = {
         'Event ID': eventId,
@@ -1257,7 +1260,7 @@ export const copyContactToWorkspace = (function () {
         return Math.max(max, num);
       }, 0);
       const newContactId = `C${String(maxId + 1).padStart(3, '0')}`;
-      const dateAdded = new Date().toISOString().split('T')[0];
+      const dateAdded = today();
 
       // Determine which fields to copy based on sync strategy
       let fieldsToInclude = Object.keys(sourceContact);
@@ -1457,7 +1460,7 @@ export async function addList(accessToken, sheetId, listData) {
       .map((id) => parseInt(id.substring(3)));
     const maxId = Math.max(...existingIds, 0);
     const listId = `LST${String(maxId + 1).padStart(3, '0')}`;
-    const createdDate = new Date().toISOString().split('T')[0];
+    const createdDate = today();
 
     const newList = {
       'List ID': listId,
@@ -1554,7 +1557,7 @@ export async function addContactToList(accessToken, sheetId, contactId, listId) 
     log('[DEV MODE] Adding contact', contactId, 'to list', listId);
 
     const contactLists = getLocalContactLists();
-    const addedDate = new Date().toISOString().split('T')[0];
+    const addedDate = today();
 
     // Check if mapping already exists
     const exists = contactLists.some(
@@ -1698,7 +1701,7 @@ export async function addNote(accessToken, sheetId, noteData, userEmail = null) 
 
     const notes = getLocalNotes();
     const noteId = await generateNoteID(accessToken, sheetId);
-    const createdDate = new Date().toISOString().split('T')[0];
+    const createdDate = today();
 
     const newNote = {
       'Note ID': noteId,
@@ -1717,7 +1720,7 @@ export async function addNote(accessToken, sheetId, noteData, userEmail = null) 
   // Production mode: Add to Google Sheets
   const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.NOTES);
   const noteId = await generateNoteID(accessToken, sheetId);
-  const createdDate = new Date().toISOString().split('T')[0];
+  const createdDate = today();
 
   const newNote = {
     'Note ID': noteId,
@@ -1943,7 +1946,7 @@ export const linkNoteToContact = (function () {
       log('[DEV MODE] Linking note', noteId, 'to contact', contactId);
 
       const contactNotes = getLocalContactNotes();
-      const linkedDate = new Date().toISOString().split('T')[0];
+      const linkedDate = today();
 
       const exists = contactNotes.some(
         (cn) => cn['Note ID'] === noteId && cn['Contact ID'] === contactId
@@ -2011,7 +2014,7 @@ export const linkNoteToEvent = (function () {
       log('[DEV MODE] Linking note', noteId, 'to event', eventId);
 
       const eventNotes = getLocalEventNotes();
-      const linkedDate = new Date().toISOString().split('T')[0];
+      const linkedDate = today();
 
       const exists = eventNotes.some(
         (en) => en['Note ID'] === noteId && en['Event ID'] === eventId
@@ -2113,7 +2116,7 @@ export const linkNoteToList = (function () {
       log('[DEV MODE] Linking note', noteId, 'to list', listId);
 
       const listNotes = getLocalListNotes();
-      const linkedDate = new Date().toISOString().split('T')[0];
+      const linkedDate = today();
 
       const exists = listNotes.some((ln) => ln['Note ID'] === noteId && ln['List ID'] === listId);
 
@@ -2213,7 +2216,7 @@ export const linkNoteToTask = (function () {
       log('[DEV MODE] Linking note', noteId, 'to task', taskId);
 
       const taskNotes = getLocalTaskNotes();
-      const linkedDate = new Date().toISOString().split('T')[0];
+      const linkedDate = today();
 
       const exists = taskNotes.some((tn) => tn['Note ID'] === noteId && tn['Task ID'] === taskId);
 
@@ -2756,7 +2759,7 @@ export async function addTask(accessToken, sheetId, taskData) {
 
     const tasks = getLocalTasks();
     const taskId = await generateTaskID(accessToken, sheetId);
-    const createdDate = new Date().toISOString().split('T')[0];
+    const createdDate = today();
 
     const newTask = {
       'Task ID': taskId,
@@ -2774,7 +2777,7 @@ export async function addTask(accessToken, sheetId, taskData) {
   // Production mode: Add to Google Sheets
   const { headers } = await sheetsModule.readSheetMetadata(accessToken, sheetId, SHEET_NAMES.TASKS);
   const taskId = await generateTaskID(accessToken, sheetId);
-  const createdDate = new Date().toISOString().split('T')[0];
+  const createdDate = today();
 
   const newTask = {
     'Task ID': taskId,
@@ -2816,7 +2819,7 @@ export async function updateTask(accessToken, sheetId, taskId, taskData) {
 
     // If marking as completed, set completion date
     if (taskData['Status'] === 'completed' && tasks[index]['Status'] !== 'completed') {
-      taskData['Completed Date'] = new Date().toISOString().split('T')[0];
+      taskData['Completed Date'] = today();
     }
 
     tasks[index] = {
@@ -2843,7 +2846,7 @@ export async function updateTask(accessToken, sheetId, taskId, taskData) {
   // If marking as completed, set completion date
   const updatedTaskData = { ...taskData };
   if (updatedTaskData['Status'] === 'completed' && task['Status'] !== 'completed') {
-    updatedTaskData['Completed Date'] = new Date().toISOString().split('T')[0];
+    updatedTaskData['Completed Date'] = today();
   }
 
   // Build updated row
@@ -3059,7 +3062,7 @@ export async function createRootWorkspace(accessToken, sheetId, workspaceData, u
     log('[DEV MODE] Creating root workspace:', workspaceData);
     const workspaces = getLocalWorkspaces();
     const workspaceId = await generateWorkspaceID(accessToken, sheetId);
-    const createdDate = new Date().toISOString();
+    const createdDate = nowIso();
     const path = `/${workspaceId}`;
 
     const newWorkspace = {
@@ -3118,7 +3121,7 @@ export async function createSubWorkspace(
     const parentPath = parent['Path'] || `/${parentWorkspaceId}`;
     const newPath = `${parentPath}/${workspaceId}`;
     const newDepth = (parent['Depth'] || 0) + 1;
-    const createdDate = new Date().toISOString();
+    const createdDate = nowIso();
 
     const newWorkspace = {
       'Workspace ID': workspaceId,
@@ -3237,7 +3240,7 @@ export async function addWorkspaceMember(
     log('[DEV MODE] Adding workspace member:', memberEmail, 'to', workspaceId);
     const members = getLocalWorkspaceMembers();
     const memberId = await generateMemberID(accessToken, sheetId);
-    const addedDate = new Date().toISOString();
+    const addedDate = nowIso();
 
     const newMember = {
       'Member ID': memberId,
@@ -3325,7 +3328,7 @@ export async function createWorkspaceInvitation(
       .map((b) => b.toString(16).padStart(2, '0'))
       .join('');
 
-    const createdDate = new Date().toISOString();
+    const createdDate = nowIso();
     const expiresInDays = options.expiresInDays || 30;
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);
@@ -4661,7 +4664,7 @@ export async function createCalendarEvent(accessToken, eventData, crmEventId) {
     log('[DEV MODE] Creating calendar event:', eventData.summary);
     const events = getLocalCalendarEvents();
     const gcalId = generateCalendarDevId();
-    const now = new Date().toISOString();
+    const now = nowIso();
     const newEvent = {
       id: gcalId,
       ...eventData,
@@ -4698,7 +4701,7 @@ export async function updateCalendarEvent(accessToken, gcalEventId, eventData) {
       ...events[index],
       ...eventData,
       id: gcalEventId,
-      updated: new Date().toISOString(),
+      updated: nowIso(),
       extendedProperties: {
         private: {
           touchpointManaged: 'true',

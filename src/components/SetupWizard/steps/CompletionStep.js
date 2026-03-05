@@ -6,7 +6,7 @@ import {
   validateSheetAccess,
   autoCreateMissingTabs,
 } from '../../../utils/sheetCreation';
-import { getOrCreateTouchpointFolder, moveFileToFolder } from '../../../utils/driveFolder';
+import { getOrCreateFolkbaseFolder, moveFileToFolder } from '../../../utils/driveFolder';
 import { useConnectionStatus } from '../../../hooks/useConnectionStatus';
 import ConnectionStatusPanel from '../../ConnectionStatusPanel';
 
@@ -82,7 +82,7 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
       // Get or create Folkbase folder
       setStatus('Organizing your files...');
       setStepStatus('drive', 'checking');
-      const folderResult = await getOrCreateTouchpointFolder(wizardData.accessToken);
+      const folderResult = await getOrCreateFolkbaseFolder(wizardData.accessToken);
 
       if (folderResult.success) {
         // Move sheet into folder (if not already there)

@@ -7,8 +7,6 @@
 
 export const FOLKBASE_FOLDER_NAME = 'Folkbase';
 
-// Legacy alias for backward compatibility
-export const TOUCHPOINT_FOLDER_NAME = FOLKBASE_FOLDER_NAME;
 
 /**
  * Check if the access token has the Drive file scope
@@ -89,8 +87,6 @@ export async function findFolkbaseFolder(accessToken) {
   }
 }
 
-// Legacy alias
-export const findTouchpointFolder = findFolkbaseFolder;
 
 /**
  * Create Folkbase folder in Google Drive
@@ -147,8 +143,6 @@ export async function createFolkbaseFolder(accessToken) {
   }
 }
 
-// Legacy alias
-export const createTouchpointFolder = createFolkbaseFolder;
 
 /**
  * Move a file into a folder
@@ -233,8 +227,6 @@ export async function getOrCreateFolkbaseFolder(accessToken) {
   return await createFolkbaseFolder(accessToken);
 }
 
-// Legacy alias
-export const getOrCreateTouchpointFolder = getOrCreateFolkbaseFolder;
 
 /**
  * Creates a new Google Sheet for a workspace inside the Folkbase Drive folder.
