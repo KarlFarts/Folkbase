@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './AuthContext';
 import { PREMIUM_FEATURES, SUBSCRIPTION_STATUS } from '../config/constants';
-import { isDevMode } from '../__tests__/mocks/mockAuth';
+import { isDevMode } from '../utils/devMode';
 import { log, warn } from '../utils/logger';
 import {
   fetchSubscription as fetchSubscriptionAPI,

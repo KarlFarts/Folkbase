@@ -39,7 +39,9 @@ const WorkspaceSwitcher = () => {
   };
 
   const displayName =
-    mode === 'personal' ? 'Personal Contacts' : activeWorkspace?.name || 'Workspace';
+    mode === 'personal'
+      ? 'Personal Contacts'
+      : activeWorkspace?.['Workspace Name'] || activeWorkspace?.name || 'Workspace';
 
   return (
     <div className="workspace-switcher" ref={dropdownRef}>
@@ -85,7 +87,7 @@ const WorkspaceSwitcher = () => {
                   <span className="item-icon">
                     <BarChart3 size={16} />
                   </span>
-                  <span>{workspace.name}</span>
+                  <span>{workspace['Workspace Name'] || workspace.name}</span>
                   {mode === 'workspace' && activeWorkspace?.id === workspace.id && (
                     <span className="checkmark">
                       <Check size={16} />

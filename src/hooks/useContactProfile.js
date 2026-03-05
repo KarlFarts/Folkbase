@@ -64,7 +64,7 @@ const initialState = {
   // Edit mode
   isEditing: false,
   editData: {},
-  dirtyFields: new Set(),
+  dirtyFields: null, // initialized via useReducer initializer to avoid shared mutable state
 
   // Modal states
   showLogModal: false,
@@ -235,7 +235,10 @@ function contactProfileReducer(state, action) {
  * useContactProfile - Custom hook for managing ContactProfile state
  */
 export function useContactProfile() {
-  const [state, dispatch] = useReducer(contactProfileReducer, initialState);
+  const [state, dispatch] = useReducer(contactProfileReducer, initialState, (init) => ({
+    ...init,
+    dirtyFields: new Set(),
+  }));
 
   // Action creators - memoized to prevent infinite loops
   const actions = useMemo(

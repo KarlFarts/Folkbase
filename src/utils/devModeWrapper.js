@@ -20,62 +20,74 @@ import * as sheetsModule from './sheets';
 import { getCachedData, setCachedData, invalidateCache } from './indexedDbCache';
 import { SHEET_NAMES } from '../config/constants';
 import monitoringService from '../services/cacheMonitoringService';
-import {
-  getLocalContacts,
-  saveLocalContacts,
-  getLocalTouchpoints,
-  saveLocalTouchpoints,
-  getLocalEvents,
-  saveLocalEvents,
-  getLocalActivities,
-  saveLocalActivities,
-  getLocalContactActivities,
-  getLocalLists,
-  saveLocalLists,
-  getLocalContactLists,
-  saveLocalContactLists,
-  getLocalNotes,
-  saveLocalNotes,
-  getLocalContactNotes,
-  saveLocalContactNotes,
-  getLocalEventNotes,
-  saveLocalEventNotes,
-  getLocalListNotes,
-  saveLocalListNotes,
-  getLocalTaskNotes,
-  saveLocalTaskNotes,
-  getNotesForContact,
-  getLocalRelationships,
-  getLocalOrganizations,
-  saveLocalOrganizations,
-  getLocalLocations,
-  saveLocalLocations,
-  getLocalLocationVisits,
-  saveLocalLocationVisits,
-  getLocalWorkspaces,
-  saveLocalWorkspaces,
-  getLocalWorkspaceMembers,
-  saveLocalWorkspaceMembers,
-  getLocalWorkspaceInvitations,
-  saveLocalWorkspaceInvitations,
-  getLocalEventAttendees,
-  saveLocalEventAttendees,
-  getLocalEventResources,
-  saveLocalEventResources,
-  getLocalEventAgenda,
-  saveLocalEventAgenda,
-  getLocalOrgContacts,
-  saveLocalOrgContacts,
-  getLocalOrgDepartments,
-  saveLocalOrgDepartments,
-  getLocalTaskChecklist,
-  saveLocalTaskChecklist,
-  getLocalTaskTimeEntries,
-  saveLocalTaskTimeEntries,
-  getLocalCalendarEvents,
-  saveLocalCalendarEvents,
-} from '../__tests__/fixtures/seedTestData';
-import { mockMetadata } from '../__tests__/fixtures/testContacts';
+// Dev mode data layer — dynamically imported to keep test fixtures out of production bundles.
+// Vite replaces import.meta.env at build time, so in production the condition is false
+// and esbuild eliminates the dynamic import entirely.
+const _devSeed =
+  import.meta.env.VITE_DEV_MODE === 'true'
+    ? await import('../__tests__/fixtures/seedTestData')
+    : {};
+const _devContacts =
+  import.meta.env.VITE_DEV_MODE === 'true'
+    ? await import('../__tests__/fixtures/testContacts')
+    : {};
+
+const {
+  getLocalContacts = () => [],
+  saveLocalContacts = () => {},
+  getLocalTouchpoints = () => [],
+  saveLocalTouchpoints = () => {},
+  getLocalEvents = () => [],
+  saveLocalEvents = () => {},
+  getLocalActivities = () => [],
+  saveLocalActivities = () => {},
+  getLocalContactActivities = () => [],
+  getLocalLists = () => [],
+  saveLocalLists = () => {},
+  getLocalContactLists = () => [],
+  saveLocalContactLists = () => {},
+  getLocalNotes = () => [],
+  saveLocalNotes = () => {},
+  getLocalContactNotes = () => [],
+  saveLocalContactNotes = () => {},
+  getLocalEventNotes = () => [],
+  saveLocalEventNotes = () => {},
+  getLocalListNotes = () => [],
+  saveLocalListNotes = () => {},
+  getLocalTaskNotes = () => [],
+  saveLocalTaskNotes = () => {},
+  getNotesForContact = () => [],
+  getLocalRelationships = () => [],
+  getLocalOrganizations = () => [],
+  saveLocalOrganizations = () => {},
+  getLocalLocations = () => [],
+  saveLocalLocations = () => {},
+  getLocalLocationVisits = () => [],
+  saveLocalLocationVisits = () => {},
+  getLocalWorkspaces = () => [],
+  saveLocalWorkspaces = () => {},
+  getLocalWorkspaceMembers = () => [],
+  saveLocalWorkspaceMembers = () => {},
+  getLocalWorkspaceInvitations = () => [],
+  saveLocalWorkspaceInvitations = () => {},
+  getLocalEventAttendees = () => [],
+  saveLocalEventAttendees = () => {},
+  getLocalEventResources = () => [],
+  saveLocalEventResources = () => {},
+  getLocalEventAgenda = () => [],
+  saveLocalEventAgenda = () => {},
+  getLocalOrgContacts = () => [],
+  saveLocalOrgContacts = () => {},
+  getLocalOrgDepartments = () => [],
+  saveLocalOrgDepartments = () => {},
+  getLocalTaskChecklist = () => [],
+  saveLocalTaskChecklist = () => {},
+  getLocalTaskTimeEntries = () => [],
+  saveLocalTaskTimeEntries = () => {},
+  getLocalCalendarEvents = () => [],
+  saveLocalCalendarEvents = () => {},
+} = _devSeed;
+const { mockMetadata = null } = _devContacts;
 import { createActivity, ACTIVITY_TYPES, sortActivitiesByDate } from './activities';
 import { log } from './logger';
 
@@ -115,7 +127,8 @@ async function updateSheetRow(accessToken, sheetId, sheetName, idField, idValue,
   if (rowIndex === -1) {
     throw new Error(`${sheetName} row with ${idField}=${idValue} not found`);
   }
-  return await sheetsModule.updateData(accessToken, sheetId, sheetName, rowIndex + 2, updatedData);
+  const sheetRowIndex = allData.data[rowIndex]._rowIndex;
+  return await sheetsModule.updateData(accessToken, sheetId, sheetName, sheetRowIndex, updatedData);
 }
 
 /**
@@ -127,7 +140,8 @@ async function deleteSheetRow(accessToken, sheetId, sheetName, idField, idValue)
   if (rowIndex === -1) {
     throw new Error(`${sheetName} row with ${idField}=${idValue} not found`);
   }
-  return await sheetsModule.deleteData(accessToken, sheetId, sheetName, rowIndex + 2);
+  const sheetRowIndex = allData.data[rowIndex]._rowIndex;
+  return await sheetsModule.deleteData(accessToken, sheetId, sheetName, sheetRowIndex);
 }
 
 /**
@@ -662,7 +676,11 @@ export const logLocationVisit = async function logLocationVisit(
     log('[DEV MODE] Logging location visit to localStorage:', visitData);
 
     const visits = getLocalLocationVisits();
-    const visitId = `VIS${String(visits.length + 1).padStart(3, '0')}`;
+    const maxId = visits.reduce((max, v) => {
+      const num = parseInt((v['Visit ID'] || '').replace('VIS', ''), 10) || 0;
+      return Math.max(max, num);
+    }, 0);
+    const visitId = `VIS${String(maxId + 1).padStart(3, '0')}`;
     const createdDate = new Date().toISOString().split('T')[0];
 
     const newVisit = {
@@ -1232,8 +1250,13 @@ export const copyContactToWorkspace = (function () {
         throw new Error(`Contact ${sourceContactId} not found in source sheet`);
       }
 
-      // Generate new contact ID for the copy
-      const newContactId = `C${Date.now().toString().slice(-6)}`;
+      // Generate new contact ID for the copy using max-ID pattern
+      const existingContacts = getLocalContacts();
+      const maxId = existingContacts.reduce((max, c) => {
+        const num = parseInt((c['Contact ID'] || '').replace('C', ''), 10) || 0;
+        return Math.max(max, num);
+      }, 0);
+      const newContactId = `C${String(maxId + 1).padStart(3, '0')}`;
       const dateAdded = new Date().toISOString().split('T')[0];
 
       // Determine which fields to copy based on sync strategy

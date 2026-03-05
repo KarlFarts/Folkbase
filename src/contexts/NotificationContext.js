@@ -76,13 +76,16 @@ export function NotificationProvider({ children }) {
     [addNotification]
   );
 
-  const value = {
-    notifications,
-    notify,
-    addNotification,
-    dismissNotification,
-    dismissAll,
-  };
+  const value = useMemo(
+    () => ({
+      notifications,
+      notify,
+      addNotification,
+      dismissNotification,
+      dismissAll,
+    }),
+    [notifications, notify, addNotification, dismissNotification, dismissAll]
+  );
 
   return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 }

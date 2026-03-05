@@ -41,7 +41,7 @@ function OrgContactsManager({ organizationId }) {
   useEffect(() => {
     loadOrgContacts();
     loadContacts();
-  }, [organizationId]);
+  }, [organizationId, accessToken, activeSheetId]);
 
   const loadOrgContacts = async () => {
     if (!accessToken || !activeSheetId || !organizationId) return;

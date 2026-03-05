@@ -151,8 +151,8 @@ async function sheetsApiCallWithRetry(apiCall, accessToken, refreshTokenCallback
         // Refresh token
         await refreshTokenCallback();
 
-        // Get new token from localStorage
-        const newToken = localStorage.getItem('googleAccessToken');
+        // Get new token from sessionStorage
+        const newToken = sessionStorage.getItem('googleAccessToken');
         if (!newToken) throw new Error('Token refresh did not provide new token');
 
         // Retry with new token
@@ -332,7 +332,7 @@ export async function appendRow(accessToken, sheetId, sheetName, values) {
     },
     {
       params: {
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
         insertDataOption: 'INSERT_ROWS',
       },
     }
@@ -353,7 +353,7 @@ export async function updateCell(accessToken, sheetId, range, value) {
     },
     {
       params: {
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
       },
     }
   );
@@ -374,7 +374,7 @@ export async function updateRow(accessToken, sheetId, sheetName, rowIndex, value
     },
     {
       params: {
-        valueInputOption: 'USER_ENTERED',
+        valueInputOption: 'RAW',
       },
     }
   );
@@ -1001,7 +1001,10 @@ export async function unlinkNoteFromContact(accessToken, sheetId, noteId, contac
  */
 export function filterNotesByVisibility(notes, userEmail) {
   if (!userEmail) {
-    return notes;
+    // No identity context — only return workspace-wide notes, never private ones
+    return notes.filter(
+      (note) => (note['Visibility'] || VISIBILITY.WORKSPACE_WIDE) === VISIBILITY.WORKSPACE_WIDE
+    );
   }
 
   return notes.filter((note) => {

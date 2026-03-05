@@ -14,7 +14,7 @@ function TokenExpiryNotifier() {
     }
 
     const checkExpiry = () => {
-      const expiresAt = localStorage.getItem('googleAccessTokenExpiresAt');
+      const expiresAt = sessionStorage.getItem('googleAccessTokenExpiresAt');
       if (!expiresAt) return;
 
       const expiresAtTime = parseInt(expiresAt, 10);

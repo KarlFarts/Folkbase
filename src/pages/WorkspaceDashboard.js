@@ -64,11 +64,11 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       });
 
       // Load existing invitation or create a new one for owners/admins
-      if (config?.sheetId) {
+      if (config?.personalSheetId) {
         try {
           const invitations = await getWorkspaceInvitations(
             accessToken,
-            config.sheetId,
+            config.personalSheetId,
             selectedWorkspace.id
           );
           // Find an active invitation
@@ -106,13 +106,13 @@ const WorkspaceDashboard = ({ onNavigate }) => {
   };
 
   const handleCreateInvitation = async () => {
-    if (!selectedWorkspace || !accessToken || !config?.sheetId || !user?.email) return;
+    if (!selectedWorkspace || !accessToken || !config?.personalSheetId || !user?.email) return;
 
     setCreatingInvitation(true);
     try {
       const invitation = await createWorkspaceInvitation(
         accessToken,
-        config.sheetId,
+        config.personalSheetId,
         selectedWorkspace.id,
         { role: 'member', expiresInDays: 30 },
         user.email
@@ -402,7 +402,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
                       <WorkspaceInvitationGenerator
                         workspace={selectedWorkspace}
                         token={invitationToken}
-                        sheetId={config.personalSheetId || config.sheetId}
+                        sheetId={config.personalSheetId || config.personalSheetId}
                       />
                     ) : (
                       <div className="create-invitation-prompt">

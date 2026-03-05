@@ -39,7 +39,7 @@ function TimeEntryManager({ taskId }) {
   useEffect(() => {
     loadTimeEntries();
     loadContacts();
-  }, [taskId]);
+  }, [taskId, accessToken, activeSheetId]);
 
   const loadTimeEntries = async () => {
     if (!accessToken || !activeSheetId || !taskId) return;

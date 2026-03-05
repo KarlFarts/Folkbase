@@ -30,8 +30,8 @@ function RecentActivity({ activities, onNavigate }) {
       <h3 className="ra-heading">Recent Activity</h3>
 
       <div className="activity-list">
-        {activities.map((activity, index) => (
-          <div key={index} className="activity-item">
+        {activities.map((activity) => (
+          <div key={activity.id || `${activity.date}-${activity.description}`} className="activity-item">
             <div className="ra-activity-desc">{activity.description}</div>
             <div className="ra-activity-date">{formatRelativeDate(activity.date)}</div>
           </div>

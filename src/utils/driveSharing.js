@@ -14,7 +14,7 @@ export async function shareFileWithUser(accessToken, fileId, email, role = 'writ
     return { success: true };
   }
 
-  const res = await fetch(`${DRIVE_API_BASE}/files/${fileId}/permissions`, {
+  const res = await fetch(`${DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}/permissions`, {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -48,7 +48,7 @@ export async function listFilePermissions(accessToken, fileId) {
   }
 
   const res = await fetch(
-    `${DRIVE_API_BASE}/files/${fileId}/permissions?fields=permissions(id,emailAddress,role,type)`,
+    `${DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}/permissions?fields=permissions(id,emailAddress,role,type)`,
     {
       headers: { Authorization: `Bearer ${accessToken}` },
     }
@@ -85,7 +85,7 @@ export async function removeFileSharing(accessToken, fileId, email) {
     return { success: true }; // Already not shared
   }
 
-  const res = await fetch(`${DRIVE_API_BASE}/files/${fileId}/permissions/${perm.id}`, {
+  const res = await fetch(`${DRIVE_API_BASE}/files/${encodeURIComponent(fileId)}/permissions/${encodeURIComponent(perm.id)}`, {
     method: 'DELETE',
     headers: { Authorization: `Bearer ${accessToken}` },
   });

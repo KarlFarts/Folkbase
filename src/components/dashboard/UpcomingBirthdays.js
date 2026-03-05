@@ -3,25 +3,16 @@ import { Cake } from 'lucide-react';
 function UpcomingBirthdays({ contacts, onNavigate }) {
   // Filter and calculate upcoming birthdays
   const upcomingBirthdays = contacts
-    .filter(contact => {
-      if (!contact.Birthday) return false;
-      const birthday = new Date(contact.Birthday);
-      const today = new Date();
-      // Set birthday to this year
-      birthday.setFullYear(today.getFullYear());
-      // If birthday already passed this year, check next year
-      if (birthday < today) birthday.setFullYear(today.getFullYear() + 1);
-      const daysUntil = Math.floor((birthday - today) / (1000 * 60 * 60 * 24));
-      return daysUntil <= 30 && daysUntil >= 0;
-    })
-    .map(contact => {
+    .map((contact) => {
+      if (!contact.Birthday) return null;
       const birthday = new Date(contact.Birthday);
       const today = new Date();
       birthday.setFullYear(today.getFullYear());
       if (birthday < today) birthday.setFullYear(today.getFullYear() + 1);
       const daysUntil = Math.floor((birthday - today) / (1000 * 60 * 60 * 24));
-      return { contact, birthday, daysUntil };
+      return daysUntil <= 30 && daysUntil >= 0 ? { contact, birthday, daysUntil } : null;
     })
+    .filter(Boolean)
     .sort((a, b) => a.daysUntil - b.daysUntil);
 
   const formatBirthdayDate = (date) => {

@@ -2,7 +2,13 @@ import React, { createContext, useState, useContext } from 'react';
 
 const ConfigContext = createContext();
 
-export const useConfig = () => useContext(ConfigContext);
+export const useConfig = () => {
+  const context = useContext(ConfigContext);
+  if (!context) {
+    throw new Error('useConfig must be used within a ConfigProvider');
+  }
+  return context;
+};
 
 // Google Sheet IDs are 44-char base64 strings
 const isValidSheetId = (id) =>

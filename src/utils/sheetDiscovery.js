@@ -19,9 +19,9 @@ import { findTouchpointFolder } from './driveFolder';
  */
 export async function hasDriveScope(accessToken) {
   try {
-    const response = await fetch(
-      `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`
-    );
+    const response = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
 
     if (!response.ok) {
       return false;

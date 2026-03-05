@@ -39,7 +39,7 @@ function EmploymentManager({ contactId }) {
   useEffect(() => {
     loadEmployment();
     loadOrganizations();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadEmployment = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;

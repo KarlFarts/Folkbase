@@ -89,7 +89,7 @@ export function classifyAuthError(error) {
 
   return {
     step: 'account',
-    detail: msg || 'An unexpected error occurred.',
+    detail: 'An unexpected error occurred.',
     fix: 'Please try again.',
     code: 'unknown',
   };

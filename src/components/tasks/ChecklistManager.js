@@ -39,7 +39,7 @@ function ChecklistManager({ taskId }) {
   useEffect(() => {
     loadChecklistItems();
     loadContacts();
-  }, [taskId]);
+  }, [taskId, accessToken, activeSheetId]);
 
   const loadChecklistItems = async () => {
     if (!accessToken || !activeSheetId || !taskId) return;

@@ -8,6 +8,7 @@ import {
   deleteContactSocial,
 } from '../../utils/devModeWrapper';
 import { useAuth } from '../../contexts/AuthContext';
+import { sanitizeUrl } from '../../utils/sanitize';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
 
@@ -36,7 +37,7 @@ function SocialsManager({ contactId }) {
 
   useEffect(() => {
     loadSocials();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadSocials = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;
@@ -154,9 +155,9 @@ function SocialsManager({ contactId }) {
                 <td>{social.Platform}</td>
                 <td>{social.Handle}</td>
                 <td>
-                  {social.URL ? (
+                  {social.URL && sanitizeUrl(social.URL) ? (
                     <a
-                      href={social.URL}
+                      href={sanitizeUrl(social.URL)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="soc-url-link"

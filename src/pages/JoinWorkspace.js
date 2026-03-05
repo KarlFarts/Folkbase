@@ -32,6 +32,8 @@ const JoinWorkspace = () => {
     if (hasValidated.current) return;
 
     const validate = async () => {
+      hasValidated.current = true;
+
       if (!token) {
         setStatus('invalid');
         setError('No invitation token provided');
@@ -58,8 +60,6 @@ const JoinWorkspace = () => {
         );
         return;
       }
-
-      hasValidated.current = true;
 
       try {
         const result = await validateInvitationToken(

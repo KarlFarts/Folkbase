@@ -7,6 +7,23 @@
 const BILLING_API_URL = import.meta.env.VITE_BILLING_API_URL;
 
 /**
+ * Validate that a billing redirect URL is safe (HTTPS + known Stripe domain)
+ */
+function validateBillingRedirectUrl(url) {
+  try {
+    const parsed = new URL(url);
+    const allowedHosts = ['checkout.stripe.com', 'billing.stripe.com'];
+    if (parsed.protocol !== 'https:' || !allowedHosts.includes(parsed.hostname)) {
+      throw new Error('Invalid billing redirect URL');
+    }
+    return url;
+  } catch (e) {
+    if (e.message === 'Invalid billing redirect URL') throw e;
+    throw new Error('Malformed billing redirect URL');
+  }
+}
+
+/**
  * Fetch the current user's subscription
  * @param {string} accessToken - Google OAuth access token
  * @returns {Promise<object>} Subscription object
@@ -62,7 +79,7 @@ export async function createCheckoutSession(accessToken, priceId, quantity = 1) 
   }
 
   const data = await response.json();
-  return data.checkoutUrl;
+  return validateBillingRedirectUrl(data.checkoutUrl);
 }
 
 /**
@@ -89,5 +106,5 @@ export async function createPortalSession(accessToken) {
   }
 
   const data = await response.json();
-  return data.portalUrl;
+  return validateBillingRedirectUrl(data.portalUrl);
 }

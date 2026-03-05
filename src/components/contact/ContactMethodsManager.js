@@ -42,7 +42,7 @@ function ContactMethodsManager({ contactId }) {
 
   useEffect(() => {
     loadMethods();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadMethods = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;

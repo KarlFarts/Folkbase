@@ -1,5 +1,5 @@
 import { error as logError } from '../../utils/logger';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Check } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
@@ -24,6 +24,11 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const timersRef = useRef([]);
+
+  useEffect(() => {
+    return () => timersRef.current.forEach(clearTimeout);
+  }, []);
 
   const handleQuickCommit = async () => {
     if (!note || !note['Note ID']) {
@@ -45,7 +50,7 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
 
       // Show success state briefly
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
+      timersRef.current.push(setTimeout(() => setSuccess(false), 2000));
 
       // Call parent callback
       if (onCommit) {
@@ -56,7 +61,7 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
       setError(err.message || 'Failed to commit note');
 
       // Clear error after 3 seconds
-      setTimeout(() => setError(''), 3000);
+      timersRef.current.push(setTimeout(() => setError(''), 3000));
     } finally {
       setIsLoading(false);
     }

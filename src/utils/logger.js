@@ -66,13 +66,12 @@ export const error = (...args) => {
 };
 
 /**
- * Conditional console.warn that only outputs in dev mode
+ * console.warn — always active (warnings indicate conditions worth attention in production)
  * @param {...any} args - Warning arguments to log
  */
 export const warn = (...args) => {
-  if (isDevMode()) {
-    console.warn(...args);
-  }
+  // eslint-disable-next-line no-console
+  console.warn(...args);
 };
 
 /**

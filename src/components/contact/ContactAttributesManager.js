@@ -44,7 +44,7 @@ function ContactAttributesManager({ contactId }) {
 
   useEffect(() => {
     loadAttributes();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadAttributes = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;
@@ -161,17 +161,15 @@ function ContactAttributesManager({ contactId }) {
                 {items.map((attr) => (
                   <div
                     key={attr['Attribute ID']}
-                    className="tag-removable"
-                    className="cam-pill-item"
+                    className="tag-removable cam-pill-item"
                     title={attr.Notes || undefined}
                   >
                     {attr.Value}
                     <div className="cam-pill-actions">
                       <button
                         onClick={() => openEditModal(attr)}
-                        className="tag-remove-btn"
+                        className="tag-remove-btn cam-edit-btn"
                         title="Edit"
-                        className="cam-edit-btn"
                       >
                         <Pencil size={10} />
                       </button>

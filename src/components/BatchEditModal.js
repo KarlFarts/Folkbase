@@ -31,19 +31,21 @@ function BatchEditModal({ isOpen, selectedCount, onApply, onCancel, isLoading })
   );
 
   const handleToggleField = (fieldKey) => {
-    setSelectedFields((prev) => {
-      const next = new Set(prev);
-      if (next.has(fieldKey)) {
+    if (selectedFields.has(fieldKey)) {
+      setSelectedFields((prev) => {
+        const next = new Set(prev);
         next.delete(fieldKey);
-        const newEditData = { ...editData };
-        delete newEditData[fieldKey];
-        setEditData(newEditData);
-      } else {
-        next.add(fieldKey);
-        setEditData((prev) => ({ ...prev, [fieldKey]: '' }));
-      }
-      return next;
-    });
+        return next;
+      });
+      setEditData((prev) => {
+        const next = { ...prev };
+        delete next[fieldKey];
+        return next;
+      });
+    } else {
+      setSelectedFields((prev) => new Set([...prev, fieldKey]));
+      setEditData((prev) => ({ ...prev, [fieldKey]: '' }));
+    }
   };
 
   const handleFieldChange = (fieldKey, value) => {

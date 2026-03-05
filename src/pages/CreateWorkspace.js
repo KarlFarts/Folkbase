@@ -94,7 +94,7 @@ const CreateWorkspace = () => {
   const loadParentWorkspace = async (parentId) => {
     setLoadingParent(true);
     try {
-      const parent = await getWorkspaceById(parentId);
+      const parent = await getWorkspaceById(accessToken, config?.personalSheetId, parentId);
       if (parent) {
         setParentWorkspace(parent);
       } else {

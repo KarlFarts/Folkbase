@@ -39,7 +39,7 @@ const SignInPage = ({ onSignedIn, initialError }) => {
       // Returning users: verify the new token can reach their sheet
       if (config.personalSheetId) {
         setStepStatus('sheets', 'checking');
-        const token = localStorage.getItem('googleAccessToken');
+        const token = sessionStorage.getItem('googleAccessToken');
         if (!token) {
           setStepStatus('sheets', 'error', {
             detail: 'Sign-in succeeded but the token could not be retrieved.',

@@ -8,7 +8,7 @@ import { ConfigProvider } from './contexts/ConfigContext';
 import { validateProductionEnv, renderEnvErrorScreen } from './utils/validateEnv';
 import { initErrorReporting } from './utils/errorReporting';
 import { GOOGLE_CLIENT_ID } from './googleAuth';
-import { isDevMode } from './__tests__/mocks/mockAuth';
+import { isDevMode } from './utils/devMode';
 
 // Validate environment variables before starting the app
 const envValidation = validateProductionEnv();

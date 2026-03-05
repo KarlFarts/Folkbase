@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useId } from 'react';
 import { X } from 'lucide-react';
 
 /**
@@ -58,7 +58,7 @@ function TagsInput({ value, onChange, placeholder = 'Add tag...', suggestionsKey
     if (inputVal.trim()) addTag(inputVal);
   };
 
-  const listId = `tags-suggestions-${Math.random().toString(36).slice(2)}`;
+  const listId = `tags-suggestions-${useId()}`;
 
   return (
     <div className="tags-input-wrap">

@@ -42,7 +42,7 @@ function DistrictsManager({ contactId }) {
 
   useEffect(() => {
     loadDistricts();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadDistricts = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;

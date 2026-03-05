@@ -31,7 +31,7 @@ import axios from 'axios';
 import { useTheme } from '../hooks/useTheme';
 
 function SettingsPage({ onShowSetup, onNavigate }) {
-  const { user, accessToken, signInWithGoogle, signOut, hasCalendarAccess, requestCalendarAccess } =
+  const { user, accessToken, signInWithGoogle, logout, hasCalendarAccess, requestCalendarAccess } =
     useAuth();
   const { config } = useConfig();
   const { notify } = useNotification();
@@ -146,9 +146,9 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       setSheetsStatus({ loading: true, connected: false, error: null });
 
       try {
-        const tokenResponse = await fetch(
-          `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${accessToken}`
-        );
+        const tokenResponse = await fetch(`https://www.googleapis.com/oauth2/v1/tokeninfo`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
 
         if (!tokenResponse.ok) {
           throw new Error('Token validation failed - please re-authenticate');
@@ -986,7 +986,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
         isOpen={showSignOutConfirm}
         onConfirm={async () => {
           setShowSignOutConfirm(false);
-          await signOut();
+          await logout();
           window.location.reload();
         }}
         onCancel={() => setShowSignOutConfirm(false)}

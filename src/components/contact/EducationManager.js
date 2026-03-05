@@ -34,7 +34,7 @@ function EducationManager({ contactId }) {
 
   useEffect(() => {
     loadEducation();
-  }, [contactId]);
+  }, [contactId, accessToken, activeSheetId]);
 
   const loadEducation = async () => {
     if (!accessToken || !activeSheetId || !contactId) return;

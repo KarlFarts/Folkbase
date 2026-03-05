@@ -1,14 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { GOOGLE_SCOPES, CALENDAR_SCOPE } from '../googleAuth';
-import {
-  isDevMode,
-  getCurrentMockUser,
-  setMockUserRole,
-  mockSignIn,
-  mockSignOut,
-  MOCK_ACCESS_TOKEN,
-} from '../__tests__/mocks/mockAuth';
+import { isDevMode } from '../utils/devMode';
+
+// Lazy-load mock auth module only in dev mode to keep it out of production bundles
+let _mockAuth = null;
+async function getMockAuth() {
+  if (!_mockAuth) {
+    _mockAuth = await import('../__tests__/mocks/mockAuth');
+  }
+  return _mockAuth;
+}
 import { log, warn } from '../utils/logger';
 import { logApiCall } from '../utils/apiUsageLogger.js';
 
@@ -85,10 +87,10 @@ export function AuthProvider({ children }) {
         // Store token with expiration metadata
         // Google OAuth tokens typically expire in 1 hour (3600 seconds)
         const expiresAt = Date.now() + tokenResponse.expires_in * 1000;
-        localStorage.setItem('googleAccessToken', token);
-        localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+        sessionStorage.setItem('googleAccessToken', token);
+        sessionStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
         // Store user info for session restoration
-        localStorage.setItem('googleUserInfo', JSON.stringify(newUser));
+        sessionStorage.setItem('googleUserInfo', JSON.stringify(newUser));
 
         // Log successful auth
         logApiCall('google-oauth', 'signInWithGoogle', {
@@ -153,6 +155,7 @@ export function AuthProvider({ children }) {
     async (forceReauth = false) => {
       // DEV MODE: Use mock authentication
       if (isDevMode()) {
+        const { mockSignIn, MOCK_ACCESS_TOKEN } = await getMockAuth();
         const mockUser = await mockSignIn();
         setUser(mockUser);
         setAccessToken(MOCK_ACCESS_TOKEN);
@@ -169,9 +172,9 @@ export function AuthProvider({ children }) {
         // The @react-oauth/google library handles this via the prompt parameter
         if (forceReauth) {
           // For forced re-auth, we'll clear the stored token and trigger a new login
-          localStorage.removeItem('googleAccessToken');
-          localStorage.removeItem('googleAccessTokenExpiresAt');
-          localStorage.removeItem('googleUserInfo');
+          sessionStorage.removeItem('googleAccessToken');
+          sessionStorage.removeItem('googleAccessTokenExpiresAt');
+          sessionStorage.removeItem('googleUserInfo');
         }
 
         // Trigger the Google OAuth popup
@@ -239,8 +242,8 @@ export function AuthProvider({ children }) {
                 // Update auth state with the new token
                 setAccessToken(token);
                 const expiresAt = Date.now() + (parseInt(expiresIn) || 3600) * 1000;
-                localStorage.setItem('googleAccessToken', token);
-                localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+                sessionStorage.setItem('googleAccessToken', token);
+                sessionStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
 
                 log('Token refreshed silently');
                 resolve(user);
@@ -272,6 +275,7 @@ export function AuthProvider({ children }) {
     try {
       // DEV MODE: Use mock sign out
       if (isDevMode()) {
+        const { mockSignOut } = await getMockAuth();
         await mockSignOut();
         setUser(null);
         setAccessToken(null);
@@ -280,14 +284,14 @@ export function AuthProvider({ children }) {
       }
 
       // Get token before clearing for revocation
-      const token = localStorage.getItem('googleAccessToken');
+      const token = sessionStorage.getItem('googleAccessToken');
 
       // Clear local state
       setUser(null);
       setAccessToken(null);
-      localStorage.removeItem('googleAccessToken');
-      localStorage.removeItem('googleAccessTokenExpiresAt');
-      localStorage.removeItem('googleUserInfo');
+      sessionStorage.removeItem('googleAccessToken');
+      sessionStorage.removeItem('googleAccessTokenExpiresAt');
+      sessionStorage.removeItem('googleUserInfo');
 
       // Clear session storage (OAuth state, etc.)
       sessionStorage.removeItem('oauth_state');
@@ -336,15 +340,17 @@ export function AuthProvider({ children }) {
 
     // DEV MODE: Auto-initialize with mock user
     if (isDevMode()) {
-      const mockUser = getCurrentMockUser();
-      setUser(mockUser);
-      setAccessToken(MOCK_ACCESS_TOKEN);
-      setLoading(false);
-      log(
-        '[DEV MODE] Auto-initialized with mock user:',
-        mockUser.displayName,
-        `(${mockUser.role})`
-      );
+      getMockAuth().then(({ getCurrentMockUser, MOCK_ACCESS_TOKEN }) => {
+        const mockUser = getCurrentMockUser();
+        setUser(mockUser);
+        setAccessToken(MOCK_ACCESS_TOKEN);
+        setLoading(false);
+        log(
+          '[DEV MODE] Auto-initialized with mock user:',
+          mockUser.displayName,
+          `(${mockUser.role})`
+        );
+      });
       return () => {
         authInitializedRef.current = false;
       };
@@ -352,9 +358,9 @@ export function AuthProvider({ children }) {
 
     // PRODUCTION: Check for existing session in localStorage
     const restoreSession = async () => {
-      const storedToken = localStorage.getItem('googleAccessToken');
-      const expiresAt = localStorage.getItem('googleAccessTokenExpiresAt');
-      const storedUserInfo = localStorage.getItem('googleUserInfo');
+      const storedToken = sessionStorage.getItem('googleAccessToken');
+      const expiresAt = sessionStorage.getItem('googleAccessTokenExpiresAt');
+      const storedUserInfo = sessionStorage.getItem('googleUserInfo');
 
       if (storedToken && expiresAt && Date.now() < parseInt(expiresAt)) {
         // Token exists and hasn't expired — restore the session optimistically.
@@ -391,7 +397,7 @@ export function AuthProvider({ children }) {
               photoURL: userInfo.picture,
             };
             setUser(restoredUser);
-            localStorage.setItem('googleUserInfo', JSON.stringify(restoredUser));
+            sessionStorage.setItem('googleUserInfo', JSON.stringify(restoredUser));
           }
           // If the fetch fails, we still have a valid non-expired token.
           // Don't log the user out — leave user as null and let the app
@@ -401,9 +407,9 @@ export function AuthProvider({ children }) {
         }
       } else if (storedToken) {
         // Token exists but timestamp says it's expired — clear it.
-        localStorage.removeItem('googleAccessToken');
-        localStorage.removeItem('googleAccessTokenExpiresAt');
-        localStorage.removeItem('googleUserInfo');
+        sessionStorage.removeItem('googleAccessToken');
+        sessionStorage.removeItem('googleAccessTokenExpiresAt');
+        sessionStorage.removeItem('googleUserInfo');
       }
 
       setLoading(false);
@@ -510,10 +516,10 @@ export function AuthProvider({ children }) {
 
           // Update token with new scope
           setAccessToken(token);
-          localStorage.setItem('googleAccessToken', token);
+          sessionStorage.setItem('googleAccessToken', token);
           // Update expiration metadata (tokens typically expire in 3600 seconds)
           const expiresAt = Date.now() + 3600 * 1000;
-          localStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
+          sessionStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
 
           log('Calendar access granted');
           resolve(true);
@@ -542,10 +548,11 @@ export function AuthProvider({ children }) {
     requestCalendarAccess,
     // Dev mode utilities
     isDevMode: isDevMode(),
-    setMockUserRole: useCallback((role) => {
+    setMockUserRole: useCallback(async (role) => {
       if (isDevMode()) {
-        setMockUserRole(role);
-        const mockUser = getCurrentMockUser();
+        const mockAuth = await getMockAuth();
+        mockAuth.setMockUserRole(role);
+        const mockUser = mockAuth.getCurrentMockUser();
         setUser(mockUser);
         log('[DEV MODE] Switched to:', mockUser.displayName, `(${mockUser.role})`);
       }

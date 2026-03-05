@@ -161,7 +161,7 @@ export async function moveFileToFolder(accessToken, fileId, folderId) {
   try {
     // First, get current parents
     const fileResponse = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}?fields=parents`,
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?fields=parents`,
       {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -179,7 +179,7 @@ export async function moveFileToFolder(accessToken, fileId, folderId) {
 
     // Move file to new folder (remove from old parents)
     const response = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${fileId}?addParents=${folderId}&removeParents=${previousParents}&fields=id,parents`,
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?addParents=${encodeURIComponent(folderId)}&removeParents=${encodeURIComponent(previousParents)}&fields=id,parents`,
       {
         method: 'PATCH',
         headers: {

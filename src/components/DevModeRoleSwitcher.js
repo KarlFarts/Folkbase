@@ -7,18 +7,25 @@
  * IMPORTANT: This component is dev-mode only and will not appear in production builds.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, ChevronDown, LogOut, Settings } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { mockUsers, getCurrentMockRole } from '../__tests__/mocks/mockAuth';
 import './DevModeRoleSwitcher.css';
 
 export function DevModeRoleSwitcher({ onShowSettings, onLogout }) {
   const { isDevMode, user, setMockUserRole } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [mockUsers, setMockUsers] = useState({});
+  const [currentRole, setCurrentRole] = useState('admin');
 
-  // Get current role directly from auth state
-  const currentRole = getCurrentMockRole();
+  useEffect(() => {
+    if (isDevMode) {
+      import('../__tests__/mocks/mockAuth').then((mod) => {
+        setMockUsers(mod.mockUsers);
+        setCurrentRole(mod.getCurrentMockRole());
+      });
+    }
+  }, [isDevMode, user]);
 
   if (!isDevMode) {
     return null;

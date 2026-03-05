@@ -229,18 +229,9 @@ function ContactProfile({ onNavigate }) {
         }
       );
 
-      const [newTouchpoints, newActivities] = await Promise.all([
-        getContactTouchpoints(accessToken, sheetId, contactId),
-        getContactActivities(contactId),
-      ]);
-      actions.setTouchpoints(
-        newTouchpoints.sort((a, b) => (b['Date'] || '').localeCompare(a['Date'] || ''))
-      );
-      actions.setActivities(newActivities);
-
       actions.toggleLogModal(false);
       actions.resetTouchpointData();
-      loadContact();
+      await loadContact();
     } catch (err) {
       console.error('Failed to log touchpoint:', err);
       notify.error('Failed to log touchpoint: ' + (err.message || 'Unknown error'));

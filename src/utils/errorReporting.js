@@ -142,7 +142,7 @@ function initCustomReporter(reporter) {
  */
 function getCurrentUser() {
   try {
-    const authData = localStorage.getItem('googleAccessToken');
+    const authData = sessionStorage.getItem('googleAccessToken');
     if (!authData) return null;
     return null;
   } catch {
