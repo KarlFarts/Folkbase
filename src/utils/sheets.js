@@ -157,7 +157,7 @@ async function sheetsApiCallWithRetry(apiCall, accessToken, refreshTokenCallback
 
         // Retry with new token
         return await apiCall(newToken);
-      } catch (_refreshErr) {
+      } catch {
         // Refresh failed, throw original auth error
         throw error;
       }

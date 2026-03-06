@@ -14,7 +14,6 @@ import {
   Search,
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
 import {
@@ -36,7 +35,6 @@ import ConfirmDialog from '../components/ConfirmDialog';
 function EventDetails({ onNavigate }) {
   const { id } = useParams();
   const { accessToken, refreshAccessToken, user } = useAuth();
-  const { config } = useConfig();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
   const { canWrite } = usePermissions();

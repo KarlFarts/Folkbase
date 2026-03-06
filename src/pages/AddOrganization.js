@@ -4,7 +4,7 @@ import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { readSheetData, addOrganization, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateOrganizations } from '../services/organizationService';
-import { sanitizeFormData, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
+import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 
 function AddOrganization({ onNavigate }) {
   const { user, accessToken } = useAuth();

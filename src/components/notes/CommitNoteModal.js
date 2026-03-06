@@ -398,10 +398,9 @@ export default function CommitNoteModal({
             </div>
 
             <button
-              className="btn btn-primary"
+              className="btn btn-primary cnm-full-width"
               onClick={() => setShowLinkEntitiesModal(true)}
               disabled={isCommitting}
-              className="cnm-full-width"
             >
               {totalEntitiesSelected > 0 ? 'Edit Entity Links' : 'Add Entity Links'}
             </button>

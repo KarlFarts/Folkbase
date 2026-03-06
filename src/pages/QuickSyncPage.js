@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { parseFile } from '../utils/importParsers';
 import { readSheetData, addContact, SHEETS } from '../utils/devModeWrapper';
@@ -22,7 +21,6 @@ const STATES = {
 
 function QuickSyncPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
-  const { config } = useConfig();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
 

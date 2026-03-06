@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useConfig } from '../contexts/ConfigContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 import {
@@ -14,7 +13,6 @@ import AttendeeSelector from '../components/events/AttendeeSelector';
 
 function AddEvent({ onNavigate }) {
   const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
-  const { config } = useConfig();
   const sheetId = useActiveSheetId();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(false);

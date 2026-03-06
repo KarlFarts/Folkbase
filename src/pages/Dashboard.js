@@ -85,7 +85,6 @@ function Dashboard({ onNavigate }) {
       setLoading(false);
       isLoadingRef.current = false;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId, refreshAccessToken]);
 
   useEffect(() => {

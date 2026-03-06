@@ -70,7 +70,6 @@ export const error = (...args) => {
  * @param {...any} args - Warning arguments to log
  */
 export const warn = (...args) => {
-  // eslint-disable-next-line no-console
   console.warn(...args);
 };
 

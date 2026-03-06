@@ -12,11 +12,7 @@ vi.mock('axios', () => ({
 }));
 vi.mock('../utils/sheets');
 
-// These are imported for future use when test implementations are added
-// eslint-disable-next-line no-unused-vars
 import {
-  saveTemplate,
-  listTemplates,
   IMPORT_TEMPLATES,
   detectTemplate,
   applyTemplate,
@@ -93,7 +89,7 @@ describe('importConfigService', () => {
     });
 
     test('all templates have required structure', () => {
-      for (const [key, template] of Object.entries(IMPORT_TEMPLATES)) {
+      for (const [_key, template] of Object.entries(IMPORT_TEMPLATES)) {
         expect(template).toHaveProperty('name');
         expect(template).toHaveProperty('description');
         expect(template).toHaveProperty('mappings');

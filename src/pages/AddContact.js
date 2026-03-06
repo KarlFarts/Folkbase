@@ -11,7 +11,7 @@ function AddContact({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
-  const [metadata, setMetadata] = useState(null);
+  const [_metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -137,19 +137,7 @@ function AddContact({ onNavigate }) {
     }
   };
 
-  // Get dropdown options from metadata
-  const priorityOptions = metadata?.validationRules?.['Priority'] || [
-    'Urgent',
-    'High',
-    'Medium',
-    'Low',
-    'No Urgency',
-  ];
-  const statusOptions = metadata?.validationRules?.['Status'] || [
-    'Active',
-    'Inactive',
-    'Do Not Contact',
-  ];
+  // Dropdown options from _metadata are available via _metadata?.validationRules if needed
 
   if (loading) {
     return (

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { getRandomGreeting, getTimeOfDayGreeting } from './greetingMessages';
 
-function HeroWelcome({ onNavigate }) {
+function HeroWelcome({ onNavigate: _onNavigate }) {
   const { user } = useAuth();
   const [greeting] = useState(getRandomGreeting());
 

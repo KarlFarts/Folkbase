@@ -1,6 +1,5 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useConfig } from '../../contexts/ConfigContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
 import { listTemplates, loadTemplate, saveTemplate } from '../../services/importConfigService';
@@ -46,7 +45,7 @@ function FieldMappingPreview({
   fileType = 'CSV', // Add fileType prop
 }) {
   const { accessToken, user } = useAuth();
-  const { config } = useConfig();
+
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
 

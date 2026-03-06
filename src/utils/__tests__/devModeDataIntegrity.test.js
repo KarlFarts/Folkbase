@@ -51,7 +51,7 @@ vi.mock('../sheets', () => ({
 // Storage keys matching seedTestData.js
 const STORAGE_KEY_EVENTS = 'dev_events';
 const STORAGE_KEY_TASKS = 'dev_tasks';
-const STORAGE_KEY_EVENT_NOTES = 'dev_event_notes';
+const _STORAGE_KEY_EVENT_NOTES = 'dev_event_notes';
 
 describe('Dev Mode Data Integrity', () => {
   beforeEach(() => {

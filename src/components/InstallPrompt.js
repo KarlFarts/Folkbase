@@ -11,7 +11,9 @@ import './InstallPrompt.css';
 function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showPrompt, setShowPrompt] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
+  const [isIOS] = useState(
+    () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
+  );
 
   useEffect(() => {
     // Check if user has already dismissed the prompt
@@ -28,12 +30,8 @@ function InstallPrompt() {
       return;
     }
 
-    // Detect iOS
-    const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(iOS);
-
     // For iOS, show manual install instructions after a few uses
-    if (iOS) {
+    if (isIOS) {
       const visitCount = parseInt(
         localStorage.getItem('folkbase_visit_count') ||
           localStorage.getItem('touchpoint_visit_count') ||
