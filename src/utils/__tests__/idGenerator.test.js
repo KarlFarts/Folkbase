@@ -16,7 +16,7 @@ describe('generateId', () => {
   });
 
   it('works with all defined prefixes', () => {
-    for (const [key, prefix] of Object.entries(ID_PREFIXES)) {
+    for (const prefix of Object.values(ID_PREFIXES)) {
       const id = generateId(prefix);
       expect(id.startsWith(`${prefix}-`)).toBe(true);
       expect(id).toMatch(new RegExp(`^${prefix}-[0-9a-f]{8}$`));
