@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { WORKSPACE_ROLES } from '../config/constants';
+import { isDevMode } from '../utils/devMode';
 
 /**
  * Parses override string like "touchpoints:write,notes:write" into a Set of feature keys.
@@ -38,6 +39,35 @@ export function usePermissions() {
   const { notify } = useNotification();
 
   return useMemo(() => {
+    // DEV MODE: Allow simulating workspace roles for permission gate testing
+    if (isDevMode()) {
+      const devRole = localStorage.getItem('dev_permission_role');
+      if (devRole && devRole !== 'owner') {
+        const roleOverrides = parseOverrides(localStorage.getItem('dev_permission_overrides') || '');
+        const isEditor = devRole === WORKSPACE_ROLES.EDITOR;
+        const isViewer = devRole === WORKSPACE_ROLES.VIEWER;
+        const canWrite = (feature) => {
+          if (isEditor) return true;
+          if (isViewer) return roleOverrides.has(feature);
+          return false;
+        };
+        const guardWrite = (feature) => {
+          if (canWrite(feature)) return true;
+          notify.warning("You don't have permission to do this. Ask the workspace owner for access.");
+          return false;
+        };
+        return {
+          role: devRole,
+          isOwner: false,
+          isEditor,
+          isViewer,
+          canRead: () => true,
+          canWrite,
+          guardWrite,
+        };
+      }
+    }
+
     // Personal mode — full access
     if (mode !== 'workspace' || !activeWorkspace) {
       return {

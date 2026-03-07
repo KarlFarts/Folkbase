@@ -17,6 +17,7 @@ export function DevModeRoleSwitcher({ onShowSettings, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mockUsers, setMockUsers] = useState({});
   const [currentRole, setCurrentRole] = useState('admin');
+  const [devPermRole, setDevPermRole] = useState(localStorage.getItem('dev_permission_role') || 'owner');
 
   useEffect(() => {
     if (isDevMode) {
@@ -77,6 +78,27 @@ export function DevModeRoleSwitcher({ onShowSettings, onLogout }) {
           <div className="dropdown-footer">
             <p>Roles persist across page reloads</p>
           </div>
+          <div className="dropdown-divider"></div>
+          <div className="dropdown-header">Permission Role (viewer test)</div>
+          {['owner', 'editor', 'viewer'].map((role) => (
+            <button
+              key={role}
+              className={`role-option ${devPermRole === role ? 'active' : ''}`}
+              onClick={() => {
+                localStorage.setItem('dev_permission_role', role);
+                setDevPermRole(role);
+                setIsOpen(false);
+                window.location.reload();
+              }}
+            >
+              <span className="role-name">{role.charAt(0).toUpperCase() + role.slice(1)}</span>
+              {devPermRole === role && (
+                <span className="checkmark">
+                  <Check size={14} />
+                </span>
+              )}
+            </button>
+          ))}
           <div className="dropdown-divider"></div>
           <button
             className="dropdown-action"
