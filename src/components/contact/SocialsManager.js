@@ -19,7 +19,7 @@ const PLATFORMS = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'TikTok', 'Yo
  * SocialsManager - Manage contact's social media profiles (junction table)
  * Establishes the pattern for all junction table managers
  */
-function SocialsManager({ contactId }) {
+function SocialsManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -139,9 +139,11 @@ function SocialsManager({ contactId }) {
     <div>
       <div className="soc-header">
         <h3>Social Media Profiles</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Profile
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Profile
+          </button>
+        )}
       </div>
 
       {socials.length === 0 ? (
@@ -180,24 +182,26 @@ function SocialsManager({ contactId }) {
                   {social['Is Primary'] === 'TRUE' || social['Is Primary'] === true ? '✓' : ''}
                 </td>
                 <td>
-                  <div className="soc-actions">
-                    <button
-                      onClick={() => openEditModal(social)}
-                      className="btn btn-ghost btn-sm"
-                      title="Edit"
-                      disabled={saving}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(social['Social ID'])}
-                      className="btn btn-ghost btn-sm"
-                      title="Delete"
-                      disabled={saving}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {!readOnly && (
+                    <div className="soc-actions">
+                      <button
+                        onClick={() => openEditModal(social)}
+                        className="btn btn-ghost btn-sm"
+                        title="Edit"
+                        disabled={saving}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(social['Social ID'])}
+                        className="btn btn-ghost btn-sm"
+                        title="Delete"
+                        disabled={saving}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

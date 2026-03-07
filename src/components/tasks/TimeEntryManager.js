@@ -16,7 +16,7 @@ import { useActiveSheetId } from '../../utils/sheetResolver';
 /**
  * TimeEntryManager - Manage task time tracking entries (junction table)
  */
-function TimeEntryManager({ taskId }) {
+function TimeEntryManager({ taskId, readOnly = false }) {
   const { accessToken, user } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -182,9 +182,11 @@ function TimeEntryManager({ taskId }) {
             <p className="text-muted tem-total">Total: {totalHours.toFixed(2)} hours</p>
           )}
         </div>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Log Time
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Log Time
+          </button>
+        )}
       </div>
 
       {timeEntries.length === 0 ? (
@@ -223,22 +225,24 @@ function TimeEntryManager({ taskId }) {
                   {entry.Notes || <span className="text-muted">—</span>}
                 </td>
                 <td>
-                  <div className="tem-actions">
-                    <button
-                      onClick={() => openEditModal(entry)}
-                      className="btn btn-ghost btn-sm"
-                      title="Edit"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(entry['Time Entry ID'])}
-                      className="btn btn-ghost btn-sm"
-                      title="Delete"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {!readOnly && (
+                    <div className="tem-actions">
+                      <button
+                        onClick={() => openEditModal(entry)}
+                        className="btn btn-ghost btn-sm"
+                        title="Edit"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(entry['Time Entry ID'])}
+                        className="btn btn-ghost btn-sm"
+                        title="Delete"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

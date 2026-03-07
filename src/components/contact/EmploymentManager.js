@@ -17,7 +17,7 @@ import { useActiveSheetId } from '../../utils/sheetResolver';
 /**
  * EmploymentManager - Manage contact's employment history (junction table)
  */
-function EmploymentManager({ contactId }) {
+function EmploymentManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -168,9 +168,11 @@ function EmploymentManager({ contactId }) {
     <div>
       <div className="emp-header">
         <h3>Employment History</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Employment
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Employment
+          </button>
+        )}
       </div>
 
       {employment.length === 0 ? (
@@ -204,24 +206,26 @@ function EmploymentManager({ contactId }) {
                   <td>{emp.Department || <span className="text-muted">—</span>}</td>
                   <td>{period || <span className="text-muted">—</span>}</td>
                   <td>
-                    <div className="emp-actions">
-                      <button
-                        onClick={() => openEditModal(emp)}
-                        className="btn btn-ghost btn-sm"
-                        title="Edit"
-                        disabled={saving}
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(emp['Employment ID'])}
-                        className="btn btn-ghost btn-sm"
-                        title="Delete"
-                        disabled={saving}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    {!readOnly && (
+                      <div className="emp-actions">
+                        <button
+                          onClick={() => openEditModal(emp)}
+                          className="btn btn-ghost btn-sm"
+                          title="Edit"
+                          disabled={saving}
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(emp['Employment ID'])}
+                          className="btn btn-ghost btn-sm"
+                          title="Delete"
+                          disabled={saving}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

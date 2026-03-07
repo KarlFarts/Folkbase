@@ -27,7 +27,7 @@ const ATTRIBUTE_CATEGORIES = [
  * ContactAttributesManager - Manage contact's multi-value attributes (skills, interests, etc.)
  * Grouped pill display by Category. Junction table manager following the SocialsManager pattern.
  */
-function ContactAttributesManager({ contactId }) {
+function ContactAttributesManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -151,9 +151,11 @@ function ContactAttributesManager({ contactId }) {
     <div>
       <div className="cam-header">
         <h3>Attributes</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Attribute
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Attribute
+          </button>
+        )}
       </div>
 
       {attributes.length === 0 ? (
@@ -173,24 +175,26 @@ function ContactAttributesManager({ contactId }) {
                     title={attr.Notes || undefined}
                   >
                     {attr.Value}
-                    <div className="cam-pill-actions">
-                      <button
-                        onClick={() => openEditModal(attr)}
-                        className="tag-remove-btn cam-edit-btn"
-                        title="Edit"
-                        disabled={saving}
-                      >
-                        <Pencil size={10} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(attr['Attribute ID'])}
-                        className="tag-remove-btn"
-                        title="Delete"
-                        disabled={saving}
-                      >
-                        <Trash2 size={10} />
-                      </button>
-                    </div>
+                    {!readOnly && (
+                      <div className="cam-pill-actions">
+                        <button
+                          onClick={() => openEditModal(attr)}
+                          className="tag-remove-btn cam-edit-btn"
+                          title="Edit"
+                          disabled={saving}
+                        >
+                          <Pencil size={10} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(attr['Attribute ID'])}
+                          className="tag-remove-btn"
+                          title="Delete"
+                          disabled={saving}
+                        >
+                          <Trash2 size={10} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -701,15 +701,15 @@ function ContactProfile({ onNavigate }) {
             </CollapsibleSection>
 
             <CollapsibleSection title="Employment" defaultOpen={false}>
-              <EmploymentManager contactId={contactId} />
+              <EmploymentManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
 
             <CollapsibleSection title="Education" defaultOpen={false}>
-              <EducationManager contactId={contactId} />
+              <EducationManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
 
             <CollapsibleSection title="Social Profiles" defaultOpen={false}>
-              <SocialsManager contactId={contactId} />
+              <SocialsManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
 
             <CollapsibleSection title="Lists" defaultOpen={false}>
@@ -719,19 +719,20 @@ function ContactProfile({ onNavigate }) {
                 accessToken={accessToken}
                 sheetId={sheetId}
                 embedded={true}
+                readOnly={!canWrite('contacts')}
               />
             </CollapsibleSection>
 
             <CollapsibleSection title="Contact Methods" defaultOpen={false}>
-              <ContactMethodsManager contactId={contactId} />
+              <ContactMethodsManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
 
             <CollapsibleSection title="Attributes" defaultOpen={false}>
-              <ContactAttributesManager contactId={contactId} />
+              <ContactAttributesManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
 
             <CollapsibleSection title="Districts" defaultOpen={false}>
-              <DistrictsManager contactId={contactId} />
+              <DistrictsManager contactId={contactId} readOnly={!canWrite('contacts')} />
             </CollapsibleSection>
           </div>
         )}
@@ -858,6 +859,7 @@ function ContactProfile({ onNavigate }) {
               sheetId={sheetId}
               userEmail={user?.email}
               isMultiEntity={true}
+              readOnly={!canWrite('contacts')}
             />
           </div>
         )}

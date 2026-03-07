@@ -5,7 +5,7 @@ import WindowTemplate from './WindowTemplate';
  * TagManager Component
  * Modal to rename/delete tags globally across all contacts
  */
-export default function TagManager({ contacts, onUpdateContacts, onClose }) {
+export default function TagManager({ contacts, onUpdateContacts, onClose, readOnly = false }) {
   // Extract all unique tags from contacts
   const allTags = useMemo(() => {
     const tagSet = new Set();
@@ -104,7 +104,7 @@ export default function TagManager({ contacts, onUpdateContacts, onClose }) {
       </div>
 
       {/* Rename Section */}
-      {selectedTag && (
+      {!readOnly && selectedTag && (
         <div className="tm-rename-section">
           <h3 className="tm-rename-heading">Rename &quot;{selectedTag}&quot;</h3>
           <input
@@ -122,7 +122,7 @@ export default function TagManager({ contacts, onUpdateContacts, onClose }) {
       )}
 
       {/* Delete Section */}
-      {selectedTag && (
+      {!readOnly && selectedTag && (
         <div className="tm-delete-section">
           <button className="btn btn-danger tm-delete-btn" onClick={handleDelete}>
             Delete &quot;{selectedTag}&quot; from all contacts

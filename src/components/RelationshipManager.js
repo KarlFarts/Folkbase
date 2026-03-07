@@ -45,6 +45,7 @@ export default function RelationshipManager({
   sheetId,
   userEmail,
   isMultiEntity = false,
+  readOnly = false,
 }) {
   const navigate = useNavigate();
   const { notify } = useNotification();
@@ -262,13 +263,15 @@ export default function RelationshipManager({
           </div>
 
           {/* Add Relationship Button */}
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="rm-add-btn"
-            style={{ background: entityConfig?.color || 'var(--color-accent-primary, #c2703e)' }}
-          >
-            + Add Relationship
-          </button>
+          {!readOnly && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="rm-add-btn"
+              style={{ background: entityConfig?.color || 'var(--color-accent-primary, #c2703e)' }}
+            >
+              + Add Relationship
+            </button>
+          )}
         </div>
       </div>
 
@@ -302,13 +305,13 @@ export default function RelationshipManager({
           locations={allLocations}
           onContactClick={handleContactClick}
           onEntityClick={handleEntityClick}
-          onDelete={handleDeleteRelationship}
+          onDelete={readOnly ? undefined : handleDeleteRelationship}
           isMultiEntity={isMultiEntity}
         />
       )}
 
       {/* Add Relationship Modal */}
-      {showAddModal && (
+      {!readOnly && showAddModal && (
         <AddRelationshipModal
           sourceContactId={!isMultiEntity ? actualEntityId : undefined}
           sourceContactName={!isMultiEntity ? entityName : undefined}

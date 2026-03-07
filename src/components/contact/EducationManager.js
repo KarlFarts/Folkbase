@@ -15,7 +15,7 @@ import { useActiveSheetId } from '../../utils/sheetResolver';
 /**
  * EducationManager - Manage contact's educational background (junction table)
  */
-function EducationManager({ contactId }) {
+function EducationManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -139,9 +139,11 @@ function EducationManager({ contactId }) {
     <div>
       <div className="edu-header">
         <h3>Education</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Education
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Education
+          </button>
+        )}
       </div>
 
       {education.length === 0 ? (
@@ -175,24 +177,26 @@ function EducationManager({ contactId }) {
                   <td>{edu['Field of Study'] || <span className="text-muted">—</span>}</td>
                   <td>{years || <span className="text-muted">—</span>}</td>
                   <td>
-                    <div className="edu-actions">
-                      <button
-                        onClick={() => openEditModal(edu)}
-                        className="btn btn-ghost btn-sm"
-                        title="Edit"
-                        disabled={saving}
-                      >
-                        <Pencil size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(edu['Education ID'])}
-                        className="btn btn-ghost btn-sm"
-                        title="Delete"
-                        disabled={saving}
-                      >
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    {!readOnly && (
+                      <div className="edu-actions">
+                        <button
+                          onClick={() => openEditModal(edu)}
+                          className="btn btn-ghost btn-sm"
+                          title="Edit"
+                          disabled={saving}
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(edu['Education ID'])}
+                          className="btn btn-ghost btn-sm"
+                          title="Delete"
+                          disabled={saving}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
                   </td>
                 </tr>
               );

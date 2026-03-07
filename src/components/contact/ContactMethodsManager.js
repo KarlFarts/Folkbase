@@ -24,7 +24,7 @@ const TYPE_ICONS = {
  * ContactMethodsManager - Manage contact's phone numbers, emails, addresses, etc.
  * Junction table manager following the SocialsManager pattern.
  */
-function ContactMethodsManager({ contactId }) {
+function ContactMethodsManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -185,9 +185,11 @@ function ContactMethodsManager({ contactId }) {
     <div>
       <div className="cmm-header">
         <h3>Contact Methods</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Method
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Method
+          </button>
+        )}
       </div>
 
       {methods.length === 0 ? (
@@ -230,24 +232,26 @@ function ContactMethodsManager({ contactId }) {
                               </span>
                             )}
                           </div>
-                          <div className="cmm-actions">
-                            <button
-                              onClick={() => openEditModal(method)}
-                              className="btn btn-ghost btn-sm"
-                              title="Edit"
-                              disabled={saving}
-                            >
-                              <Pencil size={14} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(method['Contact Method ID'])}
-                              className="btn btn-ghost btn-sm"
-                              title="Delete"
-                              disabled={saving}
-                            >
-                              <Trash2 size={14} />
-                            </button>
-                          </div>
+                          {!readOnly && (
+                            <div className="cmm-actions">
+                              <button
+                                onClick={() => openEditModal(method)}
+                                className="btn btn-ghost btn-sm"
+                                title="Edit"
+                                disabled={saving}
+                              >
+                                <Pencil size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(method['Contact Method ID'])}
+                                className="btn btn-ghost btn-sm"
+                                title="Delete"
+                                disabled={saving}
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          )}
                         </div>
                         {method.Notes && (
                           <p className="text-muted cmm-notes-text">

@@ -17,7 +17,7 @@ import { useActiveSheetId } from '../../utils/sheetResolver';
 /**
  * ChecklistManager - Manage task checklist items (junction table)
  */
-function ChecklistManager({ taskId }) {
+function ChecklistManager({ taskId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -200,9 +200,11 @@ function ChecklistManager({ taskId }) {
             </p>
           )}
         </div>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add Item
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add Item
+          </button>
+        )}
       </div>
 
       {checklistItems.length === 0 ? (
@@ -244,22 +246,24 @@ function ChecklistManager({ taskId }) {
                     )}
                   </div>
                 </div>
-                <div className="cm-item-actions">
-                  <button
-                    onClick={() => openEditModal(item)}
-                    className="btn btn-ghost btn-sm"
-                    title="Edit"
-                  >
-                    <Pencil size={14} />
-                  </button>
-                  <button
-                    onClick={() => handleDelete(item['Checklist Item ID'])}
-                    className="btn btn-ghost btn-sm"
-                    title="Delete"
-                  >
-                    <Trash2 size={14} />
-                  </button>
-                </div>
+                {!readOnly && (
+                  <div className="cm-item-actions">
+                    <button
+                      onClick={() => openEditModal(item)}
+                      className="btn btn-ghost btn-sm"
+                      title="Edit"
+                    >
+                      <Pencil size={14} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item['Checklist Item ID'])}
+                      className="btn btn-ghost btn-sm"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                )}
               </div>
             );
           })}

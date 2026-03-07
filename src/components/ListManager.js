@@ -19,7 +19,7 @@ import '../styles/index.css';
  * Supports adding/removing contacts from lists
  * Works in both dev mode (localStorage) and production (Google Sheets)
  */
-function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
+function ListManager({ contactId, onClose, accessToken, sheetId, embedded, readOnly = false }) {
   const [lists, setLists] = useState([]);
   const [selectedListIds, setSelectedListIds] = useState([]);
   const [originalListIds, setOriginalListIds] = useState([]);
@@ -189,35 +189,37 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       {error && <div className="error-message">{error}</div>}
 
       {/* Create New List Section */}
-      <div className="lm-create-section">
-        <h4 className="lm-section-heading">Create New List</h4>
-        <input
-          type="text"
-          placeholder="List name (e.g., Board Members)"
-          value={newListName}
-          onChange={(e) => setNewListName(e.target.value)}
-          className="lm-input"
-          onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
-        />
-        <input
-          type="text"
-          placeholder="Description (optional)"
-          value={newListDesc}
-          onChange={(e) => setNewListDesc(e.target.value)}
-          className="lm-input"
-          onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
-        />
-        <button
-          onClick={handleCreateList}
-          disabled={!newListName.trim()}
-          className="lm-create-btn"
-        >
-          Create List
-        </button>
-      </div>
+      {!readOnly && (
+        <div className="lm-create-section">
+          <h4 className="lm-section-heading">Create New List</h4>
+          <input
+            type="text"
+            placeholder="List name (e.g., Board Members)"
+            value={newListName}
+            onChange={(e) => setNewListName(e.target.value)}
+            className="lm-input"
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
+          />
+          <input
+            type="text"
+            placeholder="Description (optional)"
+            value={newListDesc}
+            onChange={(e) => setNewListDesc(e.target.value)}
+            className="lm-input"
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
+          />
+          <button
+            onClick={handleCreateList}
+            disabled={!newListName.trim()}
+            className="lm-create-btn"
+          >
+            Create List
+          </button>
+        </div>
+      )}
 
       {/* Edit List Section */}
-      {editingListId && (
+      {!readOnly && editingListId && (
         <div className="lm-edit-section">
           <h4 className="lm-section-heading">Edit List</h4>
           <input
@@ -271,17 +273,19 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
                   </div>
                 </label>
               </div>
-              <div className="lm-list-actions">
-                <button onClick={() => handleStartEdit(list)} className="lm-rename-btn">
-                  Rename
-                </button>
-                <button
-                  onClick={() => setListToDelete(list['List ID'])}
-                  className="lm-delete-btn"
-                >
-                  Delete
-                </button>
-              </div>
+              {!readOnly && (
+                <div className="lm-list-actions">
+                  <button onClick={() => handleStartEdit(list)} className="lm-rename-btn">
+                    Rename
+                  </button>
+                  <button
+                    onClick={() => setListToDelete(list['List ID'])}
+                    className="lm-delete-btn"
+                  >
+                    Delete
+                  </button>
+                </div>
+              )}
             </div>
           ))
         )}
@@ -293,9 +297,11 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
             Cancel
           </button>
         )}
-        <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
-          Save Lists
-        </button>
+        {!readOnly && (
+          <button className="btn btn-primary" onClick={handleSave} disabled={loading}>
+            Save Lists
+          </button>
+        )}
       </div>
 
       <ConfirmDialog

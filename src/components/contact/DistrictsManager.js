@@ -25,7 +25,7 @@ const DISTRICT_TYPES = [
 /**
  * DistrictsManager - Manage contact's electoral districts (junction table)
  */
-function DistrictsManager({ contactId }) {
+function DistrictsManager({ contactId, readOnly = false }) {
   const { accessToken } = useAuth();
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
@@ -141,9 +141,11 @@ function DistrictsManager({ contactId }) {
     <div>
       <div className="dis-header">
         <h3>Electoral Districts</h3>
-        <button onClick={openAddModal} className="btn btn-primary btn-sm">
-          <Plus size={16} /> Add District
-        </button>
+        {!readOnly && (
+          <button onClick={openAddModal} className="btn btn-primary btn-sm">
+            <Plus size={16} /> Add District
+          </button>
+        )}
       </div>
 
       {districts.length === 0 ? (
@@ -165,24 +167,26 @@ function DistrictsManager({ contactId }) {
                 <td>{district['District Name'] || <span className="text-muted">—</span>}</td>
                 <td>{district.Representative || <span className="text-muted">—</span>}</td>
                 <td>
-                  <div className="dis-actions">
-                    <button
-                      onClick={() => openEditModal(district)}
-                      className="btn btn-ghost btn-sm"
-                      title="Edit"
-                      disabled={saving}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(district['District ID'])}
-                      className="btn btn-ghost btn-sm"
-                      title="Delete"
-                      disabled={saving}
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
+                  {!readOnly && (
+                    <div className="dis-actions">
+                      <button
+                        onClick={() => openEditModal(district)}
+                        className="btn btn-ghost btn-sm"
+                        title="Edit"
+                        disabled={saving}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(district['District ID'])}
+                        className="btn btn-ghost btn-sm"
+                        title="Delete"
+                        disabled={saving}
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  )}
                 </td>
               </tr>
             ))}

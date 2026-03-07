@@ -4,6 +4,7 @@ import { CheckSquare, Calendar, User, Clock } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 import ChecklistManager from '../components/tasks/ChecklistManager';
 import TimeEntryManager from '../components/tasks/TimeEntryManager';
@@ -14,6 +15,7 @@ export default function TaskProfile({ onNavigate }) {
   const { accessToken } = useAuth();
   const activeSheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
 
   const [task, setTask] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -253,7 +255,7 @@ export default function TaskProfile({ onNavigate }) {
       {activeTab === 'checklist' && (
         <div className="card">
           <div className="card-body">
-            <ChecklistManager taskId={id} />
+            <ChecklistManager taskId={id} readOnly={!canWrite('tasks')} />
           </div>
         </div>
       )}
@@ -261,7 +263,7 @@ export default function TaskProfile({ onNavigate }) {
       {activeTab === 'time-tracking' && (
         <div className="card">
           <div className="card-body">
-            <TimeEntryManager taskId={id} />
+            <TimeEntryManager taskId={id} readOnly={!canWrite('tasks')} />
           </div>
         </div>
       )}
