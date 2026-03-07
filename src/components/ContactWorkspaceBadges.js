@@ -45,7 +45,7 @@ const ContactWorkspaceBadges = ({
       const workspaces = await getAllLinkedWorkspaces(workspaceType, workspaceId, contactId);
       setLinkedWorkspaces(workspaces);
     } catch {
-      notify('Failed to load linked workspaces', 'error');
+      notify.error('Failed to load linked workspaces. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -84,10 +84,10 @@ const ContactWorkspaceBadges = ({
     setUnlinking(workspace.linkId);
     try {
       await unlinkContact(workspace.linkId);
-      notify(`Unlinked from ${workspace.name}`, 'success');
+      notify.success(`Unlinked from ${workspace.name}`);
       await loadLinkedWorkspaces();
     } catch {
-      notify('Failed to unlink contact', 'error');
+      notify.error('Failed to unlink contact. Please try again.');
     } finally {
       setUnlinking(null);
     }

@@ -15,6 +15,7 @@ function DuplicateManager({ onNavigate }) {
   const [selectedDuplicate, setSelectedDuplicate] = useState(null);
   const [linkedPairs, setLinkedPairs] = useState([]);
   const [error, setError] = useState('');
+  const [scanInfo, setScanInfo] = useState('');
 
   // Load contacts on mount
   useEffect(() => {
@@ -25,7 +26,7 @@ function DuplicateManager({ onNavigate }) {
         setContacts(result.data || []);
         setError('');
       } catch (err) {
-        setError('Failed to load contacts: ' + (err.message || 'Unknown error'));
+        setError('Failed to load contacts. Check your connection and try again.');
       } finally {
         setLoading(false);
       }
@@ -40,16 +41,17 @@ function DuplicateManager({ onNavigate }) {
     try {
       setScanning(true);
       setError('');
+      setScanInfo('');
 
       // Find duplicates in the existing contact list
       const found = findDuplicatesInList(contacts, 75); // 75% threshold
       setDuplicates(found);
 
       if (found.length === 0) {
-        setError('No duplicate contacts found');
+        setScanInfo('No duplicate contacts found — your contact list looks clean.');
       }
     } catch (err) {
-      setError('Scan failed: ' + (err.message || 'Unknown error'));
+      setError('Scan failed. Please try again.');
     } finally {
       setScanning(false);
     }
@@ -105,7 +107,7 @@ function DuplicateManager({ onNavigate }) {
       setDuplicates(duplicates.filter((d) => d !== selectedDuplicate));
       setSelectedDuplicate(null);
     } catch (err) {
-      setError('Failed to link duplicates: ' + (err.message || 'Unknown error'));
+      setError('Failed to link duplicates. Check your connection and try again.');
     }
   };
 
@@ -144,7 +146,7 @@ function DuplicateManager({ onNavigate }) {
         linkedPairs.filter((p) => !(p.contact1Id === contact1Id && p.contact2Id === contact2Id))
       );
     } catch (err) {
-      setError('Failed to unlink duplicates: ' + (err.message || 'Unknown error'));
+      setError('Failed to unlink duplicates. Check your connection and try again.');
     }
   };
 
@@ -173,6 +175,12 @@ function DuplicateManager({ onNavigate }) {
       {error && (
         <div className="alert alert-danger dm-error">
           {error}
+        </div>
+      )}
+
+      {scanInfo && !error && (
+        <div className="alert alert-info dm-error">
+          {scanInfo}
         </div>
       )}
 

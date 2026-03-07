@@ -114,6 +114,7 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
       const sheetId = getCurrentSheetId();
       const totalNotes = notes.length;
       const noteIds = [];
+      let failedCount = 0;
 
       // Process each note
       for (let i = 0; i < notes.length; i++) {
@@ -156,6 +157,7 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
           setProgress(((i + 1) / totalNotes) * 100);
         } catch (err) {
           logError(`Error processing note ${note['Note ID']}:`, err);
+          failedCount++;
           // Continue with other notes
         }
       }
@@ -168,13 +170,19 @@ export default function BulkCommitModal({ isOpen, onClose, notes = [], onCommit 
         sharedWith: visibility === 'Shared' ? sharedWith : '',
       });
 
-      // Close modal after short delay
-      setTimeout(() => {
-        onClose();
-      }, 500);
+      if (failedCount > 0) {
+        setError(
+          `${noteIds.length} note${noteIds.length !== 1 ? 's' : ''} committed successfully, but ${failedCount} failed. Check your connection and try committing the remaining notes individually.`
+        );
+      } else {
+        // Close modal after short delay only if all succeeded
+        setTimeout(() => {
+          onClose();
+        }, 500);
+      }
     } catch (err) {
       logError('Error during bulk commit:', err);
-      setError(err.message || 'Failed to commit notes. Please try again.');
+      setError('Failed to commit notes. Please try again.');
     } finally {
       setIsProcessing(false);
     }

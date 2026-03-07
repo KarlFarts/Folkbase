@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from './AuthContext';
 import { useConfig } from './ConfigContext';
+import { useNotification } from './NotificationContext';
 // Import Sheets-based services instead of Firestore
 import {
   getWorkspaceById,
@@ -22,6 +23,7 @@ export const useWorkspace = () => {
 export const WorkspaceProvider = ({ children }) => {
   const { user, accessToken } = useAuth();
   const { config } = useConfig();
+  const { notify } = useNotification();
   const [activeWorkspace, setActiveWorkspace] = useState(null);
   const [userWorkspaces, setUserWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,6 +77,7 @@ export const WorkspaceProvider = ({ children }) => {
       } catch (error) {
         console.error('Failed to load user workspaces:', error);
         // Don't block app on workspace load failure - user can still use personal mode
+        notify.error('Couldn\'t load your workspaces. You can still use personal mode — try refreshing if this persists.');
       } finally {
         setLoading(false);
       }
@@ -124,8 +127,9 @@ export const WorkspaceProvider = ({ children }) => {
       localStorage.setItem('workspace_count', workspaces.length.toString());
     } catch (error) {
       console.error('Failed to reload workspaces:', error);
+      notify.error('Couldn\'t refresh your workspace list. Try switching views or refreshing the page.');
     }
-  }, [user, accessToken, config.personalSheetId]);
+  }, [user, accessToken, config.personalSheetId, notify]);
 
   const getCurrentSheetId = useCallback(() => {
     if (mode === 'workspace' && activeWorkspace) {

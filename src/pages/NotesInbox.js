@@ -362,7 +362,7 @@ function NotesInbox({ onNavigate }) {
         });
       }
     } catch (err) {
-      notify.error('Failed to commit note: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to commit note. Please try again.');
     }
   };
 

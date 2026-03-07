@@ -56,7 +56,7 @@ function IncompleteTouchpointsWidget({ incompleteTouchpoints, contacts, onComple
       setEditingTouchpoint(null);
       setTouchpointData(null);
     } catch (error) {
-      notify.error(`Failed to complete touchpoint: ${error.message}`);
+      notify.error('Failed to complete touchpoint. Please try again.');
     } finally {
       setSaving(false);
     }

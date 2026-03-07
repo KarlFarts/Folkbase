@@ -41,6 +41,7 @@ const CreateWorkspace = () => {
   const [error, setError] = useState('');
   const [createdWorkspace, setCreatedWorkspace] = useState(null);
   const [copiedContactCount, setCopiedContactCount] = useState(0);
+  const [copyFailedCount, setCopyFailedCount] = useState(0);
   const [parentWorkspace, setParentWorkspace] = useState(null);
   const [loadingParent, setLoadingParent] = useState(false);
   const [personalContacts, setPersonalContacts] = useState([]);
@@ -75,6 +76,7 @@ const CreateWorkspace = () => {
           setContactListMemberships(membershipsResult.data || []);
         } catch (err) {
           console.error('Failed to load lists:', err);
+          setError('Couldn\'t load your contact lists — list filtering is unavailable. You can still select contacts manually.');
         }
       };
       loadLists();
@@ -226,6 +228,7 @@ const CreateWorkspace = () => {
 
       // 2. Copy contacts (plain copy, no sync links)
       let copiedCount = 0;
+      let copyFailedCount = 0;
       if (formData.importContacts && formData.selectedContacts.length > 0) {
         const CORE_FIELDS = [
           'Contact ID',
@@ -262,17 +265,19 @@ const CreateWorkspace = () => {
             copiedCount++;
           } catch (err) {
             console.error(`Failed to copy contact ${contactId}:`, err);
+            copyFailedCount++;
           }
         }
       }
 
       setCopiedContactCount(copiedCount);
+      setCopyFailedCount(copyFailedCount);
       await reloadWorkspaces();
       switchToWorkspace(newWorkspace);
       setCurrentStep(4); // Success screen
     } catch (err) {
       console.error('Workspace creation error:', err);
-      setError(err.message || 'Failed to create workspace. Please try again.');
+      setError('Failed to create workspace. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -707,6 +712,12 @@ const CreateWorkspace = () => {
                 <p className="wizard-success-detail">
                   {copiedContactCount} contact{copiedContactCount > 1 ? 's' : ''} copied
                   successfully
+                </p>
+              )}
+              {copyFailedCount > 0 && (
+                <p className="wizard-success-detail" style={{ color: 'var(--color-warning)' }}>
+                  {copyFailedCount} contact{copyFailedCount !== 1 ? 's' : ''} couldn&apos;t be
+                  copied — you can add them manually from the workspace.
                 </p>
               )}
             </div>

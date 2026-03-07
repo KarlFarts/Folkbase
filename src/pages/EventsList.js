@@ -141,9 +141,11 @@ function EventsList({ onNavigate }) {
       if (result.errors.length > 0) messages.push(`${result.errors.length} error(s)`);
 
       if (messages.length === 0) {
-        notify('Calendar synced - no changes', 'success');
+        notify.success('Calendar synced — no changes');
+      } else if (result.errors.length > 0) {
+        notify.warning(messages.join(', '));
       } else {
-        notify(messages.join(', '), result.errors.length > 0 ? 'warning' : 'success');
+        notify.success(messages.join(', '));
       }
 
       if (result.conflicts.length > 0) {
@@ -159,7 +161,7 @@ function EventsList({ onNavigate }) {
       setSyncStatus(newStatus);
       localStorage.setItem('touchpoint_calendar_sync_status', JSON.stringify(newStatus));
     } catch (error) {
-      notify('Calendar sync failed: ' + error.message, 'error');
+      notify.error('Calendar sync failed. Check your connection and try again.');
     } finally {
       setSyncing(false);
     }

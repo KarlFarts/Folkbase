@@ -56,7 +56,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       setOriginalListIds(contactListIds);
       setError(null);
     } catch (err) {
-      setError('Failed to load lists: ' + err.message);
+      setError('Failed to load lists. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -89,7 +89,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       setNewListName('');
       setNewListDesc('');
     } catch (err) {
-      setError('Failed to create list: ' + err.message);
+      setError('Failed to create list. Check your connection and try again.');
     }
   };
 
@@ -120,7 +120,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       setEditingListName('');
       setEditingListDesc('');
     } catch (err) {
-      setError('Failed to update list: ' + err.message);
+      setError('Failed to update list. Check your connection and try again.');
     }
   };
 
@@ -136,7 +136,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
       setOriginalListIds((prev) => prev.filter((id) => id !== listToDelete));
       setListToDelete(null);
     } catch (err) {
-      setError('Failed to delete list: ' + err.message);
+      setError('Failed to delete list. Check your connection and try again.');
     }
   };
 
@@ -165,7 +165,7 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded }) {
         onClose();
       }
     } catch (err) {
-      setError('Failed to save lists: ' + err.message);
+      setError('Failed to save list changes. Check your connection and try again.');
     } finally {
       setLoading(false);
     }

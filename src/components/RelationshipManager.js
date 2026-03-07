@@ -126,7 +126,7 @@ export default function RelationshipManager({
     } catch (err) {
       console.error('[RelationshipManager] Error loading data:', err);
       logError('Error loading relationship data:', err);
-      setError(err.message || 'Failed to load relationships');
+      setError('Failed to load relationships. Check your connection and try again.');
     } finally {
       setIsLoading(false);
     }

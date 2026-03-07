@@ -65,7 +65,7 @@ function ImportPage({ onNavigate }) {
       setParsedData(result);
       setCurrentStep(STEPS.MAPPING);
     } catch (err) {
-      setError(`Failed to parse file: ${err.message}`);
+      setError('Failed to parse file. Make sure it is a valid CSV or Excel file and try again.');
     } finally {
       setIsProcessing(false);
       setProgress(null);
@@ -127,7 +127,7 @@ function ImportPage({ onNavigate }) {
           handleDuplicatesResolved([]);
         }
       } catch (err) {
-        setError(`Duplicate detection failed: ${err.message}`);
+        setError('Duplicate detection failed. Check your connection and try again.');
         setCurrentStep(STEPS.VALIDATION);
       } finally {
         setIsProcessing(false);
@@ -182,7 +182,7 @@ function ImportPage({ onNavigate }) {
           setCurrentStep(STEPS.COMPLETE);
         }
       } catch (err) {
-        setError(`Import failed: ${err.message}`);
+        setError('Import failed. Check your connection and try again.');
         setCurrentStep(STEPS.DUPLICATES);
       } finally {
         setProgress(null);

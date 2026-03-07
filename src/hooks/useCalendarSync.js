@@ -91,7 +91,11 @@ export function useCalendarSync() {
           }
 
           const summary = messages.join(', ');
-          notify(`Auto-sync: ${summary}`, result.errors.length > 0 ? 'warning' : 'success');
+          if (result.errors.length > 0) {
+            notify.warning(`Calendar sync: ${summary}`);
+          } else {
+            notify.success(`Calendar sync: ${summary}`);
+          }
         }
 
         // Update sync status in localStorage

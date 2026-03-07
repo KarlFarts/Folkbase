@@ -72,7 +72,7 @@ export default function CallMode({ onNavigate }) {
         onNavigate('contact-profile', contactId);
       }, 1000);
     } catch (error) {
-      notify.error(`Failed to save call: ${error.message}`);
+      notify.error('Failed to save call. Please try again.');
       setClosing(false);
     }
   }, [contactId, contact, elapsedSeconds, notes, accessToken, sheetId, user.email, onNavigate]);

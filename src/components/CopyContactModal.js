@@ -145,7 +145,7 @@ function CopyContactModal({ isOpen, onClose, contact, workspaces, onCopy }) {
       setSelectedWorkspaceId('');
       onClose();
     } catch (err) {
-      setError(err.message || 'Failed to copy contact');
+      setError('Failed to copy contact. Please try again.');
     } finally {
       setIsLoading(false);
     }

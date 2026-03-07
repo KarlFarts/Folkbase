@@ -83,7 +83,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
         }
       }
     } catch {
-      // Silently fail
+      notify.error('Failed to load workspace details. Try refreshing the page.');
     } finally {
       setLoadingDetails(false);
     }
@@ -119,7 +119,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       );
       setInvitationToken(invitation.token);
     } catch {
-      // Silently fail
+      notify.error('Failed to generate invitation link. Please try again.');
     } finally {
       setCreatingInvitation(false);
     }
@@ -190,7 +190,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       notify.success('Member updated.');
     } catch (err) {
       console.error('Failed to update member:', err);
-      notify.error(`Failed to update member: ${err.message}`);
+      notify.error('Failed to update member. Please try again.');
     }
   };
 
@@ -207,7 +207,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       notify.success(`${email} removed from workspace.`);
     } catch (err) {
       console.error('Failed to remove member:', err);
-      notify.error(`Failed to remove member: ${err.message}`);
+      notify.error('Failed to remove member. Please try again.');
     }
   };
 
@@ -229,7 +229,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
         notify.error('Could not find Folkbase folder');
       }
     } catch (error) {
-      notify.error(`Failed to open folder: ${error.message}`);
+      notify.error('Failed to open the Folkbase folder. Check your connection and try again.');
     }
   };
 
