@@ -11,8 +11,10 @@ import {
   Link as LinkIcon,
   Target,
   UserPlus,
+  Users,
   Search,
 } from 'lucide-react';
+import EmptyState from '../components/EmptyState';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -625,7 +627,12 @@ function EventDetails({ onNavigate }) {
           </div>
           <div className="card-body">
             {attendeeContacts.length === 0 ? (
-              <p className="text-muted text-center">No attendees for this event</p>
+              <EmptyState
+                compact
+                icon={Users}
+                title="No attendees yet"
+                description="Use the button above to add attendees."
+              />
             ) : (
               <>
                 <div className="ed-attendee-list">

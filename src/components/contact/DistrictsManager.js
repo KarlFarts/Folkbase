@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, MapPin } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactDistricts,
   addContactDistrict,
@@ -139,7 +140,7 @@ function DistrictsManager({ contactId }) {
       </div>
 
       {districts.length === 0 ? (
-        <p className="text-muted">No districts yet. Click "Add District" to get started.</p>
+        <EmptyState compact icon={MapPin} title="No districts yet" />
       ) : (
         <table className="data-table">
           <thead>

@@ -22,18 +22,6 @@
   color: var(--color-text-primary);
 }
 
-/* Empty State */
-.notes-empty-state {
-  text-align: center;
-  padding: 32px 16px;
-  color: var(--color-text-muted);
-}
-
-.notes-empty-state p {
-  margin: 0;
-  font-size: 0.9375rem;
-}
-
 /* Compact Notes List */
 .notes-list-compact {
   display: flex;

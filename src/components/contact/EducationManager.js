@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, GraduationCap } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactEducation,
   addContactEducation,
@@ -137,9 +138,7 @@ function EducationManager({ contactId }) {
       </div>
 
       {education.length === 0 ? (
-        <p className="text-muted">
-          No education records yet. Click "Add Education" to get started.
-        </p>
+        <EmptyState compact icon={GraduationCap} title="No education records yet" />
       ) : (
         <table className="data-table">
           <thead>

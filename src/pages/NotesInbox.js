@@ -585,6 +585,13 @@ function NotesInbox({ onNavigate }) {
     return dateB - dateA;
   });
 
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setTypeFilter('all');
+    setSearchQuery('');
+    setVisibilityFilter('all');
+  };
+
   // Stats
   const totalCount = (notes || []).length;
   const unprocessedCount = (notes || []).filter((n) => n && n.Status === 'Unprocessed').length;
@@ -738,20 +745,27 @@ function NotesInbox({ onNavigate }) {
       {/* Notes Content */}
       {sortedNotes.length === 0 ? (
         <div className="empty-state">
-          <div className="empty-state-icon">
-            <FileText size={16} />
-          </div>
-          <h3>No Notes Found</h3>
+          <FileText className="empty-state-icon" />
+          <h3 className="empty-state-title">
+            {notes.length === 0 ? 'No notes yet' : 'No matching notes'}
+          </h3>
           <p>
             {notes.length === 0
               ? 'Create your first note to get started.'
               : 'No notes match your current filters.'}
           </p>
-          {notes.length === 0 && (
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-              Create Note
-            </button>
-          )}
+          <div className="empty-state-actions">
+            {notes.length === 0 && canWrite('notes') && (
+              <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+                Create Note
+              </button>
+            )}
+            {notes.length > 0 && (
+              <button className="btn btn-secondary" onClick={clearFilters}>
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="notes-container">

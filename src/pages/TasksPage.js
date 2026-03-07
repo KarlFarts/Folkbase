@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { ListChecks } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import EmptyState from '../components/EmptyState';
 import {
   getTasks,
   addTask,
@@ -228,6 +230,12 @@ function TasksPage({ onNavigate }) {
     return aDate - bDate;
   });
 
+  const clearFilters = () => {
+    setStatusFilter('all');
+    setPriorityFilter('all');
+    setSearchQuery('');
+  };
+
   // Stats
   const pendingCount = tasks.filter((t) => t['Status'] === 'pending').length;
   const inProgressCount = tasks.filter((t) => t['Status'] === 'in_progress').length;
@@ -324,19 +332,22 @@ function TasksPage({ onNavigate }) {
 
       {/* Tasks List */}
       {sortedTasks.length === 0 ? (
-        <div className="empty-state">
-          <h3>No Tasks Found</h3>
-          <p>
-            {tasks.length === 0
-              ? 'Create your first task to get started.'
-              : 'No tasks match your current filters.'}
-          </p>
-          {tasks.length === 0 && (
-            <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-              Create Task
-            </button>
-          )}
-        </div>
+        tasks.length === 0 ? (
+          <EmptyState
+            icon={ListChecks}
+            title="No tasks yet"
+            description="Create your first task to get started."
+            action="Create Task"
+            onAction={() => setShowAddModal(true)}
+          />
+        ) : (
+          <EmptyState
+            title="No matching tasks"
+            description="Try adjusting your search or filters."
+            secondaryAction="Clear Filters"
+            onSecondaryAction={clearFilters}
+          />
+        )
       ) : (
         <div className="tasks-list">
           {sortedTasks.map((task) => (

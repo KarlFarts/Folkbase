@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Lock, Users, Globe, Zap } from 'lucide-react';
+import { Lock, Users, Globe, Zap, FileText } from 'lucide-react';
+import EmptyState from '../EmptyState';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWorkspace } from '../../contexts/WorkspaceContext';
 import { useNavigate } from 'react-router-dom';
@@ -102,9 +103,12 @@ function NotesDisplaySection({
       </div>
 
       {sortedNotes.length === 0 ? (
-        <div className="notes-empty-state">
-          <p>No notes yet. {canEdit && onAddNote && 'Click "Add Note" to create one.'}</p>
-        </div>
+        <EmptyState
+          compact
+          icon={FileText}
+          title="No notes yet"
+          description={canEdit && onAddNote ? 'Use the button above to add one.' : undefined}
+        />
       ) : (
         <div className="notes-list-compact">
           {sortedNotes.map((note) => {
