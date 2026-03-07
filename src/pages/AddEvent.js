@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   SHEETS,
@@ -14,6 +15,7 @@ import AttendeeSelector from '../components/events/AttendeeSelector';
 function AddEvent({ onNavigate }) {
   const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
   const sheetId = useActiveSheetId();
+  const { canWrite } = usePermissions();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loadingContacts, setLoadingContacts] = useState(true);
@@ -142,6 +144,24 @@ function AddEvent({ onNavigate }) {
   const handleCancel = () => {
     onNavigate('events');
   };
+
+  if (!canWrite('events')) {
+    return (
+      <div className="page-container">
+        <div className="card" style={{ maxWidth: '480px', margin: '4rem auto' }}>
+          <div className="card-body" style={{ textAlign: 'center', padding: '3rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Permission Required</h2>
+            <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+              You don&apos;t have permission to do this. Ask the workspace owner for access.
+            </p>
+            <button className="btn btn-primary" onClick={() => onNavigate('events')}>
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

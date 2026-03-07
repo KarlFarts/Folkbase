@@ -6,11 +6,13 @@ import { useNotification } from '../contexts/NotificationContext';
 import { readSheetMetadata, addContact, detectDuplicates, SHEETS } from '../utils/devModeWrapper';
 import { sanitizeFormData, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
 import TagsInput from '../components/TagsInput';
+import { usePermissions } from '../hooks/usePermissions';
 
 function AddContact({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [_metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -138,6 +140,24 @@ function AddContact({ onNavigate }) {
   };
 
   // Dropdown options from _metadata are available via _metadata?.validationRules if needed
+
+  if (!canWrite('contacts')) {
+    return (
+      <div className="page-container">
+        <div className="card" style={{ maxWidth: '480px', margin: '4rem auto' }}>
+          <div className="card-body" style={{ textAlign: 'center', padding: '3rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Permission Required</h2>
+            <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+              You don&apos;t have permission to do this. Ask the workspace owner for access.
+            </p>
+            <button className="btn btn-primary" onClick={() => onNavigate('contacts')}>
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

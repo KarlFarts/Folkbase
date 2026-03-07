@@ -5,11 +5,13 @@ import { useNotification } from '../contexts/NotificationContext';
 import { readSheetData, addOrganization, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateOrganizations } from '../services/organizationService';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
+import { usePermissions } from '../hooks/usePermissions';
 
 function AddOrganization({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
@@ -92,6 +94,24 @@ function AddOrganization({ onNavigate }) {
       setSaving(false);
     }
   };
+
+  if (!canWrite('contacts')) {
+    return (
+      <div className="page-container">
+        <div className="card" style={{ maxWidth: '480px', margin: '4rem auto' }}>
+          <div className="card-body" style={{ textAlign: 'center', padding: '3rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Permission Required</h2>
+            <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+              You don&apos;t have permission to do this. Ask the workspace owner for access.
+            </p>
+            <button className="btn btn-primary" onClick={() => onNavigate('organizations')}>
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const typeOptions = [
     'Corporate',
