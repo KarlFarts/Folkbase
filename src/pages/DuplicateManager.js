@@ -5,10 +5,12 @@ import MergePreview from '../components/MergePreview';
 import { findDuplicatesInList } from '../services/duplicateDetector';
 import { readSheetData, updateContact, SHEETS } from '../utils/devModeWrapper';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
+import { usePermissions } from '../hooks/usePermissions';
 
 function DuplicateManager({ onNavigate }) {
   const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
+  const { guardWrite } = usePermissions();
   const [contacts, setContacts] = useState([]);
   const [duplicates, setDuplicates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -60,6 +62,7 @@ function DuplicateManager({ onNavigate }) {
   };
 
   const handleLinkDuplicates = async (selectedValues) => {
+    if (!guardWrite('contacts')) return;
     if (!selectedDuplicate) return;
 
     setMerging(true);
@@ -117,12 +120,14 @@ function DuplicateManager({ onNavigate }) {
   };
 
   const handleSkipDuplicate = () => {
+    if (!guardWrite('contacts')) return;
     if (!selectedDuplicate) return;
     setDuplicates(duplicates.filter((d) => d !== selectedDuplicate));
     setSelectedDuplicate(null);
   };
 
   const handleUnlinkDuplicate = async (contact1Id, contact2Id) => {
+    if (!guardWrite('contacts')) return;
     setMerging(true);
     try {
       setError('');

@@ -3,6 +3,7 @@ import { Database, Download, Upload, AlertTriangle, CheckCircle, Info } from 'lu
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   createFullBackup,
   restoreFromBackup,
@@ -17,6 +18,7 @@ function BackupRestorePage() {
   const { accessToken } = useAuth();
   const { notify } = useNotification();
   const sheetId = useActiveSheetId();
+  const { canWrite, guardWrite } = usePermissions();
 
   // Backup state
   const [creatingBackup, setCreatingBackup] = useState(false);
@@ -33,6 +35,7 @@ function BackupRestorePage() {
 
   // Handle create backup
   const handleCreateBackup = async () => {
+    if (!guardWrite('contacts')) return;
     if (!accessToken || !sheetId) {
       notify.error('Please configure your Google Sheet first');
       return;
@@ -123,6 +126,7 @@ function BackupRestorePage() {
 
   // Handle restore
   const handleRestore = async () => {
+    if (!guardWrite('contacts')) return;
     if (!accessToken || !sheetId || !backupData) {
       notify.error('Missing required data for restore');
       return;
@@ -205,14 +209,16 @@ function BackupRestorePage() {
             {creatingBackup && backupProgress ? (
               <ProgressTracker progress={backupProgress} />
             ) : (
-              <button
-                className="btn btn-primary"
-                onClick={handleCreateBackup}
-                disabled={!accessToken || !sheetId}
-              >
-                <Download size={18} />
-                Create Backup
-              </button>
+              canWrite('contacts') && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleCreateBackup}
+                  disabled={!accessToken || !sheetId}
+                >
+                  <Download size={18} />
+                  Create Backup
+                </button>
+              )
             )}
 
             {!accessToken && (
@@ -333,14 +339,16 @@ function BackupRestorePage() {
             {restoring && restoreProgress ? (
               <ProgressTracker progress={restoreProgress} />
             ) : (
-              <button
-                className="btn btn-primary"
-                onClick={handleShowRestoreConfirm}
-                disabled={!validationResult?.valid || !accessToken || !sheetId}
-              >
-                <Upload size={18} />
-                Restore from Backup
-              </button>
+              canWrite('contacts') && (
+                <button
+                  className="btn btn-primary"
+                  onClick={handleShowRestoreConfirm}
+                  disabled={!validationResult?.valid || !accessToken || !sheetId}
+                >
+                  <Upload size={18} />
+                  Restore from Backup
+                </button>
+              )
             )}
           </div>
         </div>

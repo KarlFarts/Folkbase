@@ -14,6 +14,7 @@ import { formatPhone } from '../services/importValidator';
 import { detectDuplicates, applyDuplicateResolutions } from '../services/duplicateDetector';
 import { readSheetData } from '../utils/devModeWrapper';
 import { SHEET_NAMES } from '../config/constants';
+import { usePermissions } from '../hooks/usePermissions';
 
 // Import steps
 const STEPS = {
@@ -28,6 +29,7 @@ const STEPS = {
 function ImportPage({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
+  const { canWrite } = usePermissions();
 
   const [currentStep, setCurrentStep] = useState(STEPS.UPLOAD);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -290,6 +292,24 @@ function ImportPage({ onNavigate }) {
 
     handleValidationConfirmed(fieldMapping, validationData.validatedContacts);
   }, [validationData, fieldMapping, handleValidationConfirmed]);
+
+  if (!canWrite('contacts')) {
+    return (
+      <div className="page-container">
+        <div className="card" style={{ maxWidth: '480px', margin: '4rem auto' }}>
+          <div className="card-body" style={{ textAlign: 'center', padding: '3rem' }}>
+            <h2 style={{ marginBottom: '1rem' }}>Permission Required</h2>
+            <p style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>
+              You don&apos;t have permission to do this. Ask the workspace owner for access.
+            </p>
+            <button className="btn btn-primary" onClick={() => onNavigate('contacts')}>
+              Go Back
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const renderStep = () => {
     switch (currentStep) {
