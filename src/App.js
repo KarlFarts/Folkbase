@@ -78,16 +78,20 @@ function AppContent() {
   // Apply theme (light/dark) from localStorage or system preference
   useTheme();
 
-  // Check if migration is needed
+  // Check if migration is needed — only after setup is complete and sheet exists
   useEffect(() => {
     const checkMigration = async () => {
-      if (user && accessToken && activeSheetId) {
-        const needed = await needsMigration(accessToken, activeSheetId);
-        setMigrationNeeded(needed);
+      if (user && accessToken && activeSheetId && config.personalSheetId) {
+        try {
+          const needed = await needsMigration(accessToken, activeSheetId);
+          setMigrationNeeded(needed);
+        } catch {
+          // Sheet may not exist yet (new user) — silently skip migration check
+        }
       }
     };
     checkMigration();
-  }, [user, accessToken, activeSheetId]);
+  }, [user, accessToken, activeSheetId, config.personalSheetId]);
 
   // Show loading until both config and auth are ready
   // This prevents race condition where dashboard shows before auth state resolves
