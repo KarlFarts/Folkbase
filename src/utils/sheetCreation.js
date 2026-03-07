@@ -89,8 +89,9 @@ export const validateSheetInput = (input) => {
  */
 export const validateSheetAccess = async (accessToken, sheetId) => {
   try {
+    // Fetch both the spreadsheet title and each tab's title
     const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?fields=properties.title,sheets.properties.title`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
 
@@ -116,6 +117,7 @@ export const validateSheetAccess = async (accessToken, sheetId) => {
 
     return {
       valid: true,
+      title: data.properties?.title || null,
       existingTabs,
       missingTabs,
       needsAutoCreate: missingTabs.length > 0,
@@ -211,30 +213,46 @@ export const createNewSheet = async (accessToken, userName) => {
     const createdSheet = await createResponse.json();
     const sheetId = createdSheet.spreadsheetId;
 
-    // Step 2: Add headers to all tabs in one batch request
+    // Step 2: Add headers to all tabs in one batch request.
+    // Tab names with spaces must be single-quoted in A1 notation (Sheets API requirement).
     const headerData = allTabs
       .map((tabName) => {
         const headers = SHEET_HEADERS[tabName];
         if (!headers || headers.length === 0) return null;
         return {
-          range: `${tabName}!A1`,
+          range: `'${tabName}'!A1`,
           values: [headers],
         };
       })
       .filter(Boolean);
 
     if (headerData.length > 0) {
-      await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          valueInputOption: 'RAW',
-          data: headerData,
-        }),
-      });
+      const headerRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values:batchUpdate`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            valueInputOption: 'RAW',
+            data: headerData,
+          }),
+        }
+      );
+
+      if (!headerRes.ok) {
+        // Rollback: delete the incomplete sheet so retries start clean (no orphan in Drive)
+        await fetch(`https://www.googleapis.com/drive/v3/files/${sheetId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }).catch(() => {});
+        const errData = await headerRes.json().catch(() => ({}));
+        throw new Error(
+          `Failed to write column headers: ${errData.error?.message || `HTTP ${headerRes.status}`}`
+        );
+      }
     }
 
     // Step 3: Delete the auto-created "Sheet1" tab
