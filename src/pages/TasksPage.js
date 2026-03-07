@@ -112,6 +112,7 @@ function TasksPage({ onNavigate }) {
   };
 
   const handleDeleteTask = async (taskId) => {
+    if (!guardWrite('tasks')) return;
     setSaving(true);
     try {
       await deleteTask(accessToken, sheetId, taskId);
@@ -126,6 +127,7 @@ function TasksPage({ onNavigate }) {
   };
 
   const handleToggleComplete = async (task) => {
+    if (!guardWrite('tasks')) return;
     const newStatus = task['Status'] === 'completed' ? 'pending' : 'completed';
     setSaving(true);
     try {
@@ -355,8 +357,8 @@ function TasksPage({ onNavigate }) {
             icon={ListChecks}
             title="No tasks yet"
             description="Create your first task to get started."
-            action="Create Task"
-            onAction={() => setShowAddModal(true)}
+            action={canWrite('tasks') ? 'Create Task' : undefined}
+            onAction={canWrite('tasks') ? () => setShowAddModal(true) : undefined}
           />
         ) : (
           <EmptyState

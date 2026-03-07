@@ -17,7 +17,7 @@ export function DevModeRoleSwitcher({ onShowSettings, onLogout }) {
   const [isOpen, setIsOpen] = useState(false);
   const [mockUsers, setMockUsers] = useState({});
   const [currentRole, setCurrentRole] = useState('admin');
-  const [devPermRole, setDevPermRole] = useState(localStorage.getItem('dev_permission_role') || 'owner');
+  const [devPermRole, setDevPermRole] = useState(localStorage.getItem('dev_permission_role') || 'editor');
 
   useEffect(() => {
     if (isDevMode) {
@@ -80,7 +80,7 @@ export function DevModeRoleSwitcher({ onShowSettings, onLogout }) {
           </div>
           <div className="dropdown-divider"></div>
           <div className="dropdown-header">Permission Role (viewer test)</div>
-          {['owner', 'editor', 'viewer'].map((role) => (
+          {['editor', 'viewer'].map((role) => (
             <button
               key={role}
               className={`role-option ${devPermRole === role ? 'active' : ''}`}
