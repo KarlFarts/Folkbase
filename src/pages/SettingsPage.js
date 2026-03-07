@@ -175,7 +175,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
         setSheetsStatus({
           loading: false,
           connected: false,
-          error: error.response?.data?.error?.message || error.message,
+          error: 'Unable to connect to Google Sheets. Check your connection and try again.',
         });
       }
     };
@@ -214,7 +214,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       await signInWithGoogle(true);
       window.location.reload();
     } catch (error) {
-      notify.error(`Failed to reconnect: ${error.message}. Please try again.`);
+      notify.error('Failed to reconnect Google. Please try again.');
     } finally {
       setReconnecting(false);
     }
@@ -255,9 +255,9 @@ function SettingsPage({ onShowSetup, onNavigate }) {
         scanning: false,
         migrating: false,
         sheets: [],
-        error: error.message,
+        error: 'Scan failed. Check your connection and try again.',
       });
-      notify.error(`Scan failed: ${error.message}`);
+      notify.error('Scan failed. Check your connection and try again.');
     }
   };
 
@@ -311,8 +311,8 @@ function SettingsPage({ onShowSetup, onNavigate }) {
         );
       }
     } catch (error) {
-      setMigrationStatus((prev) => ({ ...prev, migrating: false, error: error.message }));
-      notify.error(`Migration failed: ${error.message}`);
+      setMigrationStatus((prev) => ({ ...prev, migrating: false, error: 'Migration failed. Check your connection and try again.' }));
+      notify.error('Migration failed. Check your connection and try again.');
     }
   };
 
@@ -345,7 +345,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       }
     } catch (error) {
       setSyncStatus((prev) => ({ ...prev, syncing: false }));
-      notify.error(`Sync failed: ${error.message}`);
+      notify.error('Calendar sync failed. Check your connection and try again.');
     }
   };
 
@@ -769,9 +769,9 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                   try {
                     await requestCalendarAccess();
                     setCalendarAccess(true);
-                    notify('Calendar access granted', 'success');
-                  } catch (error) {
-                    notify('Failed to connect calendar: ' + error.message, 'error');
+                    notify.success('Calendar access granted');
+                  } catch {
+                    notify.error('Failed to connect calendar. Please try again.');
                   } finally {
                     setRequestingCalendarAccess(false);
                   }

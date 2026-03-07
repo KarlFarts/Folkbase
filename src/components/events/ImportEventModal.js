@@ -32,11 +32,11 @@ function ImportEventModal({ isOpen, onClose, googleEvent, onImported, contacts =
         'Last Synced At': new Date().toISOString(),
       });
 
-      notify(`Imported "${googleEvent.summary}" as CRM Event`, 'success');
+      notify.success(`Imported "${googleEvent.summary}" as CRM Event`);
       if (onImported) onImported();
       onClose();
-    } catch (error) {
-      notify('Failed to import event: ' + error.message, 'error');
+    } catch {
+      notify.error('Failed to import event. Please try again.');
     } finally {
       setImporting(false);
     }
@@ -58,11 +58,11 @@ function ImportEventModal({ isOpen, onClose, googleEvent, onImported, contacts =
         Notes: googleEvent.description || '',
       });
 
-      notify(`Logged "${googleEvent.summary}" as Touchpoint`, 'success');
+      notify.success(`Logged "${googleEvent.summary}" as Touchpoint`);
       if (onImported) onImported();
       onClose();
-    } catch (error) {
-      notify('Failed to log touchpoint: ' + error.message, 'error');
+    } catch {
+      notify.error('Failed to log touchpoint. Please try again.');
     } finally {
       setImporting(false);
     }

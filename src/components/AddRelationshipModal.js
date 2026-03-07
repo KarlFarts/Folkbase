@@ -229,7 +229,7 @@ export default function AddRelationshipModal({
       onClose();
     } catch (error) {
       logError('Error creating relationship:', error);
-      setErrors({ submit: error.message || 'Failed to create relationship' });
+      setErrors({ submit: 'Failed to create relationship. Please try again.' });
       setIsSubmitting(false);
     }
   };

@@ -197,7 +197,7 @@ function ContactProfile({ onNavigate }) {
       actions.clearDirtyFields();
     } catch (err) {
       console.error('Save failed:', err);
-      notify.error('Failed to save: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to save changes. Please try again.');
     } finally {
       actions.setSaving(false);
     }
@@ -234,7 +234,7 @@ function ContactProfile({ onNavigate }) {
       await loadContact();
     } catch (err) {
       console.error('Failed to log touchpoint:', err);
-      notify.error('Failed to log touchpoint: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to log touchpoint. Please try again.');
     } finally {
       actions.setSaving(false);
     }
@@ -291,7 +291,7 @@ function ContactProfile({ onNavigate }) {
       notify.success('Note added successfully!');
     } catch (err) {
       console.error('Failed to add note:', err);
-      notify.error('Failed to add note: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to add note. Please try again.');
     } finally {
       actions.setSaving(false);
     }
@@ -369,7 +369,7 @@ function ContactProfile({ onNavigate }) {
       });
     } catch (err) {
       console.error('Failed to update touchpoint:', err);
-      notify.error('Failed to update touchpoint: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to update touchpoint. Please try again.');
     } finally {
       actions.setSaving(false);
     }
@@ -394,7 +394,7 @@ function ContactProfile({ onNavigate }) {
       notify.success('Touchpoint deleted successfully!');
     } catch (err) {
       console.error('Failed to delete touchpoint:', err);
-      notify.error('Failed to delete touchpoint: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to delete touchpoint. Please try again.');
     } finally {
       actions.setSaving(false);
     }
@@ -419,7 +419,7 @@ function ContactProfile({ onNavigate }) {
       onNavigate('contacts');
     } catch (err) {
       console.error('Failed to delete contact:', err);
-      notify.error('Failed to delete contact: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to delete contact. Please try again.');
     } finally {
       actions.setSaving(false);
       setShowDeleteContactConfirm(false);
@@ -465,7 +465,7 @@ function ContactProfile({ onNavigate }) {
       actions.toggleCopyModal(false);
     } catch (err) {
       console.error('Failed to copy contact:', err);
-      notify.error('Failed to copy contact: ' + (err.message || 'Unknown error'));
+      notify.error('Failed to copy contact. Please try again.');
     } finally {
       actions.setSaving(false);
     }

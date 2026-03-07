@@ -37,7 +37,7 @@ const SyncConflictResolver = ({ linkId, sheetId, isOpen, onClose, onResolved }) 
 
   const loadConflicts = async () => {
     if (!accessToken || !sheetId) {
-      notify('Unable to load conflicts: missing authentication or sheet ID', 'error');
+      notify.error('Unable to load conflicts. Please refresh and try again.');
       setLoading(false);
       return;
     }
@@ -53,7 +53,7 @@ const SyncConflictResolver = ({ linkId, sheetId, isOpen, onClose, onResolved }) 
       });
       setResolutions(initialResolutions);
     } catch {
-      notify('Failed to load conflicts', 'error');
+      notify.error('Failed to load conflicts. Check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -77,7 +77,7 @@ const SyncConflictResolver = ({ linkId, sheetId, isOpen, onClose, onResolved }) 
     // Validate all conflicts have a resolution selected
     const unresolved = conflicts.filter((c) => !resolutions[c.id]);
     if (unresolved.length > 0) {
-      notify('Please select a resolution for all conflicts', 'warning');
+      notify.warning('Please select a resolution for all conflicts.');
       return;
     }
 
@@ -87,7 +87,7 @@ const SyncConflictResolver = ({ linkId, sheetId, isOpen, onClose, onResolved }) 
     );
     const missingCustom = needsCustom.filter(([conflictId]) => !customValues[conflictId]?.trim());
     if (missingCustom.length > 0) {
-      notify('Please provide custom values for selected fields', 'warning');
+      notify.warning('Please provide custom values for selected fields.');
       return;
     }
 
@@ -108,13 +108,13 @@ const SyncConflictResolver = ({ linkId, sheetId, isOpen, onClose, onResolved }) 
         );
       }
 
-      notify('All conflicts resolved successfully', 'success');
+      notify.success('All conflicts resolved successfully.');
       if (onResolved) {
         onResolved();
       }
       onClose();
     } catch {
-      notify('Failed to resolve some conflicts', 'error');
+      notify.error('Failed to resolve some conflicts. Check your connection and try again.');
     } finally {
       setResolving(false);
     }

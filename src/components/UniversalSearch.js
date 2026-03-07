@@ -3,6 +3,7 @@ import { Search, User, Calendar, Building2, CheckSquare, X } from 'lucide-react'
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
+import { useNotification } from '../contexts/NotificationContext';
 import './UniversalSearch.css';
 
 /**
@@ -12,6 +13,7 @@ import './UniversalSearch.css';
 function UniversalSearch({ onNavigate, onClose }) {
   const { accessToken } = useAuth();
   const activeSheetId = useActiveSheetId();
+  const { notify } = useNotification();
 
   const [query, setQuery] = useState('');
   const [results, setResults] = useState({
@@ -47,8 +49,9 @@ function UniversalSearch({ onNavigate, onClose }) {
       });
     } catch (error) {
       console.error('Error loading data for search:', error);
+      notify.error('Search unavailable — couldn\'t load your data. Try refreshing the page.');
     }
-  }, [accessToken, activeSheetId]);
+  }, [accessToken, activeSheetId, notify]);
 
   const performSearch = useCallback(
     (searchQuery) => {

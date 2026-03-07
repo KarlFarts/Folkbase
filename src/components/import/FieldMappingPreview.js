@@ -130,7 +130,7 @@ function FieldMappingPreview({
         return updated;
       });
     } catch (error) {
-      notify.error(`Failed to load template: ${error.message}`);
+      notify.error('Failed to load template. Check your connection and try again.');
     }
   };
 
@@ -174,7 +174,7 @@ function FieldMappingPreview({
         });
       } catch (error) {
         // Don't block import if template save fails
-        notify.warning(`Template save failed: ${error.message}`);
+        notify.warning('Template save failed. Your import will continue without saving the template.');
       }
     }
 

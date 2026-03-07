@@ -108,7 +108,7 @@ function QuickSyncPage({ onNavigate }) {
           setState(STATES.REVIEWING);
         }
       } catch (error) {
-        setParseError(`Error parsing file: ${error.message}`);
+        setParseError('Failed to parse file. Make sure it is a valid CSV or Excel file and try again.');
         setState(STATES.IDLE);
       }
     },
@@ -145,7 +145,7 @@ function QuickSyncPage({ onNavigate }) {
         setStats((prev) => ({ ...prev, added: prev.added + 1 }));
         setNewContacts((prev) => prev.filter((c) => c.Name !== contact.Name));
       } catch (error) {
-        notify.error(`Failed to add contact: ${error.message}`);
+        notify.error('Failed to add contact. Check your connection and try again.');
       } finally {
         setAddingContactId(null);
       }

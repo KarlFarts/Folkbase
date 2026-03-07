@@ -69,7 +69,7 @@ function BackupRestorePage() {
       }
     } catch (error) {
       console.error('Backup failed:', error);
-      notify.error(`Backup failed: ${error.message}`);
+      notify.error('Backup failed. Check your connection and try again.');
     } finally {
       setCreatingBackup(false);
       setBackupProgress(null);
@@ -163,7 +163,7 @@ function BackupRestorePage() {
       setValidationResult(null);
     } catch (error) {
       console.error('Restore failed:', error);
-      notify.error(`Restore failed: ${error.message}`);
+      notify.error('Restore failed. Check your connection and try again.');
     } finally {
       setRestoring(false);
       setRestoreProgress(null);

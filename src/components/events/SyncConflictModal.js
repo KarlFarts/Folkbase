@@ -16,14 +16,13 @@ function SyncConflictModal({ isOpen, onClose, conflict, onResolved, contacts = [
     setResolving(true);
     try {
       await resolveConflict(conflict, resolution, accessToken, sheetId, contacts);
-      notify(
-        `Conflict resolved: kept ${resolution === 'crm' ? 'CRM' : resolution === 'calendar' ? 'Calendar' : 'latest'} version`,
-        'success'
+      notify.success(
+        `Conflict resolved: kept ${resolution === 'crm' ? 'CRM' : resolution === 'calendar' ? 'Calendar' : 'latest'} version`
       );
       if (onResolved) onResolved();
       onClose();
-    } catch (error) {
-      notify('Failed to resolve conflict: ' + error.message, 'error');
+    } catch {
+      notify.error('Failed to resolve conflict. Please try again.');
     } finally {
       setResolving(false);
     }

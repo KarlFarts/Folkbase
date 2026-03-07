@@ -49,7 +49,7 @@ export function useEntityDetection(text, context, debounceDelay = 300) {
       const results = detectEntities(debouncedText, context);
       setDetectedEntities(results);
     } catch (err) {
-      setError(err.message);
+      setError('Entity detection failed. Please try again.');
       setDetectedEntities(null);
     } finally {
       setIsDetecting(false);

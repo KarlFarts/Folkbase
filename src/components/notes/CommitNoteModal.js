@@ -155,7 +155,7 @@ export default function CommitNoteModal({
       onClose();
     } catch (err) {
       logError('Error committing note:', err);
-      setError(err.message || 'Failed to commit note. Please try again.');
+      setError('Failed to commit note. Please try again.');
     } finally {
       setIsCommitting(false);
     }

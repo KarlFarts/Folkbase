@@ -58,7 +58,7 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
       }
     } catch (err) {
       logError('Error committing note:', err);
-      setError(err.message || 'Failed to commit note');
+      setError('Failed to commit note. Please try again.');
 
       // Clear error after 3 seconds
       timersRef.current.push(setTimeout(() => setError(''), 3000));

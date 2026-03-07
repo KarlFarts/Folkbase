@@ -95,7 +95,7 @@ export default function MeetingMode({ onNavigate }) {
       }, 1000);
     } catch (error) {
       // Silent failure expected
-      notify.error(`Failed to save meeting: ${error.message}`);
+      notify.error('Failed to save meeting. Please try again.');
       setClosing(false);
     }
   }, [
