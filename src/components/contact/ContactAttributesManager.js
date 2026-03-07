@@ -34,6 +34,7 @@ function ContactAttributesManager({ contactId }) {
 
   const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -90,6 +91,7 @@ function ContactAttributesManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -112,12 +114,15 @@ function ContactAttributesManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save attribute', 'error');
       console.error('Error saving attribute:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (attrId) => {
     if (!confirm('Delete this attribute?')) return;
 
+    setSaving(true);
     try {
       await deleteContactAttribute(accessToken, activeSheetId, attrId);
       showNotification('Attribute deleted', 'success');
@@ -125,11 +130,13 @@ function ContactAttributesManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete attribute', 'error');
       console.error('Error deleting attribute:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return <p className="text-muted">Loading attributes...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   // Group by category for pill display
@@ -171,6 +178,7 @@ function ContactAttributesManager({ contactId }) {
                         onClick={() => openEditModal(attr)}
                         className="tag-remove-btn cam-edit-btn"
                         title="Edit"
+                        disabled={saving}
                       >
                         <Pencil size={10} />
                       </button>
@@ -178,6 +186,7 @@ function ContactAttributesManager({ contactId }) {
                         onClick={() => handleDelete(attr['Attribute ID'])}
                         className="tag-remove-btn"
                         title="Delete"
+                        disabled={saving}
                       >
                         <Trash2 size={10} />
                       </button>
@@ -190,15 +199,21 @@ function ContactAttributesManager({ contactId }) {
         </div>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit Attribute' : 'Add Attribute'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit Attribute' : 'Add Attribute'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="cam-form">
             <div>
               <label className="form-label">Category</label>
@@ -249,8 +264,7 @@ function ContactAttributesManager({ contactId }) {
               />
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

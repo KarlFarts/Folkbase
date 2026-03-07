@@ -26,6 +26,7 @@ function SocialsManager({ contactId }) {
 
   const [socials, setSocials] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -85,6 +86,7 @@ function SocialsManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -108,12 +110,15 @@ function SocialsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save social profile', 'error');
       console.error('Error saving social:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (socialId) => {
     if (!confirm('Delete this social profile?')) return;
 
+    setSaving(true);
     try {
       await deleteContactSocial(accessToken, activeSheetId, socialId);
       showNotification('Social profile deleted', 'success');
@@ -121,11 +126,13 @@ function SocialsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete social profile', 'error');
       console.error('Error deleting social:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return <p className="text-muted">Loading social profiles...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   return (
@@ -178,6 +185,7 @@ function SocialsManager({ contactId }) {
                       onClick={() => openEditModal(social)}
                       className="btn btn-ghost btn-sm"
                       title="Edit"
+                      disabled={saving}
                     >
                       <Pencil size={14} />
                     </button>
@@ -185,6 +193,7 @@ function SocialsManager({ contactId }) {
                       onClick={() => handleDelete(social['Social ID'])}
                       className="btn btn-ghost btn-sm"
                       title="Delete"
+                      disabled={saving}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -196,15 +205,21 @@ function SocialsManager({ contactId }) {
         </table>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit Social Profile' : 'Add Social Profile'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit Social Profile' : 'Add Social Profile'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="soc-form">
             <div>
               <label className="form-label">
@@ -268,8 +283,7 @@ function SocialsManager({ contactId }) {
               />
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

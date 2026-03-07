@@ -31,6 +31,7 @@ function ContactMethodsManager({ contactId }) {
 
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -90,6 +91,7 @@ function ContactMethodsManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -113,12 +115,15 @@ function ContactMethodsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save contact method', 'error');
       console.error('Error saving contact method:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (methodId) => {
     if (!confirm('Delete this contact method?')) return;
 
+    setSaving(true);
     try {
       await deleteContactMethod(accessToken, activeSheetId, methodId);
       showNotification('Contact method deleted', 'success');
@@ -126,6 +131,8 @@ function ContactMethodsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete contact method', 'error');
       console.error('Error deleting contact method:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -164,7 +171,7 @@ function ContactMethodsManager({ contactId }) {
   };
 
   if (loading) {
-    return <p className="text-muted">Loading contact methods...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   // Group by type for display
@@ -228,6 +235,7 @@ function ContactMethodsManager({ contactId }) {
                               onClick={() => openEditModal(method)}
                               className="btn btn-ghost btn-sm"
                               title="Edit"
+                              disabled={saving}
                             >
                               <Pencil size={14} />
                             </button>
@@ -235,6 +243,7 @@ function ContactMethodsManager({ contactId }) {
                               onClick={() => handleDelete(method['Contact Method ID'])}
                               className="btn btn-ghost btn-sm"
                               title="Delete"
+                              disabled={saving}
                             >
                               <Trash2 size={14} />
                             </button>
@@ -255,15 +264,21 @@ function ContactMethodsManager({ contactId }) {
         </div>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit Contact Method' : 'Add Contact Method'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit Contact Method' : 'Add Contact Method'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="cmm-form">
             <div>
               <label className="form-label">Type</label>
@@ -326,8 +341,7 @@ function ContactMethodsManager({ contactId }) {
               />
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

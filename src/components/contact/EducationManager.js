@@ -22,6 +22,7 @@ function EducationManager({ contactId }) {
 
   const [education, setEducation] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -84,6 +85,7 @@ function EducationManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -108,12 +110,15 @@ function EducationManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save education record', 'error');
       console.error('Error saving education:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (educationId) => {
     if (!confirm('Delete this education record?')) return;
 
+    setSaving(true);
     try {
       await deleteContactEducation(accessToken, activeSheetId, educationId);
       showNotification('Education record deleted', 'success');
@@ -121,11 +126,13 @@ function EducationManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete education record', 'error');
       console.error('Error deleting education:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return <p className="text-muted">Loading education records...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   return (
@@ -173,6 +180,7 @@ function EducationManager({ contactId }) {
                         onClick={() => openEditModal(edu)}
                         className="btn btn-ghost btn-sm"
                         title="Edit"
+                        disabled={saving}
                       >
                         <Pencil size={14} />
                       </button>
@@ -180,6 +188,7 @@ function EducationManager({ contactId }) {
                         onClick={() => handleDelete(edu['Education ID'])}
                         className="btn btn-ghost btn-sm"
                         title="Delete"
+                        disabled={saving}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -192,15 +201,21 @@ function EducationManager({ contactId }) {
         </table>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit Education' : 'Add Education'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit Education' : 'Add Education'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="edu-form">
             <div>
               <label className="form-label">
@@ -273,8 +288,7 @@ function EducationManager({ contactId }) {
               </label>
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

@@ -25,6 +25,7 @@ function EmploymentManager({ contactId }) {
   const [employment, setEmployment] = useState([]);
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -102,6 +103,7 @@ function EmploymentManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -127,12 +129,15 @@ function EmploymentManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save employment record', 'error');
       console.error('Error saving employment:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (employmentId) => {
     if (!confirm('Delete this employment record?')) return;
 
+    setSaving(true);
     try {
       await deleteContactEmployment(accessToken, activeSheetId, employmentId);
       showNotification('Employment record deleted', 'success');
@@ -140,6 +145,8 @@ function EmploymentManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete employment record', 'error');
       console.error('Error deleting employment:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -154,7 +161,7 @@ function EmploymentManager({ contactId }) {
   };
 
   if (loading) {
-    return <p className="text-muted">Loading employment records...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   return (
@@ -202,6 +209,7 @@ function EmploymentManager({ contactId }) {
                         onClick={() => openEditModal(emp)}
                         className="btn btn-ghost btn-sm"
                         title="Edit"
+                        disabled={saving}
                       >
                         <Pencil size={14} />
                       </button>
@@ -209,6 +217,7 @@ function EmploymentManager({ contactId }) {
                         onClick={() => handleDelete(emp['Employment ID'])}
                         className="btn btn-ghost btn-sm"
                         title="Delete"
+                        disabled={saving}
                       >
                         <Trash2 size={14} />
                       </button>
@@ -221,15 +230,21 @@ function EmploymentManager({ contactId }) {
         </table>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit Employment' : 'Add Employment'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit Employment' : 'Add Employment'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="emp-form">
             <div>
               <label className="form-label">Organization (from database)</label>
@@ -319,8 +334,7 @@ function EmploymentManager({ contactId }) {
               </label>
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

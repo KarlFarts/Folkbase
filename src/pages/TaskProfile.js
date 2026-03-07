@@ -7,6 +7,7 @@ import { useNotification } from '../contexts/NotificationContext';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
 import ChecklistManager from '../components/tasks/ChecklistManager';
 import TimeEntryManager from '../components/tasks/TimeEntryManager';
+import { ProfileSkeleton } from '../components/SkeletonLoader';
 
 export default function TaskProfile({ onNavigate }) {
   const { id } = useParams();
@@ -68,9 +69,7 @@ export default function TaskProfile({ onNavigate }) {
   if (loading) {
     return (
       <div className="page-container">
-        <div className="tp-center-pad">
-          <p>Loading task...</p>
-        </div>
+        <ProfileSkeleton />
       </div>
     );
   }

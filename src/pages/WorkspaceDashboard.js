@@ -31,6 +31,8 @@ const WorkspaceDashboard = ({ onNavigate }) => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [creatingInvitation, setCreatingInvitation] = useState(false);
   const [sharingSheet, setSharingSheet] = useState(false);
+  const [savingMember, setSavingMember] = useState(false);
+  const [removingMemberId, setRemovingMemberId] = useState(null);
   const [editingMember, setEditingMember] = useState(null); // { id, role, overrides }
 
   useEffect(() => {
@@ -172,6 +174,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
 
   const handleSaveMember = async () => {
     if (!editingMember || !selectedWorkspace?.sheet_id) return;
+    setSavingMember(true);
     try {
       const overridesStr =
         editingMember.role === WORKSPACE_ROLES.VIEWER
@@ -193,6 +196,8 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     } catch (err) {
       console.error('Failed to update member:', err);
       notify.error('Failed to update member. Please try again.');
+    } finally {
+      setSavingMember(false);
     }
   };
 
@@ -201,6 +206,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     const email = member['Member Email'] || member.member_email;
     if (!memberId || !selectedWorkspace?.sheet_id) return;
     if (!window.confirm(`Remove ${email} from this workspace?`)) return;
+    setRemovingMemberId(memberId);
     try {
       await removeWorkspaceMember(accessToken, selectedWorkspace.sheet_id, memberId);
       setWorkspaceMembers((prev) =>
@@ -210,6 +216,8 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     } catch (err) {
       console.error('Failed to remove member:', err);
       notify.error('Failed to remove member. Please try again.');
+    } finally {
+      setRemovingMemberId(null);
     }
   };
 
@@ -358,10 +366,10 @@ const WorkspaceDashboard = ({ onNavigate }) => {
                                   </div>
                                 )}
                                 <div className="member-edit-actions">
-                                  <button className="btn btn-primary btn-sm" onClick={handleSaveMember}>
-                                    Save
+                                  <button className="btn btn-primary btn-sm" onClick={handleSaveMember} disabled={savingMember}>
+                                    {savingMember ? 'Saving...' : 'Save'}
                                   </button>
-                                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingMember(null)}>
+                                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingMember(null)} disabled={savingMember}>
                                     Cancel
                                   </button>
                                 </div>
@@ -377,14 +385,16 @@ const WorkspaceDashboard = ({ onNavigate }) => {
                                       .filter(Boolean);
                                     setEditingMember({ id: memberId, role, overrides: currentOverrides });
                                   }}
+                                  disabled={removingMemberId === memberId}
                                 >
                                   Edit Role
                                 </button>
                                 <button
                                   className="btn btn-danger btn-sm"
                                   onClick={() => handleRemoveMember(member)}
+                                  disabled={removingMemberId === memberId}
                                 >
-                                  Remove
+                                  {removingMemberId === memberId ? 'Removing...' : 'Remove'}
                                 </button>
                               </div>
                             )}

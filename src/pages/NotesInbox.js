@@ -73,6 +73,9 @@ function NotesInbox({ onNavigate }) {
   const [bulkSelectMode, setBulkSelectMode] = useState(false);
   const [selectedNoteIds, setSelectedNoteIds] = useState(new Set());
 
+  // Mutation loading state
+  const [saving, setSaving] = useState(false);
+
   // Auto-refresh service reference
   const autoRefreshServiceRef = useRef(null);
 
@@ -277,6 +280,7 @@ function NotesInbox({ onNavigate }) {
       return;
     }
 
+    setSaving(true);
     try {
       await updateNote(accessToken, sheetId, editingNote['Note ID'], {
         Content: noteForm.Content,
@@ -299,6 +303,8 @@ function NotesInbox({ onNavigate }) {
       }
     } catch {
       notify.error('Failed to update note. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -987,15 +993,16 @@ function NotesInbox({ onNavigate }) {
                   setShowAddModal(false);
                   closeEditModal();
                 }}
+                disabled={saving}
               >
                 Cancel
               </button>
               <button
                 className="btn btn-primary"
                 onClick={editingNote ? handleUpdateNote : handleAddNote}
-                disabled={!noteForm.Content.trim()}
+                disabled={!noteForm.Content.trim() || saving}
               >
-                {editingNote ? 'Save Changes' : 'Create Note'}
+                {saving ? 'Saving...' : editingNote ? 'Save Changes' : 'Create Note'}
               </button>
             </>
           }

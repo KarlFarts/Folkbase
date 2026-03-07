@@ -32,6 +32,7 @@ function DistrictsManager({ contactId }) {
 
   const [districts, setDistricts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -88,6 +89,7 @@ function DistrictsManager({ contactId }) {
       return;
     }
 
+    setSaving(true);
     try {
       const saveData = {
         'Contact ID': contactId,
@@ -110,12 +112,15 @@ function DistrictsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to save district', 'error');
       console.error('Error saving district:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDelete = async (districtId) => {
     if (!confirm('Delete this district record?')) return;
 
+    setSaving(true);
     try {
       await deleteContactDistrict(accessToken, activeSheetId, districtId);
       showNotification('District deleted', 'success');
@@ -123,11 +128,13 @@ function DistrictsManager({ contactId }) {
     } catch (error) {
       showNotification('Failed to delete district', 'error');
       console.error('Error deleting district:', error);
+    } finally {
+      setSaving(false);
     }
   };
 
   if (loading) {
-    return <p className="text-muted">Loading districts...</p>;
+    return <div className="loading-container"><div className="loading-spinner loading-spinner-sm"></div></div>;
   }
 
   return (
@@ -163,6 +170,7 @@ function DistrictsManager({ contactId }) {
                       onClick={() => openEditModal(district)}
                       className="btn btn-ghost btn-sm"
                       title="Edit"
+                      disabled={saving}
                     >
                       <Pencil size={14} />
                     </button>
@@ -170,6 +178,7 @@ function DistrictsManager({ contactId }) {
                       onClick={() => handleDelete(district['District ID'])}
                       className="btn btn-ghost btn-sm"
                       title="Delete"
+                      disabled={saving}
                     >
                       <Trash2 size={14} />
                     </button>
@@ -181,15 +190,21 @@ function DistrictsManager({ contactId }) {
         </table>
       )}
 
-      {isModalOpen && (
-        <WindowTemplate
-          title={editingId ? 'Edit District' : 'Add District'}
-          onClose={() => setIsModalOpen(false)}
-          actions={[
-            { label: 'Cancel', onClick: () => setIsModalOpen(false) },
-            { label: 'Save', onClick: handleSave, variant: 'primary' },
-          ]}
-        >
+      <WindowTemplate
+        isOpen={isModalOpen}
+        title={editingId ? 'Edit District' : 'Add District'}
+        onClose={() => { if (!saving) setIsModalOpen(false); }}
+        footer={
+          <>
+            <button className="btn btn-secondary" onClick={() => setIsModalOpen(false)} disabled={saving}>
+              Cancel
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving...' : 'Save'}
+            </button>
+          </>
+        }
+      >
           <div className="dis-form">
             <div>
               <label className="form-label">
@@ -242,8 +257,7 @@ function DistrictsManager({ contactId }) {
               />
             </div>
           </div>
-        </WindowTemplate>
-      )}
+      </WindowTemplate>
     </div>
   );
 }

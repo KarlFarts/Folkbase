@@ -4,6 +4,7 @@ import { useActiveSheetId } from '../utils/sheetResolver';
 import MergePreview from '../components/MergePreview';
 import { findDuplicatesInList } from '../services/duplicateDetector';
 import { readSheetData, updateContact, SHEETS } from '../utils/devModeWrapper';
+import { ListPageSkeleton } from '../components/SkeletonLoader';
 
 function DuplicateManager({ onNavigate }) {
   const { accessToken, user } = useAuth();
@@ -12,6 +13,7 @@ function DuplicateManager({ onNavigate }) {
   const [duplicates, setDuplicates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
+  const [merging, setMerging] = useState(false);
   const [selectedDuplicate, setSelectedDuplicate] = useState(null);
   const [linkedPairs, setLinkedPairs] = useState([]);
   const [error, setError] = useState('');
@@ -60,6 +62,7 @@ function DuplicateManager({ onNavigate }) {
   const handleLinkDuplicates = async (selectedValues) => {
     if (!selectedDuplicate) return;
 
+    setMerging(true);
     try {
       const { contact1, contact2 } = selectedDuplicate;
       const contact1Id = contact1['Contact ID'];
@@ -108,6 +111,8 @@ function DuplicateManager({ onNavigate }) {
       setSelectedDuplicate(null);
     } catch (err) {
       setError('Failed to link duplicates. Check your connection and try again.');
+    } finally {
+      setMerging(false);
     }
   };
 
@@ -118,6 +123,7 @@ function DuplicateManager({ onNavigate }) {
   };
 
   const handleUnlinkDuplicate = async (contact1Id, contact2Id) => {
+    setMerging(true);
     try {
       setError('');
 
@@ -147,17 +153,13 @@ function DuplicateManager({ onNavigate }) {
       );
     } catch (err) {
       setError('Failed to unlink duplicates. Check your connection and try again.');
+    } finally {
+      setMerging(false);
     }
   };
 
   if (loading) {
-    return (
-      <div className="page-container">
-        <div className="text-center dm-loading">
-          <p>Loading contacts...</p>
-        </div>
-      </div>
-    );
+    return <ListPageSkeleton count={4} />;
   }
 
   return (
@@ -289,8 +291,9 @@ function DuplicateManager({ onNavigate }) {
                   <button
                     className="btn btn-danger btn-sm"
                     onClick={() => handleUnlinkDuplicate(pair.contact1Id, pair.contact2Id)}
+                    disabled={merging}
                   >
-                    Unlink
+                    {merging ? 'Unlinking...' : 'Unlink'}
                   </button>
                 </div>
               ))}

@@ -26,6 +26,7 @@ function TasksPage({ onNavigate }) {
   const [contacts, setContacts] = useState([]);
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
   // Filters
@@ -77,6 +78,7 @@ function TasksPage({ onNavigate }) {
   }, [loadData]);
 
   const handleAddTask = async () => {
+    setSaving(true);
     try {
       await addTask(accessToken, sheetId, taskForm);
       notify.success('Task created successfully!');
@@ -85,10 +87,13 @@ function TasksPage({ onNavigate }) {
       loadData();
     } catch {
       notify.error('Failed to create task. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleUpdateTask = async () => {
+    setSaving(true);
     try {
       await updateTask(accessToken, sheetId, editingTask['Task ID'], taskForm);
       notify.success('Task updated successfully!');
@@ -97,10 +102,13 @@ function TasksPage({ onNavigate }) {
       loadData();
     } catch {
       notify.error('Failed to update task. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
   const handleDeleteTask = async (taskId) => {
+    setSaving(true);
     try {
       await deleteTask(accessToken, sheetId, taskId);
       notify.success('Task deleted successfully!');
@@ -108,18 +116,22 @@ function TasksPage({ onNavigate }) {
     } catch {
       notify.error('Failed to delete task. Please try again.');
     } finally {
+      setSaving(false);
       setConfirmDeleteTaskId(null);
     }
   };
 
   const handleToggleComplete = async (task) => {
     const newStatus = task['Status'] === 'completed' ? 'pending' : 'completed';
+    setSaving(true);
     try {
       await updateTask(accessToken, sheetId, task['Task ID'], { Status: newStatus });
       notify.success(newStatus === 'completed' ? 'Task completed!' : 'Task reopened');
       loadData();
     } catch {
       notify.error('Failed to update task status.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -360,6 +372,7 @@ function TasksPage({ onNavigate }) {
                   type="checkbox"
                   checked={task['Status'] === 'completed'}
                   onChange={() => handleToggleComplete(task)}
+                  disabled={saving}
                 />
               </div>
 
@@ -404,12 +417,13 @@ function TasksPage({ onNavigate }) {
               </div>
 
               <div className="task-actions">
-                <button className="btn btn-sm btn-secondary" onClick={() => openEditModal(task)}>
+                <button className="btn btn-sm btn-secondary" onClick={() => openEditModal(task)} disabled={saving}>
                   Edit
                 </button>
                 <button
                   className="btn btn-sm btn-danger"
                   onClick={() => setConfirmDeleteTaskId(task['Task ID'])}
+                  disabled={saving}
                 >
                   Delete
                 </button>
@@ -439,15 +453,16 @@ function TasksPage({ onNavigate }) {
                   setEditingTask(null);
                   resetForm();
                 }}
+                disabled={saving}
               >
                 Cancel
               </button>
               <button
                 className="btn btn-primary"
                 onClick={editingTask ? handleUpdateTask : handleAddTask}
-                disabled={!taskForm.Title.trim()}
+                disabled={!taskForm.Title.trim() || saving}
               >
-                {editingTask ? 'Save Changes' : 'Create Task'}
+                {saving ? 'Saving...' : editingTask ? 'Save Changes' : 'Create Task'}
               </button>
             </>
           }
