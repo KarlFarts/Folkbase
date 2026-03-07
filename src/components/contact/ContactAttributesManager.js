@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, Tag } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactAttributes,
   addContactAttribute,
@@ -149,7 +150,7 @@ function ContactAttributesManager({ contactId }) {
       </div>
 
       {attributes.length === 0 ? (
-        <p className="text-muted">No attributes yet. Click "Add Attribute" to get started.</p>
+        <EmptyState compact icon={Tag} title="No attributes yet" />
       ) : (
         <div className="cam-grouped-list">
           {Object.entries(grouped).map(([category, items]) => (

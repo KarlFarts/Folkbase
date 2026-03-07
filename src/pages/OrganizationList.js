@@ -360,14 +360,27 @@ function OrganizationList({ onNavigate }) {
               ? 'Add your first organization to get started'
               : 'Try adjusting your search or filters'}
           </p>
-          {organizations.length === 0 && (
-            <button
-              className="btn btn-primary mt-md"
-              onClick={() => onNavigate('add-organization')}
-            >
-              + Add Organization
-            </button>
-          )}
+          <div className="empty-state-actions">
+            {organizations.length === 0 && (
+              <button className="btn btn-primary" onClick={() => onNavigate('add-organization')}>
+                + Add Organization
+              </button>
+            )}
+            {organizations.length > 0 && (
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setSearchQuery('');
+                  setTypeFilter('');
+                  setStatusFilter('');
+                  setPriorityFilter('');
+                  setIndustryFilter('');
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="contact-grid-wrapper">

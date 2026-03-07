@@ -2102,6 +2102,42 @@ input[type="checkbox"] {
   margin-top: var(--spacing-sm);
 }
 
+/* Compact variant — used inside card bodies (no background box) */
+.empty-state-compact {
+  text-align: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  color: var(--color-text-secondary);
+}
+
+.empty-state-compact .empty-state-icon {
+  width: 24px;
+  height: 24px;
+  color: var(--color-text-muted);
+  opacity: 0.5;
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-compact .empty-state-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.empty-state-compact p {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state-compact .empty-state-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
 /* ========================================
     PAGES - Sign In
     ======================================== */
@@ -8543,6 +8579,79 @@ body {
   a,
   .clickable {
     -webkit-tap-highlight-color: rgba(var(--color-accent-primary-rgb), 0.1);
+  }
+}
+
+/* Mobile responsiveness pass — 375px fixes */
+@media (max-width: 640px) {
+  /* ContactProfile header: stack identity and actions vertically */
+  .cp-header-inner {
+    flex-direction: column;
+  }
+
+  .cp-header-actions {
+    min-width: 0;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .cp-action-btn {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  /* Touchpoint modal: single-column form on mobile */
+  .tpm-two-col {
+    grid-template-columns: 1fr;
+  }
+
+  /* Window footer: stack action buttons vertically */
+  .window-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* ContactActivities filters: wrap row and hit 44px tap targets */
+  .ca-filters {
+    flex-wrap: wrap;
+  }
+
+  .ca-search-input,
+  .ca-type-select {
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .ca-type-select {
+    width: 100%;
+    min-width: 0;
+  }
+
+  /* Timeline expanded rows: stack label above value */
+  .timeline-expanded-row {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .timeline-expanded-label {
+    min-width: 0;
+  }
+
+  /* UserMenuDropdown: ensure 44px tap target on avatar trigger */
+  .umd-trigger {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  /* Workspace wizard type grid: single column on mobile */
+  .wizard-type-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* WorkspaceSwitcher dropdown: prevent overflow on narrow screens */
+  .workspace-switcher-dropdown {
+    max-width: calc(100vw - 2 * var(--spacing-md));
   }
 }
 

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, Briefcase } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactEmployment,
   addContactEmployment,
@@ -166,9 +167,7 @@ function EmploymentManager({ contactId }) {
       </div>
 
       {employment.length === 0 ? (
-        <p className="text-muted">
-          No employment records yet. Click "Add Employment" to get started.
-        </p>
+        <EmptyState compact icon={Briefcase} title="No employment records yet" />
       ) : (
         <table className="data-table">
           <thead>

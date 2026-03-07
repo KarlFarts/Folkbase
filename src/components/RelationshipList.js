@@ -1,4 +1,6 @@
 import { useState, useMemo } from 'react';
+import { GitBranch } from 'lucide-react';
+import EmptyState from './EmptyState';
 
 /**
  * Sort icon component for table headers
@@ -94,10 +96,7 @@ export default function RelationshipList({
 
   if (!relationships || relationships.length === 0) {
     return (
-      <div className="rl-empty-state">
-        <p className="rl-empty-primary">No relationships yet</p>
-        <p className="rl-empty-secondary">Click "Add Relationship" to get started</p>
-      </div>
+      <EmptyState compact icon={GitBranch} title="No relationships yet" />
     );
   }
 

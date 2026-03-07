@@ -320,11 +320,26 @@ function LocationList({ onNavigate }) {
               ? 'Add your first location to get started'
               : 'Try adjusting your search or filters'}
           </p>
-          {locations.length === 0 && (
-            <button className="btn btn-primary mt-md" onClick={() => onNavigate('add-location')}>
-              + Add Location
-            </button>
-          )}
+          <div className="empty-state-actions">
+            {locations.length === 0 && (
+              <button className="btn btn-primary" onClick={() => onNavigate('add-location')}>
+                + Add Location
+              </button>
+            )}
+            {locations.length > 0 && (
+              <button
+                className="btn btn-secondary"
+                onClick={() => {
+                  setSearchQuery('');
+                  setTypeFilter('');
+                  setStatusFilter('');
+                  setPriorityFilter('');
+                }}
+              >
+                Clear Filters
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <div className="contact-grid-wrapper">

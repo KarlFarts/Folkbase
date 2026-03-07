@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus } from 'lucide-react';
+import { Pencil, Trash2, Plus, Share2 } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactSocials,
   addContactSocial,
@@ -137,7 +138,7 @@ function SocialsManager({ contactId }) {
       </div>
 
       {socials.length === 0 ? (
-        <p className="text-muted">No social profiles yet. Click "Add Profile" to get started.</p>
+        <EmptyState compact icon={Share2} title="No social profiles yet" />
       ) : (
         <table className="data-table">
           <thead>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Phone, Mail, MapPin } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import EmptyState from '../EmptyState';
 import {
   getContactMethods,
   addContactMethod,
@@ -183,7 +184,7 @@ function ContactMethodsManager({ contactId }) {
       </div>
 
       {methods.length === 0 ? (
-        <p className="text-muted">No contact methods yet. Click "Add Method" to get started.</p>
+        <EmptyState compact icon={Phone} title="No contact methods yet" />
       ) : (
         <div className="cmm-grouped-list">
           {Object.entries(grouped).map(([type, items]) => {

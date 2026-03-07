@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Building2 } from 'lucide-react';
+import EmptyState from '../components/EmptyState';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useConfig } from '../contexts/ConfigContext';
@@ -483,16 +485,13 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       </div>
 
       {userWorkspaces.length === 0 ? (
-        <div className="workspace-empty-state">
-          <h2>No Workspaces Yet</h2>
-          <p>
-            Workspaces let you collaborate with your team on shared contacts. Create one to get
-            started, or ask a teammate to invite you.
-          </p>
-          <button onClick={() => onNavigate('create-workspace')} className="btn btn-primary">
-            Create Your First Workspace
-          </button>
-        </div>
+        <EmptyState
+          icon={Building2}
+          title="No workspaces yet"
+          description="Workspaces let you collaborate with your team on shared contacts. Create one to get started, or ask a teammate to invite you."
+          action="Create Your First Workspace"
+          onAction={() => onNavigate('create-workspace')}
+        />
       ) : (
         <div className="workspaces-grid">
           {userWorkspaces.map((workspace) => (

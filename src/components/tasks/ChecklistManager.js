@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Plus, Check, Square } from 'lucide-react';
+import { Pencil, Trash2, Plus, Check, Square, CheckSquare } from 'lucide-react';
+import EmptyState from '../EmptyState';
 import WindowTemplate from '../WindowTemplate';
 import {
   getTaskChecklistItems,
@@ -205,7 +206,7 @@ function ChecklistManager({ taskId }) {
       </div>
 
       {checklistItems.length === 0 ? (
-        <p className="text-muted">No checklist items yet. Click "Add Item" to get started.</p>
+        <EmptyState compact icon={CheckSquare} title="No checklist items yet" />
       ) : (
         <div className="cm-list">
           {checklistItems.map((item) => {

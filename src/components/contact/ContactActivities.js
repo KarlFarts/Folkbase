@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
+import EmptyState from '../EmptyState';
 import { TimelineContainer } from '../TimelineItem';
 import NotesDisplaySection from '../notes/NotesDisplaySection';
 
@@ -17,6 +18,11 @@ export function TouchpointHistoryCard({
 }) {
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+
+  const clearFilters = () => {
+    setSearch('');
+    setTypeFilter('');
+  };
 
   const filtered = useMemo(() => {
     return touchpoints.filter((tp) => {
@@ -86,7 +92,13 @@ export function TouchpointHistoryCard({
             )}
           </div>
         ) : filtered.length === 0 ? (
-          <p className="text-muted ca-empty-text">No results match your filter.</p>
+          <EmptyState
+            compact
+            title="No matching touchpoints"
+            description="Try adjusting your search or type filter."
+            secondaryAction="Clear Filters"
+            onSecondaryAction={clearFilters}
+          />
         ) : (
           <TimelineContainer
             touchpoints={filtered}
