@@ -3,6 +3,7 @@ import { Calendar, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   addTouchpoint,
   logActivity,
@@ -16,6 +17,7 @@ export default function MeetingMode({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { guardWrite } = usePermissions();
 
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -51,6 +53,7 @@ export default function MeetingMode({ onNavigate }) {
   }, []);
 
   const handleEndMeeting = useCallback(async () => {
+    if (!guardWrite('touchpoints')) return;
     if (selectedAttendees.length === 0) {
       notify.warning('Please select at least one attendee');
       return;

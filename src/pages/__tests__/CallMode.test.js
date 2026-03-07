@@ -16,6 +16,12 @@ vi.mock('../../utils/sheetResolver', () => ({
   useActiveSheetId: () => 'mock-sheet-id',
 }));
 
+vi.mock('../../hooks/usePermissions', () => ({
+  usePermissions: () => ({
+    guardWrite: () => true,
+  }),
+}));
+
 vi.mock('../../utils/devModeWrapper', () => ({
   readSheetData: vi.fn().mockResolvedValue({
     data: [

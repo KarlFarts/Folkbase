@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { parseFile } from '../utils/importParsers';
 import { readSheetData, addContact, SHEETS } from '../utils/devModeWrapper';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -23,6 +24,7 @@ function QuickSyncPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { guardWrite } = usePermissions();
 
   const [state, setState] = useState(STATES.IDLE);
   const [newContacts, setNewContacts] = useState([]);
@@ -117,6 +119,7 @@ function QuickSyncPage({ onNavigate }) {
 
   const handleAddContact = useCallback(
     async (contact, enrichment) => {
+      if (!guardWrite('contacts')) return;
       setAddingContactId(contact.Name);
 
       try {

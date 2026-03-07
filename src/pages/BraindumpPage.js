@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { addNote, linkNoteToContact, readSheetData, SHEETS } from '../utils/devModeWrapper';
 import { useEntityDetection } from '../hooks/useEntityDetection';
@@ -21,6 +22,7 @@ function BraindumpPage() {
   const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { guardWrite } = usePermissions();
 
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
@@ -158,6 +160,7 @@ function BraindumpPage() {
   };
 
   const handleSave = async () => {
+    if (!guardWrite('notes')) return;
     if (!content || content.trim().length === 0) {
       notify.warning('Please enter some content');
       return;

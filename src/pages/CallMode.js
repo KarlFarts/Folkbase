@@ -4,6 +4,7 @@ import { Phone, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   addTouchpoint,
   logActivity,
@@ -20,6 +21,7 @@ export default function CallMode({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { guardWrite } = usePermissions();
 
   const [notes, setNotes] = useState('');
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -42,6 +44,7 @@ export default function CallMode({ onNavigate }) {
   }, [contactId, accessToken, sheetId]);
 
   const handleCloseCall = useCallback(async () => {
+    if (!guardWrite('touchpoints')) return;
     setClosing(true);
 
     try {
