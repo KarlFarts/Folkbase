@@ -375,6 +375,7 @@ function OrganizationList({ onNavigate }) {
                   setStatusFilter('');
                   setPriorityFilter('');
                   setIndustryFilter('');
+                  setSortBy('name');
                 }}
               >
                 Clear Filters

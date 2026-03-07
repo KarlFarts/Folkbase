@@ -334,6 +334,7 @@ function LocationList({ onNavigate }) {
                   setTypeFilter('');
                   setStatusFilter('');
                   setPriorityFilter('');
+                  setSortBy('name');
                 }}
               >
                 Clear Filters

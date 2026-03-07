@@ -83,14 +83,12 @@ export function TouchpointHistoryCard({
         }}
       >
         {touchpoints.length === 0 ? (
-          <div className="ca-empty-state">
-            <p className="text-muted ca-empty-text">No touchpoints logged yet</p>
-            {canLog && (
-              <button className="btn btn-primary btn-sm" onClick={onLogTouchpoint}>
-                Log First Touchpoint
-              </button>
-            )}
-          </div>
+          <EmptyState
+            compact
+            title="No touchpoints logged yet"
+            action={canLog ? 'Log First Touchpoint' : undefined}
+            onAction={canLog ? onLogTouchpoint : undefined}
+          />
         ) : filtered.length === 0 ? (
           <EmptyState
             compact
