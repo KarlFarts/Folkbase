@@ -97,7 +97,7 @@ export function usePermissions() {
 
     const guardWrite = (feature) => {
       if (canWrite(feature)) return true;
-      notify.warning('You do not have permission to edit this item.');
+      notify.warning("You don't have permission to do this. Ask the workspace owner for access.");
       return false;
     };
 
