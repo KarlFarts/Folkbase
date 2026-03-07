@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   updateLocation,
@@ -19,6 +20,8 @@ function LocationProfile({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+
+  const { canWrite, guardWrite } = usePermissions();
 
   const [location, setLocation] = useState(null);
   const [visits, setVisits] = useState([]);
@@ -89,6 +92,7 @@ function LocationProfile({ onNavigate }) {
   };
 
   const handleSaveEdit = async () => {
+    if (!guardWrite('contacts')) return;
     try {
       setSaving(true);
       await updateLocation(accessToken, sheetId, locationId, location, editData, user.email);
@@ -104,6 +108,7 @@ function LocationProfile({ onNavigate }) {
   };
 
   const handleDelete = async () => {
+    if (!guardWrite('contacts')) return;
     try {
       await deleteLocation(accessToken, sheetId, locationId, user.email);
       notify.success('Location deleted successfully');
@@ -227,16 +232,20 @@ function LocationProfile({ onNavigate }) {
                 <div className="lp-header-actions">
                   {!isEditing ? (
                     <>
-                      <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit location">
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="btn btn-ghost btn-sm lp-delete-btn"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        title="Delete location"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canWrite('contacts') && (
+                        <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit location">
+                          <Edit size={16} />
+                        </button>
+                      )}
+                      {canWrite('contacts') && (
+                        <button
+                          className="btn btn-ghost btn-sm lp-delete-btn"
+                          onClick={() => setShowDeleteConfirm(true)}
+                          title="Delete location"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </>
                   ) : (
                     <>
@@ -268,7 +277,7 @@ function LocationProfile({ onNavigate }) {
                     <MapPin size={16} /> View on Map
                   </button>
                 )}
-                {!isEditing && (
+                {!isEditing && canWrite('contacts') && (
                   <button className="btn btn-primary btn-sm lp-log-visit-btn" onClick={() => setShowLogVisitModal(true)}>
                     <Calendar size={16} /> Log Visit
                   </button>
@@ -450,9 +459,11 @@ function LocationProfile({ onNavigate }) {
           <div className="card-body">
             <div className="lp-visits-header">
               <h3>Visit History</h3>
-              <button className="btn btn-primary btn-sm" onClick={() => setShowLogVisitModal(true)}>
-                <Calendar size={16} /> Log Visit
-              </button>
+              {canWrite('contacts') && (
+                <button className="btn btn-primary btn-sm" onClick={() => setShowLogVisitModal(true)}>
+                  <Calendar size={16} /> Log Visit
+                </button>
+              )}
             </div>
 
             {visits.length === 0 ? (
@@ -516,6 +527,7 @@ function LogVisitModal({ isOpen, onClose, locationId, locationName, onVisitLogge
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { guardWrite } = usePermissions();
 
   const [formData, setFormData] = useState({
     'Location ID': locationId,
@@ -536,6 +548,7 @@ function LogVisitModal({ isOpen, onClose, locationId, locationName, onVisitLogge
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!guardWrite('contacts')) return;
 
     try {
       setSaving(true);

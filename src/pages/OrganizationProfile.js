@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   readSheetData,
   updateOrganization,
@@ -19,6 +20,8 @@ function OrganizationProfile({ onNavigate }) {
   const { user, accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+
+  const { canWrite, guardWrite } = usePermissions();
 
   const [organization, setOrganization] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +99,7 @@ function OrganizationProfile({ onNavigate }) {
   };
 
   const handleSaveEdit = async () => {
+    if (!guardWrite('contacts')) return;
     try {
       setSaving(true);
       await updateOrganization(
@@ -117,6 +121,7 @@ function OrganizationProfile({ onNavigate }) {
   };
 
   const handleDelete = async () => {
+    if (!guardWrite('contacts')) return;
     try {
       await deleteOrganization(accessToken, sheetId, organizationId, user.email);
       notify.success('Organization deleted successfully');
@@ -244,16 +249,20 @@ function OrganizationProfile({ onNavigate }) {
                 <div className="op-header-actions">
                   {!isEditing ? (
                     <>
-                      <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit organization">
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="btn btn-ghost btn-sm op-delete-btn"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        title="Delete organization"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canWrite('contacts') && (
+                        <button className="btn btn-ghost btn-sm" onClick={handleEdit} title="Edit organization">
+                          <Edit size={16} />
+                        </button>
+                      )}
+                      {canWrite('contacts') && (
+                        <button
+                          className="btn btn-ghost btn-sm op-delete-btn"
+                          onClick={() => setShowDeleteConfirm(true)}
+                          title="Delete organization"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      )}
                     </>
                   ) : (
                     <>

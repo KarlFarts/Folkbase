@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { readSheetData, readSheetMetadata } from '../utils/devModeWrapper';
 import LocationCard from '../components/LocationCard';
 import { SHEET_NAMES } from '../config/constants';
@@ -18,6 +19,7 @@ function LocationList({ onNavigate }) {
   const { accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [locations, setLocations] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -220,9 +222,11 @@ function LocationList({ onNavigate }) {
             </button>
           </div>
 
-          <button className="btn btn-primary" onClick={() => onNavigate('add-location')}>
-            + Add Location
-          </button>
+          {canWrite('contacts') && (
+            <button className="btn btn-primary" onClick={() => onNavigate('add-location')}>
+              + Add Location
+            </button>
+          )}
         </div>
       </div>
 
@@ -321,7 +325,7 @@ function LocationList({ onNavigate }) {
               : 'Try adjusting your search or filters'}
           </p>
           <div className="empty-state-actions">
-            {locations.length === 0 && (
+            {locations.length === 0 && canWrite('contacts') && (
               <button className="btn btn-primary" onClick={() => onNavigate('add-location')}>
                 + Add Location
               </button>

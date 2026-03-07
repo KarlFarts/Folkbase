@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import { readSheetData, readSheetMetadata } from '../utils/devModeWrapper';
 import OrganizationCard from '../components/OrganizationCard';
 import { SHEET_NAMES } from '../config/constants';
@@ -22,6 +23,7 @@ function OrganizationList({ onNavigate }) {
   const { accessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite } = usePermissions();
   const [organizations, setOrganizations] = useState([]);
   const [metadata, setMetadata] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -243,9 +245,11 @@ function OrganizationList({ onNavigate }) {
             </button>
           </div>
 
-          <button className="btn btn-primary" onClick={() => onNavigate('add-organization')}>
-            + Add Organization
-          </button>
+          {canWrite('contacts') && (
+            <button className="btn btn-primary" onClick={() => onNavigate('add-organization')}>
+              + Add Organization
+            </button>
+          )}
         </div>
       </div>
 
@@ -361,7 +365,7 @@ function OrganizationList({ onNavigate }) {
               : 'Try adjusting your search or filters'}
           </p>
           <div className="empty-state-actions">
-            {organizations.length === 0 && (
+            {organizations.length === 0 && canWrite('contacts') && (
               <button className="btn btn-primary" onClick={() => onNavigate('add-organization')}>
                 + Add Organization
               </button>
