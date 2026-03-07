@@ -22,6 +22,9 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
   const [folderId, setFolderId] = useState(null);
   const [folderWarning, setFolderWarning] = useState(null);
   const hasStartedRef = useRef(false);
+  // Track the sheet ID once created so retries skip re-creation (prevents duplicate sheets)
+  const createdSheetIdRef = useRef(null);
+  const createdSheetTitleRef = useRef(null);
 
   // Account and sheets are already verified from sign-in
   const { steps, setStepStatus, resetStep } = useConnectionStatus({
@@ -68,6 +71,12 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
         setStepStatus('sheets', 'connected');
         sheetId = wizardData.sheetId;
         sheetTitle = accessCheck.title || 'Connected Sheet';
+      } else if (createdSheetIdRef.current) {
+        // Retry path: sheet was already created in a previous attempt — skip re-creation
+        // to prevent duplicate sheets in Drive.
+        sheetId = createdSheetIdRef.current;
+        sheetTitle = createdSheetTitleRef.current || 'Your Folkbase Sheet';
+        setStepStatus('sheets', 'connected');
       } else {
         // Create new sheet
         setStatus('Creating your Google Sheet...');
@@ -77,6 +86,9 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
 
         sheetId = result.sheetId;
         sheetTitle = result.sheetTitle;
+        // Persist so retries can skip this step
+        createdSheetIdRef.current = sheetId;
+        createdSheetTitleRef.current = sheetTitle;
       }
 
       // Get or create Folkbase folder
@@ -150,8 +162,11 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
     onComplete();
   };
 
-  const handleRetry = (stepId) => {
-    resetStep(stepId);
+  const handleRetry = () => {
+    // Reset both steps — the ConnectionStatusPanel shows which one failed.
+    // If the sheet was already created, the retry path skips re-creation.
+    resetStep('sheets');
+    resetStep('drive');
     setError(null);
     setPhase('provisioning');
     setStatus('Retrying...');
@@ -187,7 +202,7 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
         <div className="wizard-step-body">
           <ConnectionStatusPanel steps={steps} onRetry={handleRetry} />
           <div className="wizard-step-actions">
-            <button type="button" onClick={() => handleRetry('drive')} className="btn btn-primary btn-lg">
+            <button type="button" onClick={handleRetry} className="btn btn-primary btn-lg">
               Try Again
             </button>
           </div>
