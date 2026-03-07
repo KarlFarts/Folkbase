@@ -3,6 +3,7 @@ import { ListChecks } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
+import { usePermissions } from '../hooks/usePermissions';
 import EmptyState from '../components/EmptyState';
 import {
   getTasks,
@@ -21,6 +22,7 @@ function TasksPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
+  const { canWrite, guardWrite } = usePermissions();
 
   const [tasks, setTasks] = useState([]);
   const [contacts, setContacts] = useState([]);
@@ -78,6 +80,7 @@ function TasksPage({ onNavigate }) {
   }, [loadData]);
 
   const handleAddTask = async () => {
+    if (!guardWrite('tasks')) return;
     setSaving(true);
     try {
       await addTask(accessToken, sheetId, taskForm);
@@ -93,6 +96,7 @@ function TasksPage({ onNavigate }) {
   };
 
   const handleUpdateTask = async () => {
+    if (!guardWrite('tasks')) return;
     setSaving(true);
     try {
       await updateTask(accessToken, sheetId, editingTask['Task ID'], taskForm);
@@ -283,9 +287,11 @@ function TasksPage({ onNavigate }) {
     <div className="page-container">
       <div className="page-header">
         <h1>Tasks</h1>
-        <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
-          + New Task
-        </button>
+        {canWrite('tasks') && (
+          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            + New Task
+          </button>
+        )}
       </div>
 
       {/* Stats Bar */}
@@ -417,16 +423,20 @@ function TasksPage({ onNavigate }) {
               </div>
 
               <div className="task-actions">
-                <button className="btn btn-sm btn-secondary" onClick={() => openEditModal(task)} disabled={saving}>
-                  Edit
-                </button>
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={() => setConfirmDeleteTaskId(task['Task ID'])}
-                  disabled={saving}
-                >
-                  Delete
-                </button>
+                {canWrite('tasks') && (
+                  <button className="btn btn-sm btn-secondary" onClick={() => openEditModal(task)} disabled={saving}>
+                    Edit
+                  </button>
+                )}
+                {canWrite('tasks') && (
+                  <button
+                    className="btn btn-sm btn-danger"
+                    onClick={() => setConfirmDeleteTaskId(task['Task ID'])}
+                    disabled={saving}
+                  >
+                    Delete
+                  </button>
+                )}
               </div>
             </div>
           ))}
