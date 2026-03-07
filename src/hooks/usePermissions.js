@@ -42,7 +42,7 @@ export function usePermissions() {
     // DEV MODE: Allow simulating workspace roles for permission gate testing
     if (isDevMode()) {
       const devRole = localStorage.getItem('dev_permission_role');
-      if (devRole && devRole !== 'owner') {
+      if (devRole && (devRole === WORKSPACE_ROLES.EDITOR || devRole === WORKSPACE_ROLES.VIEWER)) {
         const roleOverrides = parseOverrides(localStorage.getItem('dev_permission_overrides') || '');
         const isEditor = devRole === WORKSPACE_ROLES.EDITOR;
         const isViewer = devRole === WORKSPACE_ROLES.VIEWER;
