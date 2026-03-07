@@ -13,6 +13,15 @@
 import { findFolkbaseFolder } from './driveFolder';
 
 /**
+ * Escape a string for safe use inside a Drive API query string literal.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeDriveQueryString(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
+
+/**
  * Check if the access token has Drive access (file or metadata scope)
  * @param {string} accessToken - Google OAuth access token
  * @returns {Promise<boolean>} True if token has drive.file, drive.metadata.readonly, or drive scope
@@ -54,7 +63,7 @@ export const hasDriveMetadataScope = hasDriveScope;
 async function findSheetsInFolder(accessToken, folderId) {
   try {
     const query = encodeURIComponent(
-      `'${folderId}' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`
+      `'${escapeDriveQueryString(folderId)}' in parents and mimeType = 'application/vnd.google-apps.spreadsheet' and trashed = false`
     );
 
     const response = await fetch(

@@ -7,6 +7,15 @@
 
 export const FOLKBASE_FOLDER_NAME = 'Folkbase';
 
+/**
+ * Escape a string for safe use inside a Drive API query string literal.
+ * Single quotes are the only special character in Drive query string values.
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeDriveQueryString(value) {
+  return String(value).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+}
 
 /**
  * Check if the access token has the Drive file scope
@@ -47,7 +56,7 @@ export async function hasDriveFileScope(accessToken) {
 export async function findFolkbaseFolder(accessToken) {
   try {
     const query = encodeURIComponent(
-      `name = '${FOLKBASE_FOLDER_NAME}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+      `name = '${escapeDriveQueryString(FOLKBASE_FOLDER_NAME)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
     );
 
     const response = await fetch(
