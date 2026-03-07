@@ -60,7 +60,7 @@ const NoWorkspaceLandingPage = lazy(() => import('./pages/NoWorkspaceLandingPage
 
 function AppContent() {
   const { user, accessToken, loading } = useAuth();
-  const { config } = useConfig();
+  const { config, ensureConfigForUser } = useConfig();
   const { userWorkspaces } = useWorkspace();
   const navigate = useNavigate();
   const [showSetup, setShowSetup] = useState(false);
@@ -77,6 +77,14 @@ function AppContent() {
 
   // Apply theme (light/dark) from localStorage or system preference
   useTheme();
+
+  // When a different user signs in, clear the previous user's sheet config
+  // so they get routed to setup instead of hitting a 403 on someone else's sheet
+  useEffect(() => {
+    if (user?.email) {
+      ensureConfigForUser(user.email);
+    }
+  }, [user?.email, ensureConfigForUser]);
 
   // Check if migration is needed — only after setup is complete and sheet exists
   useEffect(() => {

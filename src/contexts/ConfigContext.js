@@ -51,7 +51,33 @@ export const ConfigProvider = ({ children }) => {
     setConfig({ ...newConfig, isLoaded: true });
   };
 
-  const value = { config, saveConfig };
+  /**
+   * Check if the authenticated user matches the stored config.
+   * If a different user signed in, clear the stale sheet ID so they
+   * get routed to setup instead of hitting a 403 on someone else's sheet.
+   */
+  const ensureConfigForUser = (email) => {
+    if (!email) return;
+    const storedEmail = localStorage.getItem('folkbase_config_email');
+    if (storedEmail && storedEmail !== email) {
+      // Different user — clear all per-user state to prevent data leaks
+      // and 403 errors from accessing the previous user's resources
+      localStorage.removeItem('personalSheetId');
+      localStorage.removeItem('googleSheetId');
+      localStorage.removeItem('folkbase_known_workspaces');
+      localStorage.removeItem('activeWorkspaceId');
+      localStorage.removeItem('workspace_count');
+      localStorage.removeItem('user-display-name');
+      localStorage.removeItem('user-avatar-color');
+      localStorage.removeItem('user-avatar-icon');
+      localStorage.removeItem('touchpoint_calendar_settings');
+      localStorage.removeItem('touchpoint_calendar_sync_status');
+      setConfig({ personalSheetId: null, isLoaded: true });
+    }
+    localStorage.setItem('folkbase_config_email', email);
+  };
+
+  const value = { config, saveConfig, ensureConfigForUser };
 
   return <ConfigContext.Provider value={value}>{children}</ConfigContext.Provider>;
 };
