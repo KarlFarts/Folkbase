@@ -160,7 +160,11 @@ function ContactProfile({ onNavigate }) {
       );
     } catch (err) {
       console.error('Failed to load contact:', err);
-      actions.setError('Failed to load contact.');
+      if (err.response?.status === 401 || err.response?.status === 403 || err.isAuthError) {
+        actions.setError('Your Google account needs to be reconnected. Use the banner above to sign in again.');
+      } else {
+        actions.setError('Failed to load contact.');
+      }
     } finally {
       actions.setLoading(false);
     }
