@@ -71,6 +71,34 @@ function EventsList({ onNavigate }) {
     checkCalendarSync();
   }, [hasCalendarAccess]);
 
+  useEffect(() => {
+    const fetchPersonalEvents = async () => {
+      if (!calendarSyncEnabled || viewMode !== 'calendar' || !accessToken) {
+        return;
+      }
+      try {
+        const { fetchCalendarEvents } = await import('../utils/devModeWrapper');
+        const now = new Date();
+        const timeMin = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+        const timeMax = new Date(
+          now.getFullYear() + 1,
+          now.getMonth(),
+          now.getDate()
+        ).toISOString();
+        const gcalEvents = await fetchCalendarEvents(accessToken, timeMin, timeMax);
+        // Only show personal (non-Folkbase) events
+        const personal = gcalEvents.filter(
+          (e) => e.extendedProperties?.private?.touchpointManaged !== 'true'
+        );
+        setPersonalEvents(personal);
+      } catch (error) {
+        console.error('Failed to load calendar events for CalendarView:', error);
+        // Silently fail — calendar overlay is optional
+      }
+    };
+    fetchPersonalEvents();
+  }, [calendarSyncEnabled, viewMode, accessToken]);
+
   const handleImportEvent = useCallback((googleEvent) => {
     setSelectedGoogleEvent(googleEvent);
     setImportModalOpen(true);

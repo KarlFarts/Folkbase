@@ -74,6 +74,15 @@ function SettingsPage({ onShowSetup, onNavigate }) {
     const checkAccess = async () => {
       const hasAccess = await hasCalendarAccess();
       setCalendarAccess(hasAccess);
+      if (hasAccess) {
+        // Ensure enabled is written to localStorage for any user with actual calendar access
+        const stored = JSON.parse(localStorage.getItem('touchpoint_calendar_settings') || '{}');
+        if (!stored.enabled) {
+          const updated = { selectedCalendarId: stored.selectedCalendarId || 'primary', enabled: true };
+          localStorage.setItem('touchpoint_calendar_settings', JSON.stringify(updated));
+          setCalendarSettings((prev) => ({ ...prev, enabled: true }));
+        }
+      }
     };
     if (accessToken) {
       checkAccess();
@@ -714,6 +723,9 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                     await requestCalendarAccess();
                     setCalendarAccess(true);
                     notify.success('Calendar access granted');
+                    const newSettings = { ...calendarSettings, enabled: true };
+                    setCalendarSettings(newSettings);
+                    localStorage.setItem('touchpoint_calendar_settings', JSON.stringify(newSettings));
                   } catch {
                     notify.error('Failed to connect calendar. Please try again.');
                   } finally {
