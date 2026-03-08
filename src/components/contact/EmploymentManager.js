@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Briefcase } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyState from '../EmptyState';
 import {
   getContactEmployment,
@@ -26,6 +27,7 @@ function EmploymentManager({ contactId, readOnly = false }) {
   const [organizations, setOrganizations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -134,12 +136,16 @@ function EmploymentManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (employmentId) => {
-    if (!confirm('Delete this employment record?')) return;
+  const handleDelete = (employmentId) => {
+    setConfirmDeleteId(employmentId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     setSaving(true);
     try {
-      await deleteContactEmployment(accessToken, activeSheetId, employmentId);
+      await deleteContactEmployment(accessToken, activeSheetId, id);
       showNotification('Employment record deleted', 'success');
       loadEmployment();
     } catch (error) {
@@ -339,6 +345,15 @@ function EmploymentManager({ contactId, readOnly = false }) {
             </div>
           </div>
       </WindowTemplate>
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Employment Record"
+        message="Are you sure you want to delete this employment record?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

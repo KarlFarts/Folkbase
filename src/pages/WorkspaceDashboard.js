@@ -7,6 +7,7 @@ import { useConfig } from '../contexts/ConfigContext';
 import { useNotification } from '../contexts/NotificationContext';
 import WorkspaceInvitationGenerator from '../components/WorkspaceInvitationGenerator';
 import SubWorkspaceManager from '../components/SubWorkspaceManager';
+import ConfirmDialog from '../components/ConfirmDialog';
 import {
   getWorkspaceMembers,
   createWorkspaceInvitation,
@@ -34,6 +35,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
   const [savingMember, setSavingMember] = useState(false);
   const [removingMemberId, setRemovingMemberId] = useState(null);
   const [editingMember, setEditingMember] = useState(null); // { id, role, overrides }
+  const [confirmRemoveMember, setConfirmRemoveMember] = useState(null);
 
   useEffect(() => {
     if (selectedWorkspace) {
@@ -201,11 +203,16 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     }
   };
 
-  const handleRemoveMember = async (member) => {
+  const handleRemoveMember = (member) => {
+    setConfirmRemoveMember(member);
+  };
+
+  const handleConfirmRemoveMember = async () => {
+    const member = confirmRemoveMember;
+    setConfirmRemoveMember(null);
     const memberId = member['Member ID'] || member.id;
     const email = member['Member Email'] || member.member_email;
     if (!memberId || !selectedWorkspace?.sheet_id) return;
-    if (!window.confirm(`Remove ${email} from this workspace?`)) return;
     setRemovingMemberId(memberId);
     try {
       await removeWorkspaceMember(accessToken, selectedWorkspace.sheet_id, memberId);
@@ -264,7 +271,16 @@ const WorkspaceDashboard = ({ onNavigate }) => {
           <h1>{selectedWorkspace.name}</h1>
         </div>
 
-        <div className="workspace-details">
+        <ConfirmDialog
+        isOpen={confirmRemoveMember !== null}
+        onConfirm={handleConfirmRemoveMember}
+        onCancel={() => setConfirmRemoveMember(null)}
+        title="Remove Member"
+        message={confirmRemoveMember ? `Remove ${confirmRemoveMember['Member Email'] || confirmRemoveMember.member_email} from this workspace?` : ''}
+        confirmLabel="Remove"
+        variant="danger"
+      />
+      <div className="workspace-details">
           {loadingDetails ? (
             <div className="loading-spinner"></div>
           ) : (

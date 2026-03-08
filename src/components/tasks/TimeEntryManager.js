@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Clock } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import {
   getTaskTimeEntries,
   addTaskTimeEntry,
@@ -21,6 +22,7 @@ function TimeEntryManager({ taskId, readOnly = false }) {
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [timeEntries, setTimeEntries] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -141,11 +143,15 @@ function TimeEntryManager({ taskId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (entryId) => {
-    if (!confirm('Delete this time entry?')) return;
+  const handleDelete = (entryId) => {
+    setConfirmDeleteId(entryId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     try {
-      await deleteTaskTimeEntry(accessToken, activeSheetId, entryId);
+      await deleteTaskTimeEntry(accessToken, activeSheetId, id);
       showNotification('Time entry deleted', 'success');
       loadTimeEntries();
     } catch (error) {
@@ -250,6 +256,15 @@ function TimeEntryManager({ taskId, readOnly = false }) {
         </table>
       )}
 
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Time Entry"
+        message="Are you sure you want to delete this time entry?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
       {isModalOpen && (
         <WindowTemplate
           title={editingId ? 'Edit Time Entry' : 'Log Time'}

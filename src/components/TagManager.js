@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import WindowTemplate from './WindowTemplate';
+import ConfirmDialog from './ConfirmDialog';
 
 /**
  * TagManager Component
@@ -36,6 +37,7 @@ export default function TagManager({ contacts, onUpdateContacts, onClose, readOn
 
   const [selectedTag, setSelectedTag] = useState('');
   const [newTagName, setNewTagName] = useState('');
+  const [confirmDeleteTag, setConfirmDeleteTag] = useState(null);
 
   const handleRename = () => {
     if (!selectedTag || !newTagName.trim()) return;
@@ -55,23 +57,25 @@ export default function TagManager({ contacts, onUpdateContacts, onClose, readOn
 
   const handleDelete = () => {
     if (!selectedTag) return;
-    if (!window.confirm(`Delete tag "${selectedTag}" from all ${tagCounts[selectedTag]} contacts?`))
-      return;
+    setConfirmDeleteTag(selectedTag);
+  };
 
-    // Remove tag from all contacts
+  const handleConfirmDelete = () => {
+    const tag = confirmDeleteTag;
+    setConfirmDeleteTag(null);
     const updatedContacts = contacts.map((contact) => {
       if (!contact.Tags) return contact;
       const tags = contact.Tags.split(',').map((t) => t.trim());
-      const filteredTags = tags.filter((t) => t !== selectedTag);
+      const filteredTags = tags.filter((t) => t !== tag);
       return { ...contact, Tags: filteredTags.length > 0 ? filteredTags.join(', ') : '' };
     });
-
     onUpdateContacts(updatedContacts);
     setSelectedTag('');
     setNewTagName('');
   };
 
   return (
+    <>
     <WindowTemplate
       isOpen={true}
       onClose={onClose}
@@ -130,5 +134,15 @@ export default function TagManager({ contacts, onUpdateContacts, onClose, readOn
         </div>
       )}
     </WindowTemplate>
+    <ConfirmDialog
+      isOpen={confirmDeleteTag !== null}
+      onConfirm={handleConfirmDelete}
+      onCancel={() => setConfirmDeleteTag(null)}
+      title="Delete Tag"
+      message={confirmDeleteTag ? `Delete tag "${confirmDeleteTag}" from all ${tagCounts[confirmDeleteTag]} contacts?` : ''}
+      confirmLabel="Delete"
+      variant="danger"
+    />
+    </>
   );
 }

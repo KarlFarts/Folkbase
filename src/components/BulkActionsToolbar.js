@@ -59,11 +59,9 @@ function BulkActionsToolbar({
   };
 
   const handleDelete = async () => {
-    if (window.confirm(`Delete ${selectedCount} contact${selectedCount !== 1 ? 's' : ''}? This cannot be undone.`)) {
-      setActiveAction('deleting');
-      await onDeleteContacts();
-      setActiveAction(null);
-    }
+    setActiveAction('deleting');
+    await onDeleteContacts();
+    setActiveAction(null);
   };
 
   const handleExport = async () => {

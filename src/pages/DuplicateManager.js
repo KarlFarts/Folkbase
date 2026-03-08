@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import MergePreview from '../components/MergePreview';
@@ -18,6 +19,7 @@ function DuplicateManager({ onNavigate }) {
   const [merging, setMerging] = useState(false);
   const [selectedDuplicate, setSelectedDuplicate] = useState(null);
   const [linkedPairs, setLinkedPairs] = useState([]);
+  const [unlinkTarget, setUnlinkTarget] = useState(null);
   const [error, setError] = useState('');
   const [scanInfo, setScanInfo] = useState('');
 
@@ -295,7 +297,7 @@ function DuplicateManager({ onNavigate }) {
                   </div>
                   <button
                     className="btn btn-danger btn-sm"
-                    onClick={() => handleUnlinkDuplicate(pair.contact1Id, pair.contact2Id)}
+                    onClick={() => setUnlinkTarget({ contact1Id: pair.contact1Id, contact2Id: pair.contact2Id })}
                     disabled={merging}
                   >
                     {merging ? 'Unlinking...' : 'Unlink'}
@@ -317,6 +319,16 @@ function DuplicateManager({ onNavigate }) {
           onCancel={() => setSelectedDuplicate(null)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={unlinkTarget !== null}
+        onConfirm={() => { handleUnlinkDuplicate(unlinkTarget.contact1Id, unlinkTarget.contact2Id); setUnlinkTarget(null); }}
+        onCancel={() => setUnlinkTarget(null)}
+        title="Unlink Duplicate"
+        message="Remove the duplicate link between these two contacts?"
+        confirmLabel="Unlink"
+        variant="danger"
+      />
 
     </div>
   );

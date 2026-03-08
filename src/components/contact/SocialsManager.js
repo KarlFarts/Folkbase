@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Share2 } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyState from '../EmptyState';
 import {
   getContactSocials,
@@ -27,6 +28,7 @@ function SocialsManager({ contactId, readOnly = false }) {
   const [socials, setSocials] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -115,12 +117,16 @@ function SocialsManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (socialId) => {
-    if (!confirm('Delete this social profile?')) return;
+  const handleDelete = (socialId) => {
+    setConfirmDeleteId(socialId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     setSaving(true);
     try {
-      await deleteContactSocial(accessToken, activeSheetId, socialId);
+      await deleteContactSocial(accessToken, activeSheetId, id);
       showNotification('Social profile deleted', 'success');
       loadSocials();
     } catch (error) {
@@ -288,6 +294,15 @@ function SocialsManager({ contactId, readOnly = false }) {
             </div>
           </div>
       </WindowTemplate>
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Social Profile"
+        message="Are you sure you want to delete this social profile?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

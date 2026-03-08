@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, GraduationCap } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyState from '../EmptyState';
 import {
   getContactEducation,
@@ -23,6 +24,7 @@ function EducationManager({ contactId, readOnly = false }) {
   const [education, setEducation] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -115,12 +117,16 @@ function EducationManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (educationId) => {
-    if (!confirm('Delete this education record?')) return;
+  const handleDelete = (educationId) => {
+    setConfirmDeleteId(educationId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     setSaving(true);
     try {
-      await deleteContactEducation(accessToken, activeSheetId, educationId);
+      await deleteContactEducation(accessToken, activeSheetId, id);
       showNotification('Education record deleted', 'success');
       loadEducation();
     } catch (error) {
@@ -293,6 +299,15 @@ function EducationManager({ contactId, readOnly = false }) {
             </div>
           </div>
       </WindowTemplate>
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Education Record"
+        message="Are you sure you want to delete this education record?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

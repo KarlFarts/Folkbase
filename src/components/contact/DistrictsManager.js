@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, MapPin } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyState from '../EmptyState';
 import {
   getContactDistricts,
@@ -33,6 +34,7 @@ function DistrictsManager({ contactId, readOnly = false }) {
   const [districts, setDistricts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -117,12 +119,16 @@ function DistrictsManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (districtId) => {
-    if (!confirm('Delete this district record?')) return;
+  const handleDelete = (districtId) => {
+    setConfirmDeleteId(districtId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     setSaving(true);
     try {
-      await deleteContactDistrict(accessToken, activeSheetId, districtId);
+      await deleteContactDistrict(accessToken, activeSheetId, id);
       showNotification('District deleted', 'success');
       loadDistricts();
     } catch (error) {
@@ -262,6 +268,15 @@ function DistrictsManager({ contactId, readOnly = false }) {
             </div>
           </div>
       </WindowTemplate>
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete District"
+        message="Are you sure you want to delete this district?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

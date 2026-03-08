@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Tag } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import EmptyState from '../EmptyState';
 import {
   getContactAttributes,
@@ -35,6 +36,7 @@ function ContactAttributesManager({ contactId, readOnly = false }) {
   const [attributes, setAttributes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState({
@@ -119,12 +121,16 @@ function ContactAttributesManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (attrId) => {
-    if (!confirm('Delete this attribute?')) return;
+  const handleDelete = (attrId) => {
+    setConfirmDeleteId(attrId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     setSaving(true);
     try {
-      await deleteContactAttribute(accessToken, activeSheetId, attrId);
+      await deleteContactAttribute(accessToken, activeSheetId, id);
       showNotification('Attribute deleted', 'success');
       loadAttributes();
     } catch (error) {
@@ -269,6 +275,15 @@ function ContactAttributesManager({ contactId, readOnly = false }) {
             </div>
           </div>
       </WindowTemplate>
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Attribute"
+        message="Are you sure you want to delete this attribute?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

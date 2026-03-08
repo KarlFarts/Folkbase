@@ -21,6 +21,7 @@ import BatchEditModal from '../components/BatchEditModal';
 import ListsFilter from '../components/ListsFilter';
 import TagManager from '../components/TagManager';
 import WindowTemplate from '../components/WindowTemplate';
+import ConfirmDialog from '../components/ConfirmDialog';
 import {
   generateCSV,
   downloadFile,
@@ -284,6 +285,7 @@ function ContactList({ onNavigate }) {
   const [batchEditModalOpen, setBatchEditModalOpen] = useState(false);
   const [showTagManager, setShowTagManager] = useState(false);
   const [showBulkCopyModal, setShowBulkCopyModal] = useState(false);
+  const [showBulkDeleteConfirm, setShowBulkDeleteConfirm] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -624,14 +626,24 @@ function ContactList({ onNavigate }) {
     [selectedIds, contacts]
   );
 
-  const handleDeleteContacts = useCallback(async () => {
+  const handleDeleteContacts = useCallback(() => {
     if (selectedIds.size === 0) return;
+    setShowBulkDeleteConfirm(true);
+  }, [selectedIds]);
 
+  const handleConfirmBulkDelete = useCallback(async () => {
+    setShowBulkDeleteConfirm(false);
     setBulkActionInProgress(true);
     try {
-      const remainingContacts = contacts.filter((c) => !selectedIds.has(c['Contact ID']));
-      setContacts(remainingContacts);
-
+      const ids = Array.from(selectedIds);
+      for (let i = 0; i < ids.length; i++) {
+        const contact = contacts.find((c) => c['Contact ID'] === ids[i]);
+        if (contact) {
+          await updateContact(accessToken, sheetId, ids[i], contact, { ...contact, Status: 'Inactive' });
+        }
+        setBulkActionProgress(((i + 1) / ids.length) * 100);
+      }
+      setContacts((prev) => prev.filter((c) => !selectedIds.has(c['Contact ID'])));
       setUpdateNotification(
         `Deleted ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''}`
       );
@@ -643,7 +655,7 @@ function ContactList({ onNavigate }) {
       setBulkActionInProgress(false);
       setBulkActionProgress(0);
     }
-  }, [selectedIds, contacts]);
+  }, [selectedIds, contacts, accessToken, sheetId]);
 
   const handleExportSelected = useCallback(() => {
     if (selectedIds.size === 0) return;
@@ -1147,6 +1159,16 @@ function ContactList({ onNavigate }) {
           onClose={() => setShowTagManager(false)}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={showBulkDeleteConfirm}
+        onConfirm={handleConfirmBulkDelete}
+        onCancel={() => setShowBulkDeleteConfirm(false)}
+        title="Delete Contacts"
+        message={`Delete ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''}? They will be marked inactive and can be restored later.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { GitBranch } from 'lucide-react';
 import EmptyState from './EmptyState';
+import ConfirmDialog from './ConfirmDialog';
 
 /**
  * Sort icon component for table headers
@@ -38,6 +39,7 @@ export default function RelationshipList({
 }) {
   const [sortField, setSortField] = useState('Relationship Type');
   const [sortDirection, setSortDirection] = useState('asc');
+  const [confirmDeleteRel, setConfirmDeleteRel] = useState(null);
 
   // Create contact lookup map
   const contactMap = useMemo(() => {
@@ -179,11 +181,7 @@ export default function RelationshipList({
                   )}
                   {onDelete && (
                     <button
-                      onClick={() => {
-                        if (confirm(`Delete relationship with ${rel.otherContactName}?`)) {
-                          onDelete(rel['Relationship ID']);
-                        }
-                      }}
+                      onClick={() => setConfirmDeleteRel({ id: rel['Relationship ID'], name: rel.otherContactName })}
                       className="rl-btn-delete"
                     >
                       Delete
@@ -195,6 +193,15 @@ export default function RelationshipList({
           ))}
         </tbody>
       </table>
+      <ConfirmDialog
+        isOpen={confirmDeleteRel !== null}
+        onConfirm={() => { onDelete(confirmDeleteRel.id); setConfirmDeleteRel(null); }}
+        onCancel={() => setConfirmDeleteRel(null)}
+        title="Delete Relationship"
+        message={confirmDeleteRel ? `Delete relationship with ${confirmDeleteRel.name}?` : ''}
+        confirmLabel="Delete"
+        variant="danger"
+      />
     </div>
   );
 }

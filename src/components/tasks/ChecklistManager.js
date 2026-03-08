@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Check, Square, CheckSquare } from 'lucide-react';
 import EmptyState from '../EmptyState';
 import WindowTemplate from '../WindowTemplate';
+import ConfirmDialog from '../ConfirmDialog';
 import {
   getTaskChecklistItems,
   addTaskChecklistItem,
@@ -22,6 +23,7 @@ function ChecklistManager({ taskId, readOnly = false }) {
   const { showNotification } = useNotification();
   const activeSheetId = useActiveSheetId();
 
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [checklistItems, setChecklistItems] = useState([]);
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,11 +139,15 @@ function ChecklistManager({ taskId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (itemId) => {
-    if (!confirm('Delete this checklist item?')) return;
+  const handleDelete = (itemId) => {
+    setConfirmDeleteId(itemId);
+  };
 
+  const handleConfirmDelete = async () => {
+    const id = confirmDeleteId;
+    setConfirmDeleteId(null);
     try {
-      await deleteTaskChecklistItem(accessToken, activeSheetId, itemId);
+      await deleteTaskChecklistItem(accessToken, activeSheetId, id);
       showNotification('Checklist item deleted', 'success');
       loadChecklistItems();
     } catch (error) {
@@ -270,6 +276,15 @@ function ChecklistManager({ taskId, readOnly = false }) {
         </div>
       )}
 
+      <ConfirmDialog
+        isOpen={confirmDeleteId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Item"
+        message="Are you sure you want to delete this checklist item?"
+        confirmLabel="Delete"
+        variant="danger"
+      />
       {isModalOpen && (
         <WindowTemplate
           title={editingId ? 'Edit Checklist Item' : 'Add Checklist Item'}
