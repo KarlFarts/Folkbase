@@ -20,6 +20,10 @@ import {
   addNote,
   linkNoteToContact,
   getContactEmployment,
+  getMomentsForContact,
+  addMoment,
+  updateMoment,
+  deleteMoment,
   SHEETS,
   ACTIVITY_TYPES,
 } from '../utils/devModeWrapper';
@@ -51,6 +55,8 @@ import DistrictsManager from '../components/contact/DistrictsManager';
 import ContactMethodsManager from '../components/contact/ContactMethodsManager';
 import ContactAttributesManager from '../components/contact/ContactAttributesManager';
 import CollapsibleSection from '../components/contact/CollapsibleSection';
+import MomentsTab from '../components/contact/MomentsTab';
+import MomentModal from '../components/contact/MomentModal';
 
 const CONTENT_TABS = [
   { value: 'profile', label: 'Profile' },
@@ -59,6 +65,7 @@ const CONTENT_TABS = [
   { value: 'events', label: 'Events' },
   { value: 'tasks', label: 'Tasks' },
   { value: 'relationships', label: 'Relationships' },
+  { value: 'moments', label: 'Moments' },
 ];
 
 function ContactProfile({ onNavigate }) {
@@ -77,6 +84,22 @@ function ContactProfile({ onNavigate }) {
   const [linkedTasks, setLinkedTasks] = React.useState([]);
   const [showNoteExtended, setShowNoteExtended] = useState(false);
   const [noteSearch, setNoteSearch] = useState('');
+
+  const [moments, setMoments] = React.useState([]);
+  const [showMomentModal, setShowMomentModal] = useState(false);
+  const [editingMoment, setEditingMoment] = useState(null);
+  const [momentData, setMomentData] = useState({
+    Title: '',
+    Type: 'Vacation',
+    'Start Date': '',
+    'End Date': '',
+    Location: '',
+    Notes: '',
+    'Contact IDs': '',
+  });
+  const [savingMoment, setSavingMoment] = useState(false);
+  const [showDeleteMomentConfirm, setShowDeleteMomentConfirm] = useState(false);
+  const [momentToDelete, setMomentToDelete] = useState(null);
 
   const detailsCardRef = useRef(null);
 
@@ -113,6 +136,7 @@ function ContactProfile({ onNavigate }) {
         employmentResult,
         orgsResult,
         tasksResult,
+        momentsResult,
       ] = await Promise.all([
         readSheetData(accessToken, sheetId, SHEETS.CONTACTS),
         getContactTouchpoints(accessToken, sheetId, contactId),
@@ -123,6 +147,7 @@ function ContactProfile({ onNavigate }) {
         getContactEmployment(accessToken, sheetId, contactId),
         readSheetData(accessToken, sheetId, SHEETS.ORGANIZATIONS),
         readSheetData(accessToken, sheetId, SHEETS.TASKS),
+        getMomentsForContact(accessToken, sheetId, contactId),
       ]);
 
       const foundContact = contactsResult.data.find((c) => c['Contact ID'] === contactId);
@@ -158,6 +183,7 @@ function ContactProfile({ onNavigate }) {
       setLinkedTasks(
         filteredTasks.sort((a, b) => (b['Due Date'] || '').localeCompare(a['Due Date'] || ''))
       );
+      setMoments(momentsResult || []);
     } catch (err) {
       console.error('Failed to load contact:', err);
       if (err.response?.status === 401 || err.response?.status === 403 || err.isAuthError) {
@@ -204,6 +230,95 @@ function ContactProfile({ onNavigate }) {
       notify.error('Failed to save changes. Please try again.');
     } finally {
       actions.setSaving(false);
+    }
+  };
+
+  const EMPTY_MOMENT = {
+    Title: '',
+    Type: 'Vacation',
+    'Start Date': '',
+    'End Date': '',
+    Location: '',
+    Notes: '',
+    'Contact IDs': '',
+  };
+
+  const handleOpenAddMoment = () => {
+    setEditingMoment(null);
+    setMomentData({ ...EMPTY_MOMENT, 'Contact IDs': contactId });
+    setShowMomentModal(true);
+  };
+
+  const handleOpenEditMoment = (moment) => {
+    setEditingMoment(moment);
+    setMomentData({
+      Title: moment.Title || '',
+      Type: moment.Type || 'Vacation',
+      'Start Date': moment['Start Date'] || '',
+      'End Date': moment['End Date'] || '',
+      Location: moment.Location || '',
+      Notes: moment.Notes || '',
+      'Contact IDs': moment['Contact IDs'] || '',
+    });
+    setShowMomentModal(true);
+  };
+
+  const handleSaveMoment = async () => {
+    if (!momentData.Title?.trim()) {
+      notify.warning('Title is required');
+      return;
+    }
+    try {
+      setSavingMoment(true);
+      if (editingMoment) {
+        await updateMoment(accessToken, sheetId, editingMoment['Moment ID'], momentData);
+        setMoments((prev) =>
+          prev.map((m) =>
+            m['Moment ID'] === editingMoment['Moment ID']
+              ? { ...m, ...momentData }
+              : m
+          )
+        );
+        notify.success('Moment updated!');
+      } else {
+        const result = await addMoment(accessToken, sheetId, momentData);
+        if (result && result.momentId) {
+          setMoments((prev) => [
+            ...prev,
+            { 'Moment ID': result.momentId, ...momentData },
+          ]);
+        }
+        notify.success('Moment added!');
+      }
+      setShowMomentModal(false);
+      setEditingMoment(null);
+    } catch (err) {
+      console.error('Failed to save moment:', err);
+      notify.error('Failed to save moment. Please try again.');
+    } finally {
+      setSavingMoment(false);
+    }
+  };
+
+  const handleDeleteMoment = (momentId) => {
+    setMomentToDelete(momentId);
+    setShowDeleteMomentConfirm(true);
+  };
+
+  const handleConfirmDeleteMoment = async () => {
+    if (!momentToDelete) return;
+    try {
+      setSavingMoment(true);
+      await deleteMoment(accessToken, sheetId, momentToDelete);
+      setMoments((prev) => prev.filter((m) => m['Moment ID'] !== momentToDelete));
+      notify.success('Moment deleted!');
+    } catch (err) {
+      console.error('Failed to delete moment:', err);
+      notify.error('Failed to delete moment. Please try again.');
+    } finally {
+      setSavingMoment(false);
+      setShowDeleteMomentConfirm(false);
+      setMomentToDelete(null);
     }
   };
 
@@ -867,6 +982,18 @@ function ContactProfile({ onNavigate }) {
             />
           </div>
         )}
+
+        {state.contentView === 'moments' && (
+          <MomentsTab
+            moments={moments}
+            allContacts={allContacts}
+            currentContactId={contactId}
+            canWrite={canWrite('contacts')}
+            onAdd={handleOpenAddMoment}
+            onEdit={handleOpenEditMoment}
+            onDelete={handleDeleteMoment}
+          />
+        )}
       </div>
 
       {/* Modals */}
@@ -956,6 +1083,35 @@ function ContactProfile({ onNavigate }) {
         message={`Are you sure you want to delete "${state.contact?.Name}"? The contact will be marked as Inactive and can be restored later.`}
         confirmLabel="Delete"
         variant="danger"
+      />
+
+      {showMomentModal && (
+        <MomentModal
+          isOpen={showMomentModal}
+          onClose={() => {
+            setShowMomentModal(false);
+            setEditingMoment(null);
+          }}
+          onSave={handleSaveMoment}
+          saving={savingMoment}
+          momentId={editingMoment?.['Moment ID'] || null}
+          momentData={momentData}
+          setMomentData={setMomentData}
+          allContacts={allContacts}
+          currentContactId={contactId}
+        />
+      )}
+
+      <ConfirmDialog
+        isOpen={showDeleteMomentConfirm}
+        title="Delete Moment"
+        message="Are you sure you want to delete this moment? This cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleConfirmDeleteMoment}
+        onCancel={() => {
+          setShowDeleteMomentConfirm(false);
+          setMomentToDelete(null);
+        }}
       />
 
       {state.showNoteModal && (
