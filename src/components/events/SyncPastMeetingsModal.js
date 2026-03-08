@@ -49,9 +49,9 @@ function SyncPastMeetingsModal({ isOpen, onClose, onImported, existingCalendarId
     };
 
     fetchPast();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     // Intentionally omit existingCalendarIds/notify: we want to re-fetch only when
     // the modal opens (isOpen) or the token changes, not on every render cycle.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, accessToken]);
 
   const toggleSelect = (id) => {

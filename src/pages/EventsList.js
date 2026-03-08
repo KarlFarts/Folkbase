@@ -8,13 +8,11 @@ import TimelineView from '../components/events/TimelineView';
 import ImportEventModal from '../components/events/ImportEventModal';
 import SyncPastMeetingsModal from '../components/events/SyncPastMeetingsModal';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
-import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
 
 function EventsList({ onNavigate }) {
   const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
   const sheetId = useActiveSheetId();
-  const { notify } = useNotification();
   const { canWrite } = usePermissions();
   const [events, setEvents] = useState([]);
   const [contacts, setContacts] = useState([]);
