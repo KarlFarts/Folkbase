@@ -3,7 +3,7 @@
  * failed items count for UI display.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   getRetryableItems,
   getFailedItems,
@@ -38,6 +38,7 @@ export function registerRetryHandler(type, handler) {
 export function useRetryQueue(accessToken, sheetId) {
   const [failedCount, setFailedCount] = useState(0);
   const { notify } = useNotification();
+  const hasProcessedRef = useRef(false);
 
   const processQueue = useCallback(async () => {
     if (!accessToken || !sheetId) return;
@@ -46,7 +47,6 @@ export function useRetryQueue(accessToken, sheetId) {
     if (retryable.length === 0) return;
 
     let successCount = 0;
-    let failCount = 0;
 
     for (const item of retryable) {
       const handler = retryHandlers[item.type];
@@ -62,7 +62,6 @@ export function useRetryQueue(accessToken, sheetId) {
         successCount++;
       } catch {
         incrementAttempt(item.id);
-        failCount++;
       }
     }
 
@@ -80,10 +79,15 @@ export function useRetryQueue(accessToken, sheetId) {
     }
   }, [accessToken, sheetId, notify]);
 
-  // Process on mount
+  // Process on mount (once only)
+  // Intentionally exclude processQueue from deps to avoid re-running on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    processQueue();
-  }, [processQueue]);
+    if (!hasProcessedRef.current) {
+      hasProcessedRef.current = true;
+      processQueue();
+    }
+  }, [accessToken, sheetId]);
 
   return { failedCount, processQueue };
 }
