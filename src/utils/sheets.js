@@ -24,6 +24,7 @@ import {
   TOUCHPOINT_STATUS,
 } from '../config/constants';
 import { logApiCall } from './apiUsageLogger.js';
+import { notifyAuthError } from './authErrorHandler.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
 import { generateId, ID_PREFIXES } from './idGenerator';
@@ -107,6 +108,11 @@ function createSheetsClient(accessToken) {
         error: error.message,
         isRateLimit,
       });
+
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        error.isAuthError = true;
+        notifyAuthError();
+      }
 
       return Promise.reject(error);
     }
