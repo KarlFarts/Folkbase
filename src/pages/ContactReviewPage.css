@@ -1,0 +1,224 @@
+.crp-page {
+  padding: var(--spacing-lg);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.crp-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.crp-header h1 {
+  font-size: 28px;
+  margin-bottom: var(--spacing-xs);
+  color: var(--color-text-primary);
+}
+
+.crp-header p {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* Queue */
+.crp-queue {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+/* Card */
+.crp-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  cursor: pointer;
+  transition: all 200ms ease;
+}
+
+.crp-card:hover {
+  border-color: var(--color-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.crp-card--selected {
+  border-color: var(--color-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.crp-card-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+}
+
+.crp-card-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.crp-card-info h3 {
+  margin: 0 0 var(--spacing-xs) 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.crp-score-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--color-bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-xs);
+}
+
+.crp-score-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  transition: width 200ms ease;
+}
+
+.crp-score-text {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}
+
+.crp-expand-icon {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+}
+
+/* Braindump panel */
+.crp-braindump-panel {
+  border-top: 1px solid var(--color-border);
+  padding: var(--spacing-md);
+  background: var(--color-bg-secondary);
+  animation: slideDown 200ms ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.crp-braindump-panel h4 {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.crp-textarea {
+  width: 100%;
+  min-height: 160px;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-primary);
+  resize: vertical;
+  margin-bottom: var(--spacing-xs);
+}
+
+.crp-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.1);
+}
+
+.crp-char-count {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+.crp-suggestions {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Actions */
+.crp-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+.crp-actions .btn {
+  flex: 1;
+  min-width: 120px;
+}
+
+.crp-tooltip-icon {
+  margin-left: var(--spacing-xs);
+  cursor: help;
+  font-size: 12px;
+}
+
+.crp-tooltip-icon:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  pointer-events: none;
+}
+
+/* Empty state */
+.crp-empty {
+  text-align: center;
+  padding: var(--spacing-xl) var(--spacing-md);
+}
+
+.crp-empty h2 {
+  color: var(--color-text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.crp-empty p {
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-md);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .crp-page {
+    padding: var(--spacing-md);
+  }
+
+  .crp-header h1 {
+    font-size: 24px;
+  }
+
+  .crp-card-content {
+    gap: var(--spacing-sm);
+  }
+
+  .crp-actions {
+    flex-direction: column;
+  }
+
+  .crp-actions .btn {
+    width: 100%;
+  }
+
+  .crp-textarea {
+    min-height: 140px;
+  }
+}

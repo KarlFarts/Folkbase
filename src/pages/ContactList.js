@@ -858,6 +858,9 @@ function ContactList({ onNavigate }) {
           </p>
         </div>
         <div className="cl-header-actions">
+          <button className="btn btn-secondary" onClick={() => onNavigate('contact-review')}>
+            Review Incomplete
+          </button>
           <button className="btn btn-secondary" onClick={() => onNavigate('import')}>
             Import
           </button>

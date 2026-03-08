@@ -15,6 +15,7 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ContactList = lazy(() => import('./pages/ContactList'));
 const ContactProfile = lazy(() => import('./pages/ContactProfile'));
 const AddContact = lazy(() => import('./pages/AddContact'));
+const ContactReviewPage = lazy(() => import('./pages/ContactReviewPage'));
 const OrganizationList = lazy(() => import('./pages/OrganizationList'));
 const OrganizationProfile = lazy(() => import('./pages/OrganizationProfile'));
 const AddOrganization = lazy(() => import('./pages/AddOrganization'));
@@ -181,6 +182,9 @@ function AppContent() {
       case 'add-contact':
         navigate('/contacts/add');
         break;
+      case 'contact-review':
+        navigate('/contacts/review');
+        break;
       case 'organizations':
         navigate('/organizations');
         break;
@@ -276,6 +280,7 @@ function AppContent() {
               <Routes>
                 <Route path="/" element={<Dashboard onNavigate={navigateTo} />} />
                 <Route path="/contacts" element={<ContactList onNavigate={navigateTo} />} />
+                <Route path="/contacts/review" element={<ContactReviewPage onNavigate={navigateTo} />} />
                 <Route path="/contacts/:id" element={<ContactProfile onNavigate={navigateTo} />} />
                 <Route path="/contacts/add" element={<AddContact onNavigate={navigateTo} />} />
                 <Route
