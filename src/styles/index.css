@@ -12682,3 +12682,158 @@ body {
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--color-border);
 }
+
+/* ============================================================
+   MOMENTS
+   ============================================================ */
+
+.moments-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-md);
+}
+
+.moments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.moment-card {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.moment-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  cursor: pointer;
+  user-select: none;
+  background: var(--surface-secondary);
+  gap: var(--spacing-sm);
+}
+
+.moment-card-header:hover {
+  background: var(--surface-tertiary);
+}
+
+.moment-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.moment-title {
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+}
+
+.moment-date,
+.moment-location {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.moment-expand-icon {
+  flex-shrink: 0;
+  color: var(--text-secondary);
+}
+
+.moment-card-body {
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  border-top: 1px solid var(--border-color);
+}
+
+.moment-notes {
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+.moment-people {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.moment-people-label {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  margin-right: var(--spacing-xs);
+}
+
+.moment-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-tertiary);
+  border: 1px solid var(--border-color);
+  font-size: var(--font-size-xs);
+}
+
+.moment-chip-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  color: var(--text-secondary);
+}
+
+.moment-chip-remove:hover {
+  color: var(--color-danger);
+}
+
+.moment-people-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+}
+
+.moment-suggestions {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--surface-primary);
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.moment-suggestion-item button {
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+}
+
+.moment-suggestion-item button:hover {
+  background: var(--surface-secondary);
+}
+
+.moment-card-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+}
+
+.moment-delete-btn {
+  color: var(--color-danger);
+}
