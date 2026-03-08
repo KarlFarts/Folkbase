@@ -11439,6 +11439,22 @@ body {
   border-left: 3px solid var(--color-success);
 }
 
+.cv-crm-event-indicator--synced {
+  border-left: 3px solid var(--color-primary);
+  position: relative;
+}
+
+.cv-synced-badge {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  margin-right: 3px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .cv-more-count {
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);

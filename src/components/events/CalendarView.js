@@ -1,7 +1,17 @@
 import { useState, useMemo } from 'react';
+import CalendarEventPopover from './CalendarEventPopover';
 
-function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImportEvent }) {
+function CalendarView({
+  events,
+  googleCalendarEvents = [],
+  onEventClick,
+  onAddToFolkbase,
+  onImportEvent,
+  syncedCalendarIds = new Set(),
+  hideFolkbaseOnly = false,
+}) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [activePopover, setActivePopover] = useState(null); // { gcalEvent, x, y }
 
   const { calendarDays, monthName, year } = useMemo(() => {
     const year = currentMonth.getFullYear();
@@ -23,10 +33,16 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
     // Add days of current month
     for (let day = 1; day <= lastDay.getDate(); day++) {
       const date = new Date(year, month, day);
-      const dayEvents = events.filter((event) => {
+
+      let dayEvents = events.filter((event) => {
         const eventDate = new Date(event['Event Date']);
         return eventDate.toDateString() === date.toDateString();
       });
+
+      // Filter out folkbase-only events when the toggle is on
+      if (hideFolkbaseOnly) {
+        dayEvents = dayEvents.filter((event) => event['Google Calendar ID']);
+      }
 
       // Add Google Calendar personal events
       const dayGoogleEvents = googleCalendarEvents.filter((gcalEvent) => {
@@ -47,7 +63,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
     }
 
     return { calendarDays: days, monthName, year };
-  }, [currentMonth, events, googleCalendarEvents]);
+  }, [currentMonth, events, googleCalendarEvents, hideFolkbaseOnly]);
 
   const goToPreviousMonth = () => {
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
@@ -64,6 +80,26 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
   const isToday = (date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
+  };
+
+  const handleGcalEventClick = (e, gcalEvent) => {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    setActivePopover({
+      gcalEvent,
+      x: Math.min(rect.left, window.innerWidth - 300),
+      y: rect.bottom + 4,
+    });
+  };
+
+  const handleAddToFolkbase = (gcalEvent) => {
+    setActivePopover(null);
+    if (onAddToFolkbase) {
+      onAddToFolkbase(gcalEvent);
+    } else if (onImportEvent) {
+      // backward compat
+      onImportEvent(gcalEvent);
+    }
   };
 
   return (
@@ -122,10 +158,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
           <div className="calendar-grid">
             {/* Day headers */}
             {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
-              <div
-                key={day}
-                className="calendar-day-header cv-day-header"
-              >
+              <div key={day} className="calendar-day-header cv-day-header">
                 {day}
               </div>
             ))}
@@ -164,11 +197,7 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                     }}
                   >
                     {today && (
-                      <span
-                        className="cv-today-circle"
-                      >
-                        {date.getDate()}
-                      </span>
+                      <span className="cv-today-circle">{date.getDate()}</span>
                     )}
                     {!today && date.getDate()}
                   </div>
@@ -176,34 +205,37 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
                   {/* Event indicators */}
                   {(dayEvents.length > 0 || googleEvents.length > 0) && (
                     <div className="cv-event-indicators">
-                      {/* CRM Events */}
-                      {dayEvents.slice(0, 2).map((event, idx) => (
-                        <div
-                          key={`crm-${idx}`}
-                          className="calendar-event-indicator cv-crm-event-indicator"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onEventClick(event['Event ID']);
-                          }}
-                          title={event['Event Name']}
-                        >
-                          {event['Event Name']}
-                        </div>
-                      ))}
+                      {/* Folkbase Events */}
+                      {dayEvents.slice(0, 2).map((event, idx) => {
+                        const isSynced =
+                          !!event['Google Calendar ID'] &&
+                          syncedCalendarIds.has(event['Google Calendar ID']);
+                        return (
+                          <div
+                            key={`crm-${idx}`}
+                            className={`calendar-event-indicator cv-crm-event-indicator${isSynced ? ' cv-crm-event-indicator--synced' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onEventClick(event['Event ID']);
+                            }}
+                            title={event['Event Name']}
+                          >
+                            {isSynced && (
+                              <span className="cv-synced-badge" aria-label="Synced with Google Calendar" />
+                            )}
+                            {event['Event Name']}
+                          </div>
+                        );
+                      })}
                       {/* Google Calendar Events */}
                       {googleEvents.slice(0, 2).map((event, idx) => (
                         <div
                           key={`gcal-${idx}`}
                           className="calendar-event-indicator cv-gcal-event-indicator"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (onImportEvent) {
-                              onImportEvent(event);
-                            }
-                          }}
+                          onClick={(e) => handleGcalEventClick(e, event)}
                           title={`${event.summary} (Google Calendar)`}
                         >
-                          📅 {event.summary}
+                          {event.summary}
                         </div>
                       ))}
                       {dayEvents.length + googleEvents.length > 4 && (
@@ -219,6 +251,24 @@ function CalendarView({ events, googleCalendarEvents = [], onEventClick, onImpor
           </div>
         </div>
       </div>
+
+      {/* Popover for calendar-only events */}
+      {activePopover && (
+        <div
+          style={{
+            position: 'fixed',
+            left: activePopover.x,
+            top: activePopover.y,
+            zIndex: 201,
+          }}
+        >
+          <CalendarEventPopover
+            gcalEvent={activePopover.gcalEvent}
+            onClose={() => setActivePopover(null)}
+            onAddToFolkbase={handleAddToFolkbase}
+          />
+        </div>
+      )}
     </div>
   );
 }
