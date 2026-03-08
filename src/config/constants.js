@@ -98,6 +98,7 @@ export const SHEET_NAMES = {
   LISTS: 'Lists', // Custom list definitions
   NOTES: 'Notes', // Standalone notes
   LOCATION_VISITS: 'Location Visits', // Visit history for locations
+  MOMENTS: 'Moments', // Life events (vacations, trips, funerals, etc.)
 
   // === RELATIONSHIPS (Many-to-Many) ===
   CONTACT_LISTS: 'Contact Lists', // Links contacts <-> lists
@@ -790,6 +791,17 @@ export const SHEET_HEADERS = {
     'Follow-up Date',
     'Created By',
     'Created Date',
+  ],
+  [SHEET_NAMES.MOMENTS]: [
+    'Moment ID',
+    'Title',
+    'Type',
+    'Start Date',
+    'End Date',
+    'Location',
+    'Notes',
+    'Contact IDs',
+    'Created At',
   ],
 };
 
