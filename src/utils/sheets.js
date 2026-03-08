@@ -319,6 +319,38 @@ export async function appendRow(accessToken, sheetId, sheetName, values) {
 }
 
 /**
+ * Append multiple rows to multiple sheets in a single API call.
+ * Uses the values:batchUpdate endpoint to minimize request count.
+ *
+ * @param {string} accessToken - Google OAuth access token
+ * @param {string} sheetId - Google Sheet ID
+ * @param {Object} rowsBySheet - Map of sheet name to array of row value arrays
+ *   e.g. { 'Contact Notes': [['N1', 'C1', '2026-01-01']], 'Event Notes': [...] }
+ * @returns {Promise<Object>} API response data
+ */
+export async function batchAppendRows(accessToken, sheetId, rowsBySheet) {
+  const entries = Object.entries(rowsBySheet);
+  if (entries.length === 0) return { totalUpdatedRows: 0 };
+
+  const client = createSheetsClient(accessToken);
+
+  const data = entries.map(([sheetName, rows]) => ({
+    range: sheetName,
+    values: rows,
+  }));
+
+  const response = await client.post(
+    `/${sheetId}/values:batchUpdate`,
+    {
+      valueInputOption: 'RAW',
+      data,
+    }
+  );
+
+  return response.data;
+}
+
+/**
  * Update a specific cell or range
  */
 export async function updateCell(accessToken, sheetId, range, value) {
