@@ -1,16 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
 import { useEntityDetection } from '../hooks/useEntityDetection';
-import { addNote, linkNoteToContact, updateContact, readSheetData, SHEETS } from '../utils/devModeWrapper';
-import { sanitizeFormData, sanitizeStringInput, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
+import { addNote, linkNoteToContact, readSheetData, SHEETS } from '../utils/devModeWrapper';
+import { sanitizeStringInput, INPUT_LIMITS } from '../utils/inputSanitizer';
 import { scoreContact } from '../utils/contactCompleteness';
 import Avatar from '../components/Avatar';
 import EntitySuggestionsPanel from '../components/braindump/EntitySuggestionsPanel';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import './ContactReviewPage.css';
+
+const EMPTY_LINKED = { contacts: [], events: [], locations: [], tasks: [] };
 
 function ContactReviewPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
@@ -23,111 +25,114 @@ function ContactReviewPage({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  // Review state
   const [queue, setQueue] = useState([]);
   const [selectedContactId, setSelectedContactId] = useState(null);
   const [braindumpText, setBraindumpText] = useState('');
+  const [linkedEntities, setLinkedEntities] = useState(EMPTY_LINKED);
 
-  // Entity detection for braindump
-  const { detectedEntities, isDetecting } = useEntityDetection(braindumpText, {
-    contacts,
-    events,
-  });
+  const { detectedEntities, isDetecting } = useEntityDetection(braindumpText, { contacts, events });
 
-  // Load contacts and events on mount
-  useEffect(() => {
-    loadData();
-  }, [accessToken, sheetId]);
-
-  // Build queue whenever contacts or localStorage changes
-  useEffect(() => {
-    buildQueue();
-  }, [contacts]);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [contactsResult, eventsResult] = await Promise.all([
-        readSheetData(accessToken, sheetId, SHEETS.CONTACTS),
-        readSheetData(accessToken, sheetId, SHEETS.EVENTS),
-      ]);
-
-      setContacts(contactsResult?.data && Array.isArray(contactsResult.data) ? contactsResult.data : []);
-      setEvents(eventsResult?.data && Array.isArray(eventsResult.data) ? eventsResult.data : []);
-    } catch (err) {
-      console.error('Failed to load data:', err);
-      notify.error('Failed to load contacts and events');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const buildQueue = () => {
+  const buildQueue = useCallback((contactList) => {
     const dismissed = JSON.parse(localStorage.getItem('folkbase_review_dismissed') || '[]');
     const snoozed = JSON.parse(localStorage.getItem('folkbase_review_snoozed') || '{}');
     const now = new Date();
+    let snoozedChanged = false;
 
-    const filtered = contacts.filter((contact) => {
+    const filtered = contactList.filter((contact) => {
       const contactId = contact['Contact ID'];
-
-      // Skip if dismissed
       if (dismissed.includes(contactId)) return false;
-
-      // Skip if snoozed and snooze not expired
       if (snoozed[contactId]) {
         const snoozeUntil = new Date(snoozed[contactId]);
         if (snoozeUntil > now) return false;
-        // Snooze expired, remove it
         delete snoozed[contactId];
+        snoozedChanged = true;
       }
-
       return true;
     });
 
-    // Save cleaned snoozed state
-    localStorage.setItem('folkbase_review_snoozed', JSON.stringify(snoozed));
+    if (snoozedChanged) {
+      localStorage.setItem('folkbase_review_snoozed', JSON.stringify(snoozed));
+    }
 
-    // Score and sort
-    const scored = filtered.map((contact) => ({
-      contact,
-      score: scoreContact(contact),
-    }));
+    const scored = filtered
+      .map((contact) => ({ contact, score: scoreContact(contact) }))
+      .sort((a, b) => a.score - b.score)
+      .slice(0, 50);
 
-    scored.sort((a, b) => a.score - b.score);
-
-    // Take top 50
-    setQueue(scored.slice(0, 50));
+    setQueue(scored);
     setSelectedContactId(null);
     setBraindumpText('');
+    setLinkedEntities(EMPTY_LINKED);
+  }, []);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        const [contactsResult, eventsResult] = await Promise.all([
+          readSheetData(accessToken, sheetId, SHEETS.CONTACTS),
+          readSheetData(accessToken, sheetId, SHEETS.EVENTS),
+        ]);
+        const loadedContacts =
+          contactsResult?.data && Array.isArray(contactsResult.data) ? contactsResult.data : [];
+        const loadedEvents =
+          eventsResult?.data && Array.isArray(eventsResult.data) ? eventsResult.data : [];
+        setContacts(loadedContacts);
+        setEvents(loadedEvents);
+        buildQueue(loadedContacts);
+      } catch (err) {
+        console.error('Failed to load data:', err);
+        notify.error('Failed to load contacts and events');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (accessToken || import.meta.env.VITE_DEV_MODE === 'true') {
+      loadData();
+    }
+  }, [accessToken, sheetId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleSelectContact = (contactId) => {
+    setSelectedContactId((prev) => (prev === contactId ? null : contactId));
+    setBraindumpText('');
+    setLinkedEntities(EMPTY_LINKED);
   };
 
-  const getDisplayName = (contact) => {
-    return contact['Display Name'] || contact['First Name'] || contact['Last Name'] || 'Unknown';
+  const handleLinkEntity = (entity, type) => {
+    setLinkedEntities((prev) => ({
+      ...prev,
+      [type + 's']: [...prev[type + 's'], entity],
+    }));
   };
 
-  const handleSave = async () => {
+  const handleIgnoreEntity = (_entity, _type) => {
+    // User dismissed the suggestion — no action needed
+  };
+
+  const handleAcceptAllHighConfidence = () => {
+    if (!detectedEntities) return;
+    const { CONFIDENCE_THRESHOLD } = { CONFIDENCE_THRESHOLD: { AUTO_LINK: 85 } };
+    setLinkedEntities({
+      contacts: detectedEntities.contacts.filter((e) => e.confidence >= CONFIDENCE_THRESHOLD),
+      events: detectedEntities.events.filter((e) => e.confidence >= CONFIDENCE_THRESHOLD),
+      locations: detectedEntities.locations.filter((e) => e.confidence >= CONFIDENCE_THRESHOLD),
+      tasks: detectedEntities.tasks.filter((e) => e.confidence >= CONFIDENCE_THRESHOLD),
+    });
+  };
+
+  const handleSave = async (e) => {
+    e.stopPropagation();
     if (!selectedContactId || !braindumpText.trim()) {
       notify.warn('Please write something before saving');
       return;
     }
 
+    if (!guardWrite()) return;
+
     try {
       setSaving(true);
-      const selected = queue.find((q) => q.contact['Contact ID'] === selectedContactId)?.contact;
-      if (!selected) return;
 
-      // Build update data from confirmed suggestions
-      const updateData = {};
-
-      // Collect confirmed tags
-      if (detectedEntities.contacts?.length > 0) {
-        // Not using contact detections for fields
-      }
-
-      // For now, we just save the text as a note and mark as reviewed
-      // User can manually add tags/org via the suggestions they confirm
-
-      // Sanitize and save as note
       const sanitizedText = sanitizeStringInput(braindumpText, INPUT_LIMITS.veryLongText);
       const noteData = {
         Content: sanitizedText,
@@ -136,8 +141,19 @@ function ContactReviewPage({ onNavigate }) {
       };
 
       const noteId = await addNote(accessToken, sheetId, noteData, user?.email);
+
       if (noteId) {
+        // Link note to the contact being reviewed
         await linkNoteToContact(accessToken, sheetId, noteId, selectedContactId, user?.email);
+
+        // Link note to any confirmed contacts from suggestions
+        for (const linked of linkedEntities.contacts) {
+          if (linked.contactId && linked.contactId !== selectedContactId) {
+            await linkNoteToContact(accessToken, sheetId, noteId, linked.contactId, user?.email);
+          }
+        }
+      } else {
+        console.error('addNote did not return a noteId');
       }
 
       // Mark as dismissed
@@ -148,7 +164,7 @@ function ContactReviewPage({ onNavigate }) {
       }
 
       notify.success('Review saved');
-      advanceToNext();
+      buildQueue(contacts);
     } catch (err) {
       console.error('Save failed:', err);
       notify.error('Failed to save review');
@@ -157,30 +173,32 @@ function ContactReviewPage({ onNavigate }) {
     }
   };
 
-  const handleSkip = () => {
+  const handleSkip = (e) => {
+    e.stopPropagation();
     if (!selectedContactId) return;
 
     const snoozed = JSON.parse(localStorage.getItem('folkbase_review_snoozed') || '{}');
-    const now = new Date();
-    const snoozeUntil = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000); // 7 days
-    snoozed[selectedContactId] = snoozeUntil.toISOString();
+    snoozed[selectedContactId] = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     localStorage.setItem('folkbase_review_snoozed', JSON.stringify(snoozed));
 
     notify.info('Snoozed for 7 days');
-    advanceToNext();
+    buildQueue(contacts);
   };
 
-  const handleDone = () => {
+  const handleDone = (e) => {
+    e.stopPropagation();
     onNavigate('contacts');
   };
 
-  const advanceToNext = () => {
-    // Rebuild queue
-    buildQueue();
-  };
+  const getDisplayName = (contact) =>
+    contact['Display Name'] || contact['First Name'] || contact['Last Name'] || 'Unknown';
 
   if (loading) {
-    return <div className="crp-page"><p>Loading contacts...</p></div>;
+    return (
+      <div className="crp-page">
+        <p>Loading contacts...</p>
+      </div>
+    );
   }
 
   if (queue.length === 0) {
@@ -197,8 +215,6 @@ function ContactReviewPage({ onNavigate }) {
     );
   }
 
-  const selectedCard = queue.find((q) => q.contact['Contact ID'] === selectedContactId);
-
   return (
     <div className="crp-page">
       <div className="crp-header">
@@ -207,72 +223,85 @@ function ContactReviewPage({ onNavigate }) {
       </div>
 
       <div className="crp-queue">
-        {queue.map((item) => (
-          <div
-            key={item.contact['Contact ID']}
-            className={`crp-card ${selectedContactId === item.contact['Contact ID'] ? 'crp-card--selected' : ''}`}
-            onClick={() =>
-              setSelectedContactId(
-                selectedContactId === item.contact['Contact ID'] ? null : item.contact['Contact ID']
-              )
-            }
-          >
-            <div className="crp-card-content">
-              <Avatar name={getDisplayName(item.contact)} size="sm" />
-              <div className="crp-card-info">
-                <h3>{getDisplayName(item.contact)}</h3>
-                <div className="crp-score-bar">
-                  <div className="crp-score-fill" style={{ width: `${(item.score / 9) * 100}%` }} />
-                </div>
-                <p className="crp-score-text">
-                  {item.score} of 9 fields filled
-                </p>
-              </div>
-              <div className="crp-expand-icon">
-                {selectedContactId === item.contact['Contact ID'] ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-              </div>
-            </div>
+        {queue.map((item) => {
+          const contactId = item.contact['Contact ID'];
+          const isSelected = selectedContactId === contactId;
 
-            {selectedContactId === item.contact['Contact ID'] && selectedCard && (
-              <div className="crp-braindump-panel">
-                <h4>What do you know about {getDisplayName(selectedCard.contact)}?</h4>
-                <textarea
-                  className="crp-textarea"
-                  placeholder={`Write anything you know about ${getDisplayName(selectedCard.contact)}...`}
-                  value={braindumpText}
-                  onChange={(e) => setBraindumpText(e.target.value)}
-                  maxLength={10000}
-                />
-                <div className="crp-char-count">{braindumpText.length} / 10000</div>
-
-                {braindumpText.trim().length > 0 && (
-                  <div className="crp-suggestions">
-                    <EntitySuggestionsPanel entities={detectedEntities} isDetecting={isDetecting} />
+          return (
+            <div
+              key={contactId}
+              className={`crp-card${isSelected ? ' crp-card--selected' : ''}`}
+              onClick={() => handleSelectContact(contactId)}
+            >
+              <div className="crp-card-content">
+                <Avatar name={getDisplayName(item.contact)} size="sm" />
+                <div className="crp-card-info">
+                  <h3>{getDisplayName(item.contact)}</h3>
+                  <div className="crp-score-bar">
+                    <div
+                      className="crp-score-fill"
+                      style={{ width: `${(item.score / 9) * 100}%` }}
+                    />
                   </div>
-                )}
-
-                <div className="crp-actions">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSave}
-                    disabled={saving || !braindumpText.trim()}
-                  >
-                    {saving ? 'Saving...' : 'Save'}
-                  </button>
-                  <button className="btn btn-secondary" onClick={handleSkip} disabled={saving}>
-                    Skip for now
-                    <span className="crp-tooltip-icon" title="Snooze is saved on this device only.">
-                      ⓘ
-                    </span>
-                  </button>
-                  <button className="btn btn-tertiary" onClick={handleDone} disabled={saving}>
-                    Done for now
-                  </button>
+                  <p className="crp-score-text">{item.score} of 9 fields filled</p>
+                </div>
+                <div className="crp-expand-icon">
+                  {isSelected ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                 </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {isSelected && (
+                <div className="crp-braindump-panel" onClick={(e) => e.stopPropagation()}>
+                  <h4>What do you know about {getDisplayName(item.contact)}?</h4>
+                  <textarea
+                    className="crp-textarea"
+                    placeholder={`Write anything you know about ${getDisplayName(item.contact)}...`}
+                    value={braindumpText}
+                    onChange={(e) => setBraindumpText(e.target.value)}
+                    maxLength={10000}
+                  />
+                  <div className="crp-char-count">{braindumpText.length} / 10000</div>
+
+                  {braindumpText.trim().length > 0 && (
+                    <div className="crp-suggestions">
+                      <EntitySuggestionsPanel
+                        detectedEntities={detectedEntities}
+                        linkedEntities={linkedEntities}
+                        isDetecting={isDetecting}
+                        onLinkEntity={handleLinkEntity}
+                        onIgnoreEntity={handleIgnoreEntity}
+                        onDisambiguate={handleIgnoreEntity}
+                        onAcceptAllHighConfidence={handleAcceptAllHighConfidence}
+                      />
+                    </div>
+                  )}
+
+                  <div className="crp-actions">
+                    <button
+                      className="btn btn-primary"
+                      onClick={handleSave}
+                      disabled={saving || !braindumpText.trim()}
+                    >
+                      {saving ? 'Saving...' : 'Save'}
+                    </button>
+                    <button className="btn btn-secondary" onClick={handleSkip} disabled={saving}>
+                      Skip for now{' '}
+                      <span
+                        className="crp-tooltip-icon"
+                        title="Snooze is saved on this device only."
+                      >
+                        ⓘ
+                      </span>
+                    </button>
+                    <button className="btn btn-tertiary" onClick={handleDone} disabled={saving}>
+                      Done for now
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
