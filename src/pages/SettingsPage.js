@@ -12,7 +12,6 @@ import {
   XCircle,
   Loader,
   Calendar,
-  FolderSync,
   Sun,
   Moon,
 } from 'lucide-react';
@@ -47,19 +46,10 @@ function SettingsPage({ onShowSetup, onNavigate }) {
   const [calendarSettings, setCalendarSettings] = useState({
     enabled: false,
     selectedCalendarId: 'primary',
-    conflictResolution: 'prompt', // 'prompt' | 'crm' | 'calendar' | 'latest'
-    autoSync: false,
-    autoSyncInterval: 30, // minutes
   });
   const [requestingCalendarAccess, setRequestingCalendarAccess] = useState(false);
   const [calendars, setCalendars] = useState([]);
   const [loadingCalendars, setLoadingCalendars] = useState(false);
-  const [syncStatus, setSyncStatus] = useState({
-    lastSyncedAt: null,
-    lastPushed: 0,
-    lastPulled: 0,
-    syncing: false,
-  });
   const [migrationStatus, setMigrationStatus] = useState({
     scanning: false,
     migrating: false,
@@ -110,18 +100,6 @@ function SettingsPage({ onShowSetup, onNavigate }) {
     };
     loadCalendars();
   }, [calendarAccess, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Load sync status from localStorage
-  useEffect(() => {
-    const stored = localStorage.getItem('touchpoint_calendar_sync_status');
-    if (stored) {
-      try {
-        setSyncStatus((prev) => ({ ...prev, ...JSON.parse(stored) }));
-      } catch {
-        // Invalid stored status, use defaults
-      }
-    }
-  }, []);
 
   // Check Google Sheets API connection with real token validation
   useEffect(() => {
@@ -313,39 +291,6 @@ function SettingsPage({ onShowSetup, onNavigate }) {
     } catch (error) {
       setMigrationStatus((prev) => ({ ...prev, migrating: false, error: 'Migration failed. Check your connection and try again.' }));
       notify.error('Migration failed. Check your connection and try again.');
-    }
-  };
-
-  const handleManualSync = async () => {
-    if (!accessToken || !config.personalSheetId || !calendarSettings.enabled) {
-      return;
-    }
-
-    setSyncStatus((prev) => ({ ...prev, syncing: true }));
-
-    try {
-      const { syncEvents } = await import('../utils/syncEngine');
-      const result = await syncEvents(accessToken, config.personalSheetId);
-
-      const newStatus = {
-        lastSyncedAt: new Date().toISOString(),
-        lastPushed: result.pushed.length,
-        lastPulled: result.pulled.length,
-        syncing: false,
-      };
-
-      setSyncStatus(newStatus);
-      localStorage.setItem('touchpoint_calendar_sync_status', JSON.stringify(newStatus));
-
-      const summary = `Pushed ${result.pushed.length} events, pulled ${result.pulled.length} updates`;
-      if (result.conflicts.length > 0) {
-        notify.warning(`${summary}. ${result.conflicts.length} conflicts need resolution.`);
-      } else {
-        notify.success(summary);
-      }
-    } catch (error) {
-      setSyncStatus((prev) => ({ ...prev, syncing: false }));
-      notify.error('Calendar sync failed. Check your connection and try again.');
     }
   };
 
@@ -748,17 +693,16 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       {/* Cache Configuration Section */}
       <CacheConfigSection />
 
-      {/* Calendar Sync Section */}
+      {/* Calendar Section */}
       <section className="sp-section">
         <h2 className="sp-section-heading">
           <Calendar size={18} />
-          Google Calendar Sync
+          Google Calendar
         </h2>
 
         <div className="sp-cal-body">
           <p className="sp-section-desc">
-            Sync CRM events with your Google Calendar. Your personal calendar events can be
-            imported as CRM events or touchpoints.
+            Connect Google Calendar to import events and send calendar invites to attendees.
           </p>
 
           {!calendarAccess ? (
@@ -798,147 +742,21 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                 <span className="sp-cal-connected-label">Calendar Connected</span>
               </div>
 
-              <div className="sp-cal-toggle-row">
-                <label className="sp-cal-setting-label">Enable Sync</label>
-                <input
-                  type="checkbox"
-                  checked={calendarSettings.enabled}
-                  onChange={(e) => {
-                    const newSettings = { ...calendarSettings, enabled: e.target.checked };
-                    setCalendarSettings(newSettings);
-                    localStorage.setItem(
-                      'touchpoint_calendar_settings',
-                      JSON.stringify(newSettings)
-                    );
-                  }}
-                  className="sp-cal-checkbox"
-                />
-              </div>
-
-              {calendarSettings.enabled && (
-                <>
-                  {/* Calendar Selector */}
-                  <div className="sp-cal-subsection">
-                    <label className="sp-cal-setting-label">Which Calendar to Sync</label>
-                    {loadingCalendars ? (
-                      <div className="sp-cal-loading">
-                        <Loader size={14} className="spin" />
-                        <span className="sp-cal-loading-text">Loading calendars...</span>
-                      </div>
-                    ) : (
-                      <select
-                        value={calendarSettings.selectedCalendarId}
-                        onChange={(e) => {
-                          const newSettings = {
-                            ...calendarSettings,
-                            selectedCalendarId: e.target.value,
-                          };
-                          setCalendarSettings(newSettings);
-                          localStorage.setItem(
-                            'touchpoint_calendar_settings',
-                            JSON.stringify(newSettings)
-                          );
-                        }}
-                        className="form-select sp-cal-select"
-                      >
-                        {calendars.map((cal) => (
-                          <option key={cal.id} value={cal.id}>
-                            {cal.summary} {cal.primary ? '(Primary)' : ''}
-                          </option>
-                        ))}
-                      </select>
-                    )}
+              {/* Calendar Selector — always shown when connected */}
+              <div className="sp-cal-subsection">
+                <label className="sp-cal-setting-label">Default Calendar</label>
+                {loadingCalendars ? (
+                  <div className="sp-cal-loading">
+                    <Loader size={14} className="spin" />
+                    <span className="sp-cal-loading-text">Loading calendars...</span>
                   </div>
-
-                  {/* Sync Status */}
-                  {syncStatus.lastSyncedAt && (
-                    <div className="sp-cal-sync-status">
-                      <div className="sp-cal-sync-row">
-                        <CheckCircle size={14} className="sp-icon-success" />
-                        <span className="sp-cal-sync-text">
-                          Last synced: {new Date(syncStatus.lastSyncedAt).toLocaleString()}
-                        </span>
-                      </div>
-                      <span className="sp-cal-sync-text">
-                        Pushed {syncStatus.lastPushed} events, pulled {syncStatus.lastPulled} updates
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Manual Sync Button */}
-                  <div className="sp-cal-subsection">
-                    <button
-                      onClick={handleManualSync}
-                      disabled={syncStatus.syncing}
-                      className="btn btn-secondary btn-sm sp-icon-btn"
-                    >
-                      {syncStatus.syncing ? (
-                        <Loader size={14} className="spin" />
-                      ) : (
-                        <FolderSync size={14} />
-                      )}
-                      {syncStatus.syncing ? 'Syncing...' : 'Sync Now'}
-                    </button>
-                  </div>
-
-                  {/* Auto-Sync Settings */}
-                  <div className="sp-cal-subsection">
-                    <div className="sp-cal-toggle-row">
-                      <label className="sp-cal-setting-label">Auto-Sync</label>
-                      <input
-                        type="checkbox"
-                        checked={calendarSettings.autoSync}
-                        onChange={(e) => {
-                          const newSettings = { ...calendarSettings, autoSync: e.target.checked };
-                          setCalendarSettings(newSettings);
-                          localStorage.setItem(
-                            'touchpoint_calendar_settings',
-                            JSON.stringify(newSettings)
-                          );
-                        }}
-                        className="sp-cal-checkbox"
-                      />
-                    </div>
-
-                    {calendarSettings.autoSync && (
-                      <div>
-                        <label className="sp-cal-setting-label sp-cal-setting-label--block">
-                          Sync Interval
-                        </label>
-                        <select
-                          value={calendarSettings.autoSyncInterval}
-                          onChange={(e) => {
-                            const newSettings = {
-                              ...calendarSettings,
-                              autoSyncInterval: parseInt(e.target.value),
-                            };
-                            setCalendarSettings(newSettings);
-                            localStorage.setItem(
-                              'touchpoint_calendar_settings',
-                              JSON.stringify(newSettings)
-                            );
-                          }}
-                          className="form-select sp-cal-select--sm"
-                        >
-                          <option value="15">Every 15 minutes</option>
-                          <option value="30">Every 30 minutes</option>
-                          <option value="60">Every hour</option>
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {calendarSettings.enabled && (
-                <div className="sp-cal-subsection">
-                  <label className="sp-cal-setting-label">Conflict Resolution</label>
+                ) : (
                   <select
-                    value={calendarSettings.conflictResolution}
+                    value={calendarSettings.selectedCalendarId}
                     onChange={(e) => {
                       const newSettings = {
                         ...calendarSettings,
-                        conflictResolution: e.target.value,
+                        selectedCalendarId: e.target.value,
                       };
                       setCalendarSettings(newSettings);
                       localStorage.setItem(
@@ -946,18 +764,16 @@ function SettingsPage({ onShowSetup, onNavigate }) {
                         JSON.stringify(newSettings)
                       );
                     }}
-                    className="form-select sp-cal-select--md"
+                    className="form-select sp-cal-select"
                   >
-                    <option value="prompt">Always Ask</option>
-                    <option value="crm">Keep CRM Version</option>
-                    <option value="calendar">Keep Calendar Version</option>
-                    <option value="latest">Keep Latest Edit</option>
+                    {calendars.map((cal) => (
+                      <option key={cal.id} value={cal.id}>
+                        {cal.summary} {cal.primary ? '(Primary)' : ''}
+                      </option>
+                    ))}
                   </select>
-                  <p className="sp-cal-conflict-hint">
-                    How to handle conflicts when the same event is edited in both places
-                  </p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>
