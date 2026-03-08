@@ -204,7 +204,7 @@ export const TOUCHPOINT_STATUS = {
 };
 
 // Schema Version Tracking
-export const SCHEMA_VERSION = 3; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory, v3 = expanded contact profile)
+export const SCHEMA_VERSION = 4; // Current schema version (v1 = legacy 6-column contacts, v2 = master directory, v3 = expanded contact profile, v4 = events Unresolved Attendees column)
 export const SCHEMA_STORAGE_KEY = '_folkbase_schema_version'; // localStorage key for dev mode
 
 // Workspace Roles
@@ -372,7 +372,7 @@ export const SHEET_HEADERS = {
     'Confirmed Attendees',
     'Actual Attendance',
     'Attendees',
-    'Unresolved Attendees',
+    'Unresolved Attendees', // JSON array of name strings for attendees not matched to contacts
     'RSVP Deadline',
     // Logistics (4)
     'Organizer Contact ID',
