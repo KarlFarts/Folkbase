@@ -52,6 +52,7 @@ import { MonitoringPanel } from './components/MonitoringPanel';
 import { needsMigration } from './services/migrationService';
 import MigrationBanner from './components/MigrationBanner';
 import { useActiveSheetId } from './utils/sheetResolver';
+import { useRetryQueue } from './hooks/useRetryQueue';
 
 // Lazy load setup wizard (only loaded when needed)
 const SetupWizard = lazy(() => import('./components/SetupWizard/SetupWizard'));
@@ -77,6 +78,9 @@ function AppContent() {
 
   // Apply theme (light/dark) from localStorage or system preference
   useTheme();
+
+  // Initialize retry queue for failed write operations
+  const { failedCount } = useRetryQueue(accessToken, activeSheetId);
 
   // When a different user signs in, clear the previous user's sheet config
   // so they get routed to setup instead of hitting a 403 on someone else's sheet
