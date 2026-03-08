@@ -1,0 +1,36 @@
+.reauth-banner {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  z-index: 1001;
+  padding: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  box-shadow: var(--shadow-md);
+  background: var(--color-danger-bg);
+  border-bottom: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.reauth-banner-icon {
+  flex-shrink: 0;
+}
+
+.reauth-banner-message {
+  flex: 1;
+}
+
+.reauth-banner-btn {
+  flex-shrink: 0;
+}
+
+.reauth-banner-error {
+  flex-shrink: 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-danger);
+  font-weight: var(--font-weight-normal);
+}
