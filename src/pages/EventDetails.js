@@ -69,6 +69,8 @@ function EventDetails({ onNavigate }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showAddAttendeeModal, setShowAddAttendeeModal] = useState(false);
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState('');
+  const [unresolvedAttendees, setUnresolvedAttendees] = useState([]);
+  const [newUnresolvedInput, setNewUnresolvedInput] = useState('');
 
   const loadEventDetails = useCallback(async () => {
     if (!accessToken || !sheetId) {
@@ -106,6 +108,13 @@ function EventDetails({ onNavigate }) {
           attendeeIds.includes(contact['Contact ID'])
         );
         setAttendeeContacts(attendees);
+      }
+
+      try {
+        const raw = foundEvent['Unresolved Attendees'] || '[]';
+        setUnresolvedAttendees(JSON.parse(raw));
+      } catch {
+        setUnresolvedAttendees([]);
       }
 
       const orgIds = (foundEvent['Organization'] || '')
@@ -173,8 +182,15 @@ function EventDetails({ onNavigate }) {
       }
 
       setShowBulkTouchpointModal(false);
-      setBulkTouchpointData({ notes: '', type: 'Meeting', outcome: '', selectedAttendees: new Set() });
-      notify.success(`Successfully logged ${bulkTouchpointData.selectedAttendees.size} touchpoint(s)!`);
+      setBulkTouchpointData({
+        notes: '',
+        type: 'Meeting',
+        outcome: '',
+        selectedAttendees: new Set(),
+      });
+      notify.success(
+        `Successfully logged ${bulkTouchpointData.selectedAttendees.size} touchpoint(s)!`
+      );
     } catch {
       notify.error('Failed to save touchpoints. Please try again.');
     } finally {
@@ -205,7 +221,12 @@ function EventDetails({ onNavigate }) {
 
       notify.success('Note created successfully!');
       setShowNoteModal(false);
-      setNoteForm({ Content: '', 'Note Type': 'Event Note', Visibility: 'Workspace-Wide', 'Shared With': '' });
+      setNoteForm({
+        Content: '',
+        'Note Type': 'Event Note',
+        Visibility: 'Workspace-Wide',
+        'Shared With': '',
+      });
       loadEventDetails();
     } catch {
       notify.error('Failed to create note. Please try again.');
@@ -248,6 +269,27 @@ function EventDetails({ onNavigate }) {
     } catch {
       notify.error('Failed to add attendee');
     }
+  };
+
+  const saveUnresolved = async (names) => {
+    await updateEvent(accessToken, sheetId, id, {
+      'Unresolved Attendees': JSON.stringify(names),
+    });
+  };
+
+  const handleAddUnresolved = async (name) => {
+    const trimmed = name.trim();
+    if (!trimmed || unresolvedAttendees.includes(trimmed)) return;
+    const next = [...unresolvedAttendees, trimmed];
+    setUnresolvedAttendees(next);
+    setNewUnresolvedInput('');
+    await saveUnresolved(next);
+  };
+
+  const handleRemoveUnresolved = async (name) => {
+    const next = unresolvedAttendees.filter((n) => n !== name);
+    setUnresolvedAttendees(next);
+    await saveUnresolved(next);
   };
 
   const getStatusBadgeClass = (status) => {
@@ -345,7 +387,13 @@ function EventDetails({ onNavigate }) {
   if (error) {
     return (
       <div className="empty-state">
-        <svg className="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+        <svg
+          className="empty-state-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+        >
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -353,11 +401,17 @@ function EventDetails({ onNavigate }) {
         <h3 className="empty-state-title">Error Loading Event</h3>
         <p>{error}</p>
         {needsReauth ? (
-          <button className="btn btn-primary mt-md" onClick={handleReauth}>Sign In Again</button>
+          <button className="btn btn-primary mt-md" onClick={handleReauth}>
+            Sign In Again
+          </button>
         ) : (
           <div className="ed-error-actions">
-            <button className="btn btn-secondary mt-md" onClick={() => onNavigate('events')}>Back to Events</button>
-            <button className="btn btn-primary mt-md" onClick={loadEventDetails}>Try Again</button>
+            <button className="btn btn-secondary mt-md" onClick={() => onNavigate('events')}>
+              Back to Events
+            </button>
+            <button className="btn btn-primary mt-md" onClick={loadEventDetails}>
+              Try Again
+            </button>
           </div>
         )}
       </div>
@@ -375,7 +429,14 @@ function EventDetails({ onNavigate }) {
       <div className="dashboard-header">
         <div className="ed-header-left">
           <button className="btn btn-ghost ed-back-btn" onClick={() => onNavigate('events')}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
               <path d="M19 12H5M12 19l-7-7 7-7" />
             </svg>
           </button>
@@ -388,9 +449,13 @@ function EventDetails({ onNavigate }) {
                   title={`Synced with Google Calendar${event['Last Synced At'] ? ` (${new Date(event['Last Synced At']).toLocaleString()})` : ''}`}
                 >
                   {event['Sync Source'] === 'Imported' ? (
-                    <><CalendarIcon size={12} /> Imported</>
+                    <>
+                      <CalendarIcon size={12} /> Imported
+                    </>
                   ) : (
-                    <><RefreshCw size={12} /> Synced</>
+                    <>
+                      <RefreshCw size={12} /> Synced
+                    </>
                   )}
                 </span>
               )}
@@ -399,27 +464,44 @@ function EventDetails({ onNavigate }) {
           </div>
         </div>
         <div className="ed-header-actions">
-          {canWrite('events') && (
-            isEditing ? (
+          {canWrite('events') &&
+            (isEditing ? (
               <>
-                <button className="btn btn-primary btn-sm" onClick={handleSaveEdit} disabled={saving} title="Save changes">
+                <button
+                  className="btn btn-primary btn-sm"
+                  onClick={handleSaveEdit}
+                  disabled={saving}
+                  title="Save changes"
+                >
                   <Check size={16} /> {saving ? 'Saving...' : 'Save'}
                 </button>
-                <button className="btn btn-secondary btn-sm" onClick={() => setIsEditing(false)} disabled={saving} title="Cancel editing">
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => setIsEditing(false)}
+                  disabled={saving}
+                  title="Cancel editing"
+                >
                   <X size={16} /> Cancel
                 </button>
               </>
             ) : (
               <>
-                <button className="btn btn-ghost btn-sm" onClick={handleStartEdit} title="Edit event">
+                <button
+                  className="btn btn-ghost btn-sm"
+                  onClick={handleStartEdit}
+                  title="Edit event"
+                >
                   <Edit size={16} />
                 </button>
-                <button className="btn btn-ghost btn-sm ed-delete-btn" onClick={() => setShowDeleteConfirm(true)} title="Delete event">
+                <button
+                  className="btn btn-ghost btn-sm ed-delete-btn"
+                  onClick={() => setShowDeleteConfirm(true)}
+                  title="Delete event"
+                >
                   <Trash2 size={16} />
                 </button>
               </>
-            )
-          )}
+            ))}
         </div>
       </div>
 
@@ -446,7 +528,14 @@ function EventDetails({ onNavigate }) {
               {/* Date */}
               <div>
                 <div className="ed-field-label">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
                     <rect x="3" y="4" width="18" height="18" rx="2" />
                     <line x1="16" y1="2" x2="16" y2="6" />
                     <line x1="8" y1="2" x2="8" y2="6" />
@@ -462,7 +551,9 @@ function EventDetails({ onNavigate }) {
                     onChange={(e) => setEditData({ ...editData, 'Event Date': e.target.value })}
                   />
                 ) : (
-                  <p className="text-muted ed-field-indented">{formatEventDate(event['Event Date'])}</p>
+                  <p className="text-muted ed-field-indented">
+                    {formatEventDate(event['Event Date'])}
+                  </p>
                 )}
               </div>
 
@@ -479,18 +570,14 @@ function EventDetails({ onNavigate }) {
                         type="time"
                         className="form-input"
                         value={editData['Start Time']}
-                        onChange={(e) =>
-                          setEditData({ ...editData, 'Start Time': e.target.value })
-                        }
+                        onChange={(e) => setEditData({ ...editData, 'Start Time': e.target.value })}
                       />
                       <span className="ed-time-separator">to</span>
                       <input
                         type="time"
                         className="form-input"
                         value={editData['End Time']}
-                        onChange={(e) =>
-                          setEditData({ ...editData, 'End Time': e.target.value })
-                        }
+                        onChange={(e) => setEditData({ ...editData, 'End Time': e.target.value })}
                       />
                     </div>
                   ) : (
@@ -535,7 +622,14 @@ function EventDetails({ onNavigate }) {
               {(isEditing || event['Event Location']) && (
                 <div>
                   <div className="ed-field-label">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
                       <circle cx="12" cy="10" r="3" />
                     </svg>
@@ -546,7 +640,9 @@ function EventDetails({ onNavigate }) {
                       type="text"
                       className="form-input ed-field-indented"
                       value={editData['Event Location']}
-                      onChange={(e) => setEditData({ ...editData, 'Event Location': e.target.value })}
+                      onChange={(e) =>
+                        setEditData({ ...editData, 'Event Location': e.target.value })
+                      }
                     />
                   ) : (
                     <p className="text-muted ed-field-indented">{event['Event Location']}</p>
@@ -558,7 +654,14 @@ function EventDetails({ onNavigate }) {
               {(isEditing || event['Description']) && (
                 <div>
                   <div className="ed-field-label">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg
+                      width="18"
+                      height="18"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
                       <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                       <polyline points="14 2 14 8 20 8" />
                       <line x1="16" y1="13" x2="8" y2="13" />
@@ -575,7 +678,9 @@ function EventDetails({ onNavigate }) {
                       rows={4}
                     />
                   ) : (
-                    <p className="text-muted ed-field-indented ed-pre-wrap">{event['Description']}</p>
+                    <p className="text-muted ed-field-indented ed-pre-wrap">
+                      {event['Description']}
+                    </p>
                   )}
                 </div>
               )}
@@ -588,9 +693,7 @@ function EventDetails({ onNavigate }) {
                     <select
                       className="form-select ed-field-input"
                       value={editData['Status']}
-                      onChange={(e) =>
-                        setEditData({ ...editData, Status: e.target.value })
-                      }
+                      onChange={(e) => setEditData({ ...editData, Status: e.target.value })}
                     >
                       <option value="">Auto (based on date)</option>
                       <option value="Planned">Planned</option>
@@ -601,8 +704,7 @@ function EventDetails({ onNavigate }) {
                   </>
                 ) : (
                   <span className={getStatusBadgeClass(event['Status'])}>
-                    {event['Status'] ||
-                      (isPastEvent ? 'Past Event' : 'Upcoming Event')}
+                    {event['Status'] || (isPastEvent ? 'Past Event' : 'Upcoming Event')}
                   </span>
                 )}
               </div>
@@ -661,6 +763,52 @@ function EventDetails({ onNavigate }) {
                 )}
               </>
             )}
+
+            {/* Unresolved attendees */}
+            {(unresolvedAttendees.length > 0 || canWrite('events')) && (
+              <div className="ed-unresolved-section">
+                {unresolvedAttendees.length > 0 && (
+                  <>
+                    <p className="ed-unresolved-label">Not in contacts yet</p>
+                    <div className="tags-input-wrap">
+                      {unresolvedAttendees.map((name) => (
+                        <span key={name} className="tags-input-chip">
+                          {name}
+                          {canWrite('events') && (
+                            <button
+                              type="button"
+                              className="tags-input-chip-remove"
+                              onClick={() => handleRemoveUnresolved(name)}
+                              aria-label={`Remove ${name}`}
+                            >
+                              <X size={10} />
+                            </button>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+                {canWrite('events') && (
+                  <input
+                    type="text"
+                    className="ed-unresolved-input"
+                    placeholder="Add name, press Enter..."
+                    value={newUnresolvedInput}
+                    onChange={(e) => setNewUnresolvedInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddUnresolved(newUnresolvedInput);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (newUnresolvedInput.trim()) handleAddUnresolved(newUnresolvedInput);
+                    }}
+                  />
+                )}
+              </div>
+            )}
           </div>
         </div>
 
@@ -711,9 +859,7 @@ function EventDetails({ onNavigate }) {
         </div>
 
         {/* Meeting Prep Card */}
-        {(isEditing ||
-          event['Virtual Meeting Link'] ||
-          event['Goals/Objectives']) && (
+        {(isEditing || event['Virtual Meeting Link'] || event['Goals/Objectives']) && (
           <div className="card ed-prep-card">
             <div className="card-header">
               <h3>Meeting Prep</h3>
@@ -799,7 +945,11 @@ function EventDetails({ onNavigate }) {
             <div className="card-body">
               <div className="ed-modal-field">
                 <label className="form-label">Note Type</label>
-                <select className="form-input" value={noteForm['Note Type']} onChange={(e) => setNoteForm({ ...noteForm, 'Note Type': e.target.value })}>
+                <select
+                  className="form-input"
+                  value={noteForm['Note Type']}
+                  onChange={(e) => setNoteForm({ ...noteForm, 'Note Type': e.target.value })}
+                >
                   <option value="Event Note">Event Note</option>
                   <option value="Meeting Note">Meeting Note</option>
                   <option value="General">General</option>
@@ -822,7 +972,11 @@ function EventDetails({ onNavigate }) {
 
               <div className="ed-modal-field">
                 <label className="form-label">Visibility</label>
-                <select className="form-input" value={noteForm.Visibility} onChange={(e) => setNoteForm({ ...noteForm, Visibility: e.target.value })}>
+                <select
+                  className="form-input"
+                  value={noteForm.Visibility}
+                  onChange={(e) => setNoteForm({ ...noteForm, Visibility: e.target.value })}
+                >
                   <option value="Workspace-Wide">Workspace-Wide</option>
                   <option value="Shared">Shared with specific users</option>
                   <option value="Private">Private (only me)</option>
@@ -843,8 +997,16 @@ function EventDetails({ onNavigate }) {
               )}
             </div>
             <div className="card-footer ed-modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowNoteModal(false)}>Cancel</button>
-              <button className="btn btn-primary" onClick={handleAddNote} disabled={!noteForm.Content.trim()}>Create Note</button>
+              <button className="btn btn-secondary" onClick={() => setShowNoteModal(false)}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleAddNote}
+                disabled={!noteForm.Content.trim()}
+              >
+                Create Note
+              </button>
             </div>
           </div>
         </div>
@@ -856,7 +1018,10 @@ function EventDetails({ onNavigate }) {
           <div className="card ed-modal-card">
             <div className="card-header">
               <h3>Log Touchpoints</h3>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowBulkTouchpointModal(false)}>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => setShowBulkTouchpointModal(false)}
+              >
                 <X size={16} />
               </button>
             </div>
@@ -866,7 +1031,9 @@ function EventDetails({ onNavigate }) {
                 <select
                   className="form-input"
                   value={bulkTouchpointData.type}
-                  onChange={(e) => setBulkTouchpointData((prev) => ({ ...prev, type: e.target.value }))}
+                  onChange={(e) =>
+                    setBulkTouchpointData((prev) => ({ ...prev, type: e.target.value }))
+                  }
                   disabled={savingBulkTouchpoints}
                 >
                   <option value="Call">Call</option>
@@ -884,7 +1051,9 @@ function EventDetails({ onNavigate }) {
                   className="form-input"
                   placeholder="e.g., Committed, Interested, Follow-up needed"
                   value={bulkTouchpointData.outcome}
-                  onChange={(e) => setBulkTouchpointData((prev) => ({ ...prev, outcome: e.target.value }))}
+                  onChange={(e) =>
+                    setBulkTouchpointData((prev) => ({ ...prev, outcome: e.target.value }))
+                  }
                   disabled={savingBulkTouchpoints}
                 />
               </div>
@@ -895,7 +1064,9 @@ function EventDetails({ onNavigate }) {
                   className="form-textarea"
                   placeholder="What was discussed? Any action items?"
                   value={bulkTouchpointData.notes}
-                  onChange={(e) => setBulkTouchpointData((prev) => ({ ...prev, notes: e.target.value }))}
+                  onChange={(e) =>
+                    setBulkTouchpointData((prev) => ({ ...prev, notes: e.target.value }))
+                  }
                   rows={4}
                   disabled={savingBulkTouchpoints}
                   required
@@ -917,26 +1088,39 @@ function EventDetails({ onNavigate }) {
                           } else {
                             newSelected.delete(contact['Contact ID']);
                           }
-                          setBulkTouchpointData((prev) => ({ ...prev, selectedAttendees: newSelected }));
+                          setBulkTouchpointData((prev) => ({
+                            ...prev,
+                            selectedAttendees: newSelected,
+                          }));
                         }}
                         disabled={savingBulkTouchpoints}
                       />
-                      <span>{contact['First Name']} {contact['Last Name']}</span>
+                      <span>
+                        {contact['First Name']} {contact['Last Name']}
+                      </span>
                     </label>
                   ))}
                 </div>
               </div>
 
               <div className="ed-modal-footer-row">
-                <button className="btn btn-secondary" onClick={() => setShowBulkTouchpointModal(false)} disabled={savingBulkTouchpoints}>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowBulkTouchpointModal(false)}
+                  disabled={savingBulkTouchpoints}
+                >
                   Cancel
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={handleSaveBulkTouchpoints}
-                  disabled={savingBulkTouchpoints || bulkTouchpointData.selectedAttendees.size === 0}
+                  disabled={
+                    savingBulkTouchpoints || bulkTouchpointData.selectedAttendees.size === 0
+                  }
                 >
-                  {savingBulkTouchpoints ? 'Saving...' : `Save (${bulkTouchpointData.selectedAttendees.size})`}
+                  {savingBulkTouchpoints
+                    ? 'Saving...'
+                    : `Save (${bulkTouchpointData.selectedAttendees.size})`}
                 </button>
               </div>
             </div>
@@ -987,15 +1171,11 @@ function EventDetails({ onNavigate }) {
               <div className="ed-attendee-search-results">
                 {allContacts
                   .filter((c) => {
-                    const name =
-                      `${c['First Name'] || ''} ${c['Last Name'] || ''}`.toLowerCase();
+                    const name = `${c['First Name'] || ''} ${c['Last Name'] || ''}`.toLowerCase();
                     const alreadyAttending = attendeeContacts.some(
-                      (a) => a['Contact ID'] === c['Contact ID'],
+                      (a) => a['Contact ID'] === c['Contact ID']
                     );
-                    return (
-                      !alreadyAttending &&
-                      name.includes(attendeeSearchQuery.toLowerCase())
-                    );
+                    return !alreadyAttending && name.includes(attendeeSearchQuery.toLowerCase());
                   })
                   .slice(0, 20)
                   .map((contact) => (
