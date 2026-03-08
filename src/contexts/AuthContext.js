@@ -13,6 +13,7 @@ async function getMockAuth() {
 }
 import { log, warn } from '../utils/logger';
 import { logApiCall } from '../utils/apiUsageLogger.js';
+import { registerAuthErrorHandler } from '../utils/authErrorHandler.js';
 
 const AuthContext = createContext();
 
@@ -39,11 +40,14 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [accessToken, setAccessToken] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [needsReauth, setNeedsReauth] = useState(false);
 
   // Ref to prevent StrictMode double-mount from initializing auth twice
   const authInitializedRef = useRef(false);
   // Ref to track pending login callback
   const loginCallbackRef = useRef(null);
+  // Ref to track previous token for auto-clear logic
+  const prevTokenRef = useRef(null);
 
   // Google OAuth login hook
   // Called unconditionally to satisfy Rules of Hooks. In dev mode the result is
@@ -422,6 +426,21 @@ export function AuthProvider({ children }) {
     };
   }, []);
 
+  // Register auth error handler so API utilities can signal re-auth is needed
+  useEffect(() => {
+    if (isDevMode()) return;
+    registerAuthErrorHandler(() => setNeedsReauth(true));
+    return () => registerAuthErrorHandler(null);
+  }, []);
+
+  // Auto-clear needsReauth when a new token arrives (refresh succeeded)
+  useEffect(() => {
+    if (accessToken && prevTokenRef.current !== null && prevTokenRef.current !== accessToken) {
+      setNeedsReauth(false);
+    }
+    prevTokenRef.current = accessToken;
+  }, [accessToken]);
+
   // Token refresh removed - will happen on-demand when API calls fail
   // This prevents surprise popup interruptions during user's work
 
@@ -546,6 +565,9 @@ export function AuthProvider({ children }) {
     loading,
     hasCalendarAccess,
     requestCalendarAccess,
+    needsReauth,
+    triggerReauth: () => setNeedsReauth(true),
+    clearReauth: () => setNeedsReauth(false),
     // Dev mode utilities
     isDevMode: isDevMode(),
     setMockUserRole: useCallback(async (role) => {
