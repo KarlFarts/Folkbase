@@ -26,6 +26,7 @@ export const ID_PREFIXES = {
   INVITATION: 'INV',
   RELATIONSHIP: 'REL',
   ENTITY_REL: 'ERE',
+  MOMENT: 'MOM',
 };
 
 /**
