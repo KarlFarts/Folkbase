@@ -260,3 +260,87 @@ export async function invalidateCache(sheetName) {
 export async function invalidateAllCaches() {
   await clearCache();
 }
+
+/**
+ * Append a new row to cached data for a sheet (optimistic update).
+ * If no cache exists for the sheet, does nothing (next read will fetch fresh).
+ *
+ * @param {string} sheetName - Sheet name
+ * @param {Object} newRow - Row object with field names as keys
+ * @returns {Promise<void>}
+ */
+export async function appendToCachedData(sheetName, newRow) {
+  if (!CACHE_CONFIG.ENABLED) return;
+
+  try {
+    const db = await initializeCache();
+    if (!db) return;
+
+    const data = await db.get(sheetName, 'data');
+    if (!data) return;
+
+    data.data.push(newRow);
+    await db.put(sheetName, data, 'data');
+    await db.put('_syncMeta', { timestamp: Date.now() }, sheetName);
+  } catch (error) {
+    console.warn('[IndexedDB] Failed to append to cache:', error);
+  }
+}
+
+/**
+ * Update a row in cached data by matching an ID field (optimistic update).
+ * If no cache exists or no matching row found, does nothing.
+ *
+ * @param {string} sheetName - Sheet name
+ * @param {string} idField - The field name to match on (e.g., 'Contact ID')
+ * @param {string} idValue - The ID value to find
+ * @param {Object} updatedFields - Fields to merge into the existing row
+ * @returns {Promise<void>}
+ */
+export async function updateCachedRow(sheetName, idField, idValue, updatedFields) {
+  if (!CACHE_CONFIG.ENABLED) return;
+
+  try {
+    const db = await initializeCache();
+    if (!db) return;
+
+    const data = await db.get(sheetName, 'data');
+    if (!data) return;
+
+    const rowIndex = data.data.findIndex((row) => row[idField] === idValue);
+    if (rowIndex === -1) return;
+
+    data.data[rowIndex] = { ...data.data[rowIndex], ...updatedFields };
+    await db.put(sheetName, data, 'data');
+    await db.put('_syncMeta', { timestamp: Date.now() }, sheetName);
+  } catch (error) {
+    console.warn('[IndexedDB] Failed to update cached row:', error);
+  }
+}
+
+/**
+ * Delete a row from cached data by matching an ID field (optimistic update).
+ * If no cache exists or no matching row found, does nothing.
+ *
+ * @param {string} sheetName - Sheet name
+ * @param {string} idField - The field name to match on (e.g., 'Contact ID')
+ * @param {string} idValue - The ID value to find
+ * @returns {Promise<void>}
+ */
+export async function deleteCachedRow(sheetName, idField, idValue) {
+  if (!CACHE_CONFIG.ENABLED) return;
+
+  try {
+    const db = await initializeCache();
+    if (!db) return;
+
+    const data = await db.get(sheetName, 'data');
+    if (!data) return;
+
+    data.data = data.data.filter((row) => row[idField] !== idValue);
+    await db.put(sheetName, data, 'data');
+    await db.put('_syncMeta', { timestamp: Date.now() }, sheetName);
+  } catch (error) {
+    console.warn('[IndexedDB] Failed to delete cached row:', error);
+  }
+}
