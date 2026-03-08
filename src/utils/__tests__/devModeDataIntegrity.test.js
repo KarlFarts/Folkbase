@@ -59,35 +59,27 @@ describe('Dev Mode Data Integrity', () => {
   });
 
   describe('Event ID Format (via stored data verification)', () => {
-    it('generateEventID should produce EVT format', async () => {
-      // Verify the regex in generateEventID by testing with existing EVT-format data
-      localStorage.setItem(
-        STORAGE_KEY_EVENTS,
-        JSON.stringify([
-          { 'Event ID': 'EVT001', 'Event Name': 'Test Event 1' },
-          { 'Event ID': 'EVT002', 'Event Name': 'Test Event 2' },
-        ])
-      );
-
+    it('generateEventID should produce EVT-uuid format', async () => {
       const { generateEventID } = await import('../devModeWrapper');
       const id = await generateEventID('fake-token', 'fake-sheet');
-      expect(id).toBe('EVT003');
+      expect(id).toMatch(/^EVT-[0-9a-f]{8}$/);
     });
 
-    it('generateEventID should return EVT001 for empty events', async () => {
+    it('generateEventID should produce a unique ID each call', async () => {
       const { generateEventID } = await import('../devModeWrapper');
-      const id = await generateEventID('fake-token', 'fake-sheet');
-      expect(id).toBe('EVT001');
+      const id1 = await generateEventID('fake-token', 'fake-sheet');
+      const id2 = await generateEventID('fake-token', 'fake-sheet');
+      expect(id1).not.toBe(id2);
     });
 
     it('generateEventID should NOT produce old E001 format', async () => {
       const { generateEventID } = await import('../devModeWrapper');
       const id = await generateEventID('fake-token', 'fake-sheet');
       expect(id).not.toMatch(/^E\d+$/);
-      expect(id).toMatch(/^EVT\d{3}$/);
+      expect(id).not.toMatch(/^EVT\d{3}$/);
     });
 
-    it('addEvent should store events with EVT format IDs', async () => {
+    it('addEvent should store events with EVT-uuid format IDs', async () => {
       const { addEvent } = await import('../devModeWrapper');
       await addEvent('fake-token', 'fake-sheet', {
         'Event Name': 'Test Event',
@@ -97,38 +89,31 @@ describe('Dev Mode Data Integrity', () => {
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_EVENTS));
       expect(stored).toHaveLength(1);
-      expect(stored[0]['Event ID']).toMatch(/^EVT\d{3}$/);
-      expect(stored[0]['Event ID']).toBe('EVT001');
+      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{8}$/);
       expect(stored[0]['Event Name']).toBe('Test Event');
     });
   });
 
   describe('Task ID Format', () => {
-    it('should generate TSK001 as the first task ID', async () => {
+    it('should generate TSK-uuid format for the first task ID', async () => {
       const { generateTaskID } = await import('../devModeWrapper');
       const id = await generateTaskID('fake-token', 'fake-sheet');
-      expect(id).toBe('TSK001');
+      expect(id).toMatch(/^TSK-[0-9a-f]{8}$/);
     });
 
-    it('should generate sequential TSK IDs', async () => {
-      localStorage.setItem(
-        STORAGE_KEY_TASKS,
-        JSON.stringify([
-          { 'Task ID': 'TSK001', Title: 'Test Task 1' },
-          { 'Task ID': 'TSK002', Title: 'Test Task 2' },
-        ])
-      );
-
+    it('should generate unique TSK IDs on successive calls', async () => {
       const { generateTaskID } = await import('../devModeWrapper');
-      const id = await generateTaskID('fake-token', 'fake-sheet');
-      expect(id).toBe('TSK003');
+      const id1 = await generateTaskID('fake-token', 'fake-sheet');
+      const id2 = await generateTaskID('fake-token', 'fake-sheet');
+      expect(id1).not.toBe(id2);
     });
 
-    it('should NOT generate old TASK001 format', async () => {
+    it('should NOT generate old TASK001 or TSK001 sequential format', async () => {
       const { generateTaskID } = await import('../devModeWrapper');
       const id = await generateTaskID('fake-token', 'fake-sheet');
       expect(id).not.toMatch(/^TASK\d+$/i);
-      expect(id).toMatch(/^TSK\d{3}$/);
+      expect(id).not.toMatch(/^TSK\d{3}$/);
+      expect(id).toMatch(/^TSK-[0-9a-f]{8}$/);
     });
   });
 
@@ -247,7 +232,7 @@ describe('Dev Mode Data Integrity', () => {
   });
 
   describe('Data Relationship Integrity', () => {
-    it('addEvent should store with EVT format and Event Created Date', async () => {
+    it('addEvent should store with EVT-uuid format and Event Created Date', async () => {
       const { addEvent } = await import('../devModeWrapper');
       await addEvent('fake-token', 'fake-sheet', {
         'Event Name': 'Team Meeting',
@@ -255,11 +240,11 @@ describe('Dev Mode Data Integrity', () => {
       });
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_EVENTS));
-      expect(stored[0]['Event ID']).toMatch(/^EVT\d{3}$/);
+      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{8}$/);
       expect(stored[0]['Event Created Date']).toBeTruthy();
     });
 
-    it('addTask should store with TSK format', async () => {
+    it('addTask should store with TSK-uuid format', async () => {
       const { addTask } = await import('../devModeWrapper');
       const task = await addTask('fake-token', 'fake-sheet', {
         Title: 'Follow up call',
@@ -267,10 +252,10 @@ describe('Dev Mode Data Integrity', () => {
         Status: 'pending',
       });
 
-      expect(task['Task ID']).toMatch(/^TSK\d{3}$/);
+      expect(task['Task ID']).toMatch(/^TSK-[0-9a-f]{8}$/);
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS));
-      expect(stored[0]['Task ID']).toMatch(/^TSK\d{3}$/);
+      expect(stored[0]['Task ID']).toMatch(/^TSK-[0-9a-f]{8}$/);
     });
   });
 

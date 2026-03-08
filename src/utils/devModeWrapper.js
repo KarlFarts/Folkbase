@@ -20,6 +20,7 @@ import * as sheetsModule from './sheets';
 import { getCachedData, setCachedData, invalidateCache } from './indexedDbCache';
 import { SHEET_NAMES } from '../config/constants';
 import monitoringService from '../services/cacheMonitoringService';
+import { generateId, ID_PREFIXES } from './idGenerator';
 // Dev mode data layer — dynamically imported to keep test fixtures out of production bundles.
 // Vite replaces import.meta.env at build time, so in production the condition is false
 // and esbuild eliminates the dynamic import entirely.
@@ -250,53 +251,19 @@ export const readSheetData = (function () {
 
 /**
  * WRAPPER: generateContactID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based contact ID without any API or localStorage scanning.
  */
-export const generateContactID = (function () {
-  const originalFn = sheetsModule.generateContactID;
-  return async function generateContactID(accessToken, sheetId) {
-    if (isDevMode()) {
-      log('[DEV MODE] Generating contact ID from localStorage');
-      const contacts = getLocalContacts();
-      if (contacts.length === 0) return 'C001';
-
-      const ids = contacts
-        .map((row) => row['Contact ID'])
-        .filter((id) => id && id.startsWith('C'))
-        .map((id) => parseInt(id.substring(1), 10))
-        .filter((num) => !isNaN(num));
-
-      const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-      return `C${String(maxId + 1).padStart(3, '0')}`;
-    }
-    return originalFn(accessToken, sheetId);
-  };
-})();
+export async function generateContactID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.CONTACT);
+}
 
 /**
  * WRAPPER: generateTouchpointID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based touchpoint ID without any API or localStorage scanning.
  */
-export const generateTouchpointID = (function () {
-  const originalFn = sheetsModule.generateTouchpointID;
-  return async function generateTouchpointID(accessToken, sheetId) {
-    if (isDevMode()) {
-      log('[DEV MODE] Generating touchpoint ID from localStorage');
-      const touchpoints = getLocalTouchpoints();
-      if (touchpoints.length === 0) return 'T001';
-
-      const ids = touchpoints
-        .map((row) => row['Touchpoint ID'])
-        .filter((id) => id && id.startsWith('T'))
-        .map((id) => parseInt(id.substring(1), 10))
-        .filter((num) => !isNaN(num));
-
-      const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-      return `T${String(maxId + 1).padStart(3, '0')}`;
-    }
-    return originalFn(accessToken, sheetId);
-  };
-})();
+export async function generateTouchpointID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.TOUCHPOINT);
+}
 
 /**
  * WRAPPER: addContact
@@ -529,26 +496,11 @@ export const deleteOrganization = async function deleteOrganization(
 
 /**
  * WRAPPER: generateLocationID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based location ID without any API or localStorage scanning.
  */
-export const generateLocationID = async function generateLocationID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating location ID from localStorage');
-    const locations = getLocalLocations();
-    if (locations.length === 0) return 'LOC001';
-
-    const ids = locations
-      .map((row) => row['Location ID'])
-      .filter((id) => id && id.startsWith('LOC'))
-      .map((id) => parseInt(id.substring(3), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `LOC${String(maxId + 1).padStart(3, '0')}`;
-  }
-  const { generateLocationID } = await import('../services/locationService');
-  return generateLocationID(accessToken, sheetId);
-};
+export async function generateLocationID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.LOCATION);
+}
 
 /**
  * WRAPPER: addLocation
@@ -1005,61 +957,18 @@ export const detectDuplicates = (function () {
 
 /**
  * WRAPPER: generateEventID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based event ID without any API or localStorage scanning.
  */
-export const generateEventID = (function () {
-  const originalFn = sheetsModule.generateEventID;
-  return async function generateEventID(accessToken, sheetId) {
-    if (isDevMode()) {
-      log('[DEV MODE] Generating event ID from localStorage');
-      const events = getLocalEvents();
-
-      if (events.length === 0) return 'EVT001';
-
-      const ids = events
-        .map((e) => e['Event ID'])
-        .filter((id) => id && id.match(/^EVT\d+$/))
-        .map((id) => parseInt(id.substring(3)));
-
-      const maxId = Math.max(...ids, 0);
-      return `EVT${String(maxId + 1).padStart(3, '0')}`;
-    }
-    return originalFn(accessToken, sheetId);
-  };
-})();
+export async function generateEventID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.EVENT);
+}
 
 /**
  * WRAPPER: generateNoteID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based note ID without any API or localStorage scanning.
  */
-export async function generateNoteID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating note ID from localStorage');
-    const notes = getLocalNotes();
-
-    if (notes.length === 0) return 'N001';
-
-    const ids = notes
-      .map((n) => n['Note ID'])
-      .filter((id) => id && id.match(/^N\d+$/))
-      .map((id) => parseInt(id.substring(1)));
-
-    const maxId = Math.max(...ids, 0);
-    return `N${String(maxId + 1).padStart(3, '0')}`;
-  }
-
-  // Production mode: Generate from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.NOTES);
-
-  if (data.length === 0) return 'N001';
-
-  const ids = data
-    .map((n) => n['Note ID'])
-    .filter((id) => id && id.match(/^N\d+$/))
-    .map((id) => parseInt(id.substring(1)));
-
-  const maxId = Math.max(...ids, 0);
-  return `N${String(maxId + 1).padStart(3, '0')}`;
+export async function generateNoteID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.NOTE);
 }
 
 /**
@@ -2666,39 +2575,10 @@ export const addNoteWithLink = (function () {
 
 /**
  * WRAPPER: generateTaskID
- * Generates from localStorage in dev mode
+ * Generates a UUID-based task ID without any API or localStorage scanning.
  */
-export async function generateTaskID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating task ID from localStorage');
-    const { getLocalTasks } = await import('../__tests__/fixtures/seedTestData');
-    const tasks = getLocalTasks();
-
-    if (tasks.length === 0) return 'TSK001';
-
-    const ids = tasks
-      .map((t) => t['Task ID'])
-      .filter((id) => id && id.match(/^TSK\d+$/))
-      .map((id) => parseInt(id.substring(3), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `TSK${String(maxId + 1).padStart(3, '0')}`;
-  }
-
-  // Production mode: Generate from Google Sheets
-  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.TASKS);
-
-  if (data.length === 0) return 'TSK001';
-
-  const ids = data
-    .map((t) => t['Task ID'])
-    .filter((id) => id && id.match(/^TSK\d+$/))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `TSK${String(maxId + 1).padStart(3, '0')}`;
+export async function generateTaskID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.TASK);
 }
 
 /**
@@ -2972,71 +2852,26 @@ export async function getTasksForWorkspace(workspaceId) {
 
 /**
  * WRAPPER: generateWorkspaceID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based workspace ID without any API or localStorage scanning.
  */
-export async function generateWorkspaceID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating workspace ID from localStorage');
-    const workspaces = getLocalWorkspaces();
-    if (workspaces.length === 0) return 'WS001';
-
-    const ids = workspaces
-      .map((row) => row['Workspace ID'])
-      .filter((id) => id && id.startsWith('WS'))
-      .map((id) => parseInt(id.substring(2), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `WS${String(maxId + 1).padStart(3, '0')}`;
-  }
-  const { generateWorkspaceID } = await import('../services/workspaceHierarchyServiceSheets');
-  return generateWorkspaceID(accessToken, sheetId);
+export async function generateWorkspaceID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.WORKSPACE);
 }
 
 /**
  * WRAPPER: generateMemberID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based member ID without any API or localStorage scanning.
  */
-export async function generateMemberID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating member ID from localStorage');
-    const members = getLocalWorkspaceMembers();
-    if (members.length === 0) return 'MEM001';
-
-    const ids = members
-      .map((row) => row['Member ID'])
-      .filter((id) => id && id.startsWith('MEM'))
-      .map((id) => parseInt(id.substring(3), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `MEM${String(maxId + 1).padStart(3, '0')}`;
-  }
-  const { generateMemberID } = await import('../services/workspaceHierarchyServiceSheets');
-  return generateMemberID(accessToken, sheetId);
+export async function generateMemberID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.MEMBER);
 }
 
 /**
  * WRAPPER: generateInvitationID
- * Generates from localStorage in dev mode, Google Sheets in production
+ * Generates a UUID-based invitation ID without any API or localStorage scanning.
  */
-export async function generateInvitationID(accessToken, sheetId) {
-  if (isDevMode()) {
-    log('[DEV MODE] Generating invitation ID from localStorage');
-    const invitations = getLocalWorkspaceInvitations();
-    if (!invitations || invitations.length === 0) return 'INV001';
-
-    const ids = invitations
-      .map((row) => row['Invitation ID'])
-      .filter((id) => id && id.startsWith('INV'))
-      .map((id) => parseInt(id.substring(3), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `INV${String(maxId + 1).padStart(3, '0')}`;
-  }
-  const { generateInvitationID } = await import('../services/workspaceHierarchyServiceSheets');
-  return generateInvitationID(accessToken, sheetId);
+export async function generateInvitationID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.INVITATION);
 }
 
 /**
