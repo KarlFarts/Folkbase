@@ -36,7 +36,7 @@ import ConfirmDialog from '../components/ConfirmDialog';
 
 function EventDetails({ onNavigate }) {
   const { id } = useParams();
-  const { accessToken, refreshAccessToken, user } = useAuth();
+  const { accessToken, refreshAccessToken, user, hasCalendarAccess } = useAuth();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
   const { canWrite } = usePermissions();
@@ -71,6 +71,8 @@ function EventDetails({ onNavigate }) {
   const [attendeeSearchQuery, setAttendeeSearchQuery] = useState('');
   const [unresolvedAttendees, setUnresolvedAttendees] = useState([]);
   const [newUnresolvedInput, setNewUnresolvedInput] = useState('');
+  const [sendingInvites, setSendingInvites] = useState(false);
+  const [calendarConnected, setCalendarConnected] = useState(false);
 
   const loadEventDetails = useCallback(async () => {
     if (!accessToken || !sheetId) {
@@ -142,6 +144,15 @@ function EventDetails({ onNavigate }) {
   useEffect(() => {
     loadEventDetails();
   }, [loadEventDetails]);
+
+  useEffect(() => {
+    const check = async () => {
+      const settings = JSON.parse(localStorage.getItem('touchpoint_calendar_settings') || '{}');
+      const hasAccess = await hasCalendarAccess();
+      setCalendarConnected(settings.enabled === true && hasAccess);
+    };
+    check();
+  }, [hasCalendarAccess]);
 
   const handleReauth = async () => {
     try {
@@ -290,6 +301,44 @@ function EventDetails({ onNavigate }) {
     const next = unresolvedAttendees.filter((n) => n !== name);
     setUnresolvedAttendees(next);
     await saveUnresolved(next);
+  };
+
+  const handleSendCalendarInvites = async () => {
+    setSendingInvites(true);
+    try {
+      const googleEvent = crmEventToGoogleEvent(event, allContacts);
+
+      if (event['Google Calendar ID']) {
+        await updateCalendarEvent(accessToken, event['Google Calendar ID'], googleEvent);
+      } else {
+        const { createCalendarEvent } = await import('../utils/devModeWrapper');
+        const created = await createCalendarEvent(accessToken, googleEvent, event['Event ID']);
+        await updateEvent(accessToken, sheetId, id, {
+          'Google Calendar ID': created.id,
+          'Sync Source': 'CRM',
+          'Last Synced At': new Date().toISOString(),
+        });
+      }
+
+      await updateEvent(accessToken, sheetId, id, {
+        'Last Synced At': new Date().toISOString(),
+      });
+
+      const attendeesWithEmail = allContacts.filter((c) => {
+        const ids = (event['Attendees'] || '').split(',').map((i) => i.trim());
+        return ids.includes(c['Contact ID']) && c['Email'];
+      });
+
+      notify.success(
+        `Calendar invites sent to ${attendeesWithEmail.length} attendee(s) with email addresses`
+      );
+      loadEventDetails();
+    } catch (error) {
+      console.error('Failed to send calendar invites:', error);
+      notify.error('Failed to send calendar invites. Check your calendar connection.');
+    } finally {
+      setSendingInvites(false);
+    }
   };
 
   const getStatusBadgeClass = (status) => {
@@ -446,7 +495,7 @@ function EventDetails({ onNavigate }) {
               {event['Google Calendar ID'] && (
                 <span
                   className="ed-sync-badge"
-                  title={`Synced with Google Calendar${event['Last Synced At'] ? ` (${new Date(event['Last Synced At']).toLocaleString()})` : ''}`}
+                  title={`Invite sent via Google Calendar${event['Last Synced At'] ? ` (${new Date(event['Last Synced At']).toLocaleString()})` : ''}`}
                 >
                   {event['Sync Source'] === 'Imported' ? (
                     <>
@@ -454,7 +503,7 @@ function EventDetails({ onNavigate }) {
                     </>
                   ) : (
                     <>
-                      <RefreshCw size={12} /> Synced
+                      <CalendarIcon size={12} /> Invite Sent
                     </>
                   )}
                 </span>
@@ -759,6 +808,20 @@ function EventDetails({ onNavigate }) {
                     }}
                   >
                     Log Touchpoints for All
+                  </button>
+                )}
+                {!isPastEvent && calendarConnected && canWrite('events') && attendeeContacts.length > 0 && (
+                  <button
+                    className="btn btn-secondary ed-log-all-btn"
+                    onClick={handleSendCalendarInvites}
+                    disabled={sendingInvites}
+                  >
+                    <CalendarIcon size={16} />
+                    {sendingInvites
+                      ? 'Sending...'
+                      : event['Google Calendar ID']
+                        ? 'Update Calendar Invites'
+                        : 'Send Calendar Invites'}
                   </button>
                 )}
               </>

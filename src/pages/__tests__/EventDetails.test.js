@@ -9,6 +9,7 @@ vi.mock('../../contexts/AuthContext', () => ({
     accessToken: 'tok',
     user: { email: 'a@b.com' },
     refreshAccessToken: vi.fn(),
+    hasCalendarAccess: vi.fn().mockResolvedValue(true),
   }),
 }));
 vi.mock('../../utils/sheetResolver', () => ({ useActiveSheetId: () => 'sheet1' }));
@@ -62,5 +63,51 @@ describe('EventDetails unresolved attendees', () => {
   it('renders the add-name input for writers', async () => {
     render(<EventDetails onNavigate={vi.fn()} />);
     expect(await screen.findByPlaceholderText('Add name, press Enter...')).toBeInTheDocument();
+  });
+});
+
+describe('EventDetails Send Calendar Invites button', () => {
+  it('shows "Send Calendar Invites" button for future events with attendees when calendar connected', async () => {
+    // Mock localStorage to have calendar enabled
+    localStorage.setItem(
+      'touchpoint_calendar_settings',
+      JSON.stringify({ enabled: true, selectedCalendarId: 'primary' })
+    );
+
+    const { readSheetData } = await import('../../utils/devModeWrapper');
+    readSheetData.mockImplementation((_a, _b, sheet) => {
+      if (sheet === 'Events') {
+        return Promise.resolve({
+          data: [
+            {
+              'Event ID': 'EVT001',
+              'Event Name': 'Future Meeting',
+              'Event Date': '2099-01-01',
+              Attendees: 'CON001',
+              'Unresolved Attendees': '[]',
+            },
+          ],
+        });
+      }
+      if (sheet === 'Contacts') {
+        return Promise.resolve({
+          data: [
+            {
+              'Contact ID': 'CON001',
+              'First Name': 'Jane',
+              'Last Name': 'Doe',
+              Email: 'jane@example.com',
+            },
+          ],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+
+    render(<EventDetails onNavigate={vi.fn()} />);
+    expect(await screen.findByText('Send Calendar Invites')).toBeInTheDocument();
+
+    // cleanup
+    localStorage.removeItem('touchpoint_calendar_settings');
   });
 });
