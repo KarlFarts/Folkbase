@@ -20,6 +20,9 @@ function SyncPastMeetingsModal({ isOpen, onClose, onImported, existingCalendarId
     if (!isOpen || !accessToken) return;
 
     const fetchPast = async () => {
+      // Reset state on each re-open so stale data does not flash
+      setPastEvents([]);
+      setSelectedIds(new Set());
       setLoading(true);
       try {
         const now = new Date();
@@ -46,7 +49,10 @@ function SyncPastMeetingsModal({ isOpen, onClose, onImported, existingCalendarId
     };
 
     fetchPast();
-  }, [isOpen, accessToken]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Intentionally omit existingCalendarIds/notify: we want to re-fetch only when
+    // the modal opens (isOpen) or the token changes, not on every render cycle.
+  }, [isOpen, accessToken]);
 
   const toggleSelect = (id) => {
     setSelectedIds((prev) => {
@@ -66,6 +72,7 @@ function SyncPastMeetingsModal({ isOpen, onClose, onImported, existingCalendarId
   };
 
   const handleImport = async () => {
+    if (!accessToken) return;
     const toImport = pastEvents.filter((e) => selectedIds.has(e.id));
     if (toImport.length === 0) return;
 

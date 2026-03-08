@@ -2718,6 +2718,24 @@ input[type="checkbox"] {
   flex: 1 1 250px;
 }
 
+.el-mycal-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+}
+
+.el-mycal-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
 .el-section-card {
   margin-bottom: var(--spacing-lg);
 }

@@ -6,6 +6,7 @@ import EventCard from '../components/events/EventCard';
 import CalendarView from '../components/events/CalendarView';
 import TimelineView from '../components/events/TimelineView';
 import ImportEventModal from '../components/events/ImportEventModal';
+import SyncPastMeetingsModal from '../components/events/SyncPastMeetingsModal';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -27,6 +28,14 @@ function EventsList({ onNavigate }) {
   const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [selectedGoogleEvent, setSelectedGoogleEvent] = useState(null);
+  const [hideFolkbaseOnly, setHideFolkbaseOnly] = useState(false);
+  const [syncPastModalOpen, setSyncPastModalOpen] = useState(false);
+
+  // Set of Google Calendar IDs that exist in Folkbase events
+  const syncedCalendarIds = useMemo(
+    () => new Set(events.map((e) => e['Google Calendar ID']).filter(Boolean)),
+    [events]
+  );
 
   const loadEvents = useCallback(async () => {
     if (!sheetId || !accessToken) {
@@ -239,7 +248,7 @@ function EventsList({ onNavigate }) {
             List View
           </button>
           <button className={`btn ${viewMode === 'calendar' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('calendar')}>
-            Calendar
+            My Calendar
           </button>
           <button className={`btn ${viewMode === 'timeline' ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setViewMode('timeline')}>
             Timeline
@@ -257,6 +266,26 @@ function EventsList({ onNavigate }) {
           />
         </div>
       </div>
+
+      {/* My Calendar controls — only shown in calendar viewMode when calendar sync is enabled */}
+      {viewMode === 'calendar' && calendarSyncEnabled && (
+        <div className="el-mycal-controls">
+          <label className="el-mycal-toggle">
+            <input
+              type="checkbox"
+              checked={hideFolkbaseOnly}
+              onChange={(e) => setHideFolkbaseOnly(e.target.checked)}
+            />
+            Hide Folkbase-only events
+          </label>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={() => setSyncPastModalOpen(true)}
+          >
+            Sync Past Meetings
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
       {events.length === 0 ? (
@@ -290,7 +319,9 @@ function EventsList({ onNavigate }) {
           events={filteredForViews}
           googleCalendarEvents={personalEvents}
           onEventClick={(eventId) => onNavigate('event-details', eventId)}
-          onImportEvent={handleImportEvent}
+          onAddToFolkbase={handleImportEvent}
+          syncedCalendarIds={syncedCalendarIds}
+          hideFolkbaseOnly={hideFolkbaseOnly}
         />
       ) : viewMode === 'timeline' ? (
         <TimelineView
@@ -405,6 +436,14 @@ function EventsList({ onNavigate }) {
         onClose={handleImportModalClose}
         googleEvent={selectedGoogleEvent}
         onImported={handleImported}
+        contacts={contacts}
+      />
+
+      <SyncPastMeetingsModal
+        isOpen={syncPastModalOpen}
+        onClose={() => setSyncPastModalOpen(false)}
+        onImported={handleImported}
+        existingCalendarIds={syncedCalendarIds}
         contacts={contacts}
       />
 
