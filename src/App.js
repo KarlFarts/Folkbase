@@ -4,7 +4,6 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useConfig } from './contexts/ConfigContext';
 import { WorkspaceProvider, useWorkspace } from './contexts/WorkspaceContext';
 import { useApiTracking } from './hooks/useApiTracking';
-import { useCalendarSync } from './hooks/useCalendarSync';
 import { useTheme } from './hooks/useTheme';
 import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
@@ -73,9 +72,6 @@ function AppContent() {
 
   // Initialize API tracking on app startup
   useApiTracking();
-
-  // Initialize auto-sync for calendar
-  useCalendarSync();
 
   // Apply theme (light/dark) from localStorage or system preference
   useTheme();
