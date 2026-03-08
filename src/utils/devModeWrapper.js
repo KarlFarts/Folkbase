@@ -94,6 +94,8 @@ const {
   saveLocalTaskTimeEntries = () => {},
   getLocalCalendarEvents = () => [],
   saveLocalCalendarEvents = () => {},
+  getLocalMoments = () => [],
+  saveLocalMoments = () => {},
 } = _devSeed;
 const { mockMetadata = null } = _devContacts;
 import { createActivity, ACTIVITY_TYPES, sortActivitiesByDate } from './activities';
@@ -4695,3 +4697,168 @@ export { SHEETS, AUTO_FIELDS } from './sheets';
 // Activity types are already exported at the top
 
 export { getLocalLists, getLocalContactLists };
+
+/**
+ * WRAPPER: getMomentsForContact
+ * Loads all Moments and filters by contactId (client-side) in both dev and prod.
+ */
+export async function getMomentsForContact(accessToken, sheetId, contactId) {
+  if (isDevMode()) {
+    log('[DEV MODE] Getting moments for contact:', contactId);
+    const moments = getLocalMoments();
+    return moments.filter((m) => {
+      const ids = (m['Contact IDs'] || '').split(',').map((s) => s.trim());
+      return ids.includes(contactId);
+    });
+  }
+
+  // Production mode: read full Moments tab, filter client-side
+  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.MOMENTS);
+  return data.filter((m) => {
+    const ids = (m['Contact IDs'] || '').split(',').map((s) => s.trim());
+    return ids.includes(contactId);
+  });
+}
+
+/**
+ * WRAPPER: addMoment
+ * Adds a new moment to localStorage in dev mode, Google Sheets in production.
+ */
+export async function addMoment(accessToken, sheetId, momentData) {
+  if (isDevMode()) {
+    log('[DEV MODE] Adding moment to localStorage:', momentData);
+
+    const moments = getLocalMoments();
+    const momentId = generateId(ID_PREFIXES.MOMENT);
+    const createdAt = nowIso();
+
+    const newMoment = {
+      'Moment ID': momentId,
+      'Created At': createdAt,
+      ...momentData,
+    };
+
+    moments.push(newMoment);
+    saveLocalMoments(moments);
+    return { momentId, ...newMoment };
+  }
+
+  // Production mode
+  const { headers } = await sheetsModule.readSheetMetadata(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.MOMENTS
+  );
+  const momentId = generateId(ID_PREFIXES.MOMENT);
+  const createdAt = nowIso();
+
+  const newMoment = {
+    'Moment ID': momentId,
+    'Created At': createdAt,
+    ...momentData,
+  };
+
+  const values = headers.map((h) => newMoment[h.name] || '');
+  const startTime = Date.now();
+  await sheetsModule.appendRow(accessToken, sheetId, SHEET_NAMES.MOMENTS, values);
+  const duration = Date.now() - startTime;
+  monitoringService.recordApiCall('write', SHEET_NAMES.MOMENTS, duration);
+  await appendToCachedData(SHEET_NAMES.MOMENTS, { 'Moment ID': momentId, ...newMoment });
+  return { momentId, ...newMoment };
+}
+
+/**
+ * WRAPPER: updateMoment
+ * Updates an existing moment.
+ */
+export async function updateMoment(accessToken, sheetId, momentId, momentData) {
+  if (isDevMode()) {
+    log('[DEV MODE] Updating moment:', momentId);
+
+    const moments = getLocalMoments();
+    const index = moments.findIndex((m) => m['Moment ID'] === momentId);
+    if (index === -1) throw new Error(`Moment ${momentId} not found`);
+
+    moments[index] = {
+      ...moments[index],
+      ...momentData,
+      'Moment ID': momentId,
+      'Created At': moments[index]['Created At'],
+    };
+
+    saveLocalMoments(moments);
+    return moments[index];
+  }
+
+  // Production mode
+  const { headers } = await sheetsModule.readSheetMetadata(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.MOMENTS
+  );
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.MOMENTS);
+  const moment = data.find((m) => m['Moment ID'] === momentId);
+  if (!moment) throw new Error(`Moment ${momentId} not found`);
+
+  const updatedMoment = { ...moment, ...momentData, 'Moment ID': momentId };
+  const values = headers.map((h) => updatedMoment[h.name] || '');
+  const startTime = Date.now();
+  await sheetsModule.updateRow(accessToken, sheetId, SHEET_NAMES.MOMENTS, moment._rowIndex, values);
+  const duration = Date.now() - startTime;
+  monitoringService.recordApiCall('write', SHEET_NAMES.MOMENTS, duration);
+  await updateCachedRow(SHEET_NAMES.MOMENTS, 'Moment ID', momentId, updatedMoment);
+  return updatedMoment;
+}
+
+/**
+ * WRAPPER: deleteMoment
+ * Deletes a moment by ID.
+ */
+export async function deleteMoment(accessToken, sheetId, momentId) {
+  if (isDevMode()) {
+    log('[DEV MODE] Deleting moment:', momentId);
+
+    const moments = getLocalMoments();
+    const filtered = moments.filter((m) => m['Moment ID'] !== momentId);
+    saveLocalMoments(filtered);
+    return { success: true, momentId };
+  }
+
+  // Production mode: delete row via batchUpdate
+  const { data } = await sheetsModule.readSheetData(accessToken, sheetId, SHEET_NAMES.MOMENTS);
+  const moment = data.find((m) => m['Moment ID'] === momentId);
+  if (!moment) throw new Error(`Moment ${momentId} not found`);
+
+  const internalSheetId = await sheetsModule.getSheetIdByName(
+    accessToken,
+    sheetId,
+    SHEET_NAMES.MOMENTS
+  );
+  const axios = (await import('axios')).default;
+  const { API_CONFIG } = await import('../config/constants');
+  const rowIndex = moment._rowIndex;
+
+  const startTime = Date.now();
+  await axios.post(
+    `${API_CONFIG.SHEETS_API_BASE}/${sheetId}:batchUpdate`,
+    {
+      requests: [
+        {
+          deleteDimension: {
+            range: {
+              sheetId: internalSheetId,
+              dimension: 'ROWS',
+              startIndex: rowIndex - 1,
+              endIndex: rowIndex,
+            },
+          },
+        },
+      ],
+    },
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  const duration = Date.now() - startTime;
+  monitoringService.recordApiCall('write', SHEET_NAMES.MOMENTS, duration);
+  await deleteCachedRow(SHEET_NAMES.MOMENTS, 'Moment ID', momentId);
+  return { success: true, momentId };
+}
