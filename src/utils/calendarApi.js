@@ -73,9 +73,13 @@ function createCalendarClient(accessToken) {
         error: error.message,
         isRateLimit: error.response?.status === 429,
       });
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (error.response?.status === 401) {
         error.isAuthError = true;
         notifyAuthError();
+      } else if (error.response?.status === 403) {
+        error.isAuthError = true;
+        // 403 from Calendar API typically means missing scope, not expired token.
+        // Don't trigger the reauth banner — the caller handles scope errors.
       }
       return Promise.reject(error);
     }
