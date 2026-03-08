@@ -13,6 +13,7 @@ import axios from 'axios';
 import { logApiCall } from './apiUsageLogger.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
+import { notifyAuthError } from './authErrorHandler.js';
 
 const CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 
@@ -72,6 +73,10 @@ function createCalendarClient(accessToken) {
         error: error.message,
         isRateLimit: error.response?.status === 429,
       });
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        error.isAuthError = true;
+        notifyAuthError();
+      }
       return Promise.reject(error);
     }
   );
