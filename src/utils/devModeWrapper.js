@@ -17,7 +17,14 @@
  */
 
 import * as sheetsModule from './sheets';
-import { getCachedData, setCachedData, invalidateCache } from './indexedDbCache';
+import {
+  getCachedData,
+  setCachedData,
+  invalidateCache,
+  appendToCachedData,
+  updateCachedRow,
+  deleteCachedRow,
+} from './indexedDbCache';
 import { SHEET_NAMES } from '../config/constants';
 import monitoringService from '../services/cacheMonitoringService';
 import { generateId, ID_PREFIXES } from './idGenerator';
@@ -291,7 +298,7 @@ export const addContact = (function () {
       return { contactId, ...newContact };
     }
 
-    // Production mode: Call API then invalidate cache
+    // Production mode: Call API then optimistically update cache
     const startTime = Date.now();
     const result = await originalFn(accessToken, sheetId, contactData, userEmail);
     const duration = Date.now() - startTime;
@@ -299,7 +306,7 @@ export const addContact = (function () {
     // Record API call for monitoring
     monitoringService.recordApiCall('write', SHEET_NAMES.CONTACTS, duration);
 
-    await invalidateCache(SHEET_NAMES.CONTACTS);
+    await appendToCachedData(SHEET_NAMES.CONTACTS, { 'Contact ID': result.contactId, ...result });
     return result;
   };
 })();
@@ -339,7 +346,7 @@ export const updateContact = (function () {
       return { contactId, ...contacts[index] };
     }
 
-    // Production mode: Call API then invalidate cache
+    // Production mode: Call API then optimistically update cache
     const startTime = Date.now();
     const result = await originalFn(accessToken, sheetId, contactId, oldData, newData, userEmail);
     const duration = Date.now() - startTime;
@@ -347,7 +354,7 @@ export const updateContact = (function () {
     // Record API call for monitoring
     monitoringService.recordApiCall('write', SHEET_NAMES.CONTACTS, duration);
 
-    await invalidateCache(SHEET_NAMES.CONTACTS);
+    await updateCachedRow(SHEET_NAMES.CONTACTS, 'Contact ID', result.contactId, result);
     return result;
   };
 })();
@@ -751,13 +758,14 @@ export const addTouchpoint = (function () {
       return { touchpointId, ...newTouchpoint };
     }
 
-    // Production mode: Call API then invalidate cache
+    // Production mode: Call API then optimistically update cache
     const startTime = Date.now();
     const result = await originalFn(accessToken, sheetId, touchpointData, userEmail);
     const duration = Date.now() - startTime;
     monitoringService.recordApiCall('write', SHEET_NAMES.TOUCHPOINTS, duration);
-    await invalidateCache(SHEET_NAMES.TOUCHPOINTS);
-    await invalidateCache(SHEET_NAMES.CONTACTS); // Also invalidate contacts (Last Contact Date may change)
+    await appendToCachedData(SHEET_NAMES.TOUCHPOINTS, { 'Touchpoint ID': result.touchpointId, ...result });
+    // Note: CONTACTS cache invalidated because Last Contact Date may change — hard to patch locally
+    await invalidateCache(SHEET_NAMES.CONTACTS);
     return result;
   };
 })();
@@ -796,7 +804,7 @@ export const updateTouchpoint = (function () {
       return { touchpointId, ...touchpoints[index] };
     }
 
-    // Production mode: Call API then invalidate cache
+    // Production mode: Call API then optimistically update cache
     const startTime = Date.now();
     const result = await originalFn(
       accessToken,
@@ -808,8 +816,9 @@ export const updateTouchpoint = (function () {
     );
     const duration = Date.now() - startTime;
     monitoringService.recordApiCall('write', SHEET_NAMES.TOUCHPOINTS, duration);
-    await invalidateCache(SHEET_NAMES.TOUCHPOINTS);
-    await invalidateCache(SHEET_NAMES.CONTACTS); // Also invalidate contacts (Last Contact Date may change)
+    await updateCachedRow(SHEET_NAMES.TOUCHPOINTS, 'Touchpoint ID', result.touchpointId, result);
+    // Note: CONTACTS cache invalidated because Last Contact Date may change — hard to patch locally
+    await invalidateCache(SHEET_NAMES.CONTACTS);
     return result;
   };
 })();
@@ -996,12 +1005,12 @@ export const addEvent = (function () {
       return { eventId, ...newEvent };
     }
 
-    // Production mode: Call API then invalidate cache
+    // Production mode: Call API then optimistically update cache
     const startTime = Date.now();
     const result = await originalFn(accessToken, sheetId, eventData, refreshTokenCallback);
     const duration = Date.now() - startTime;
     monitoringService.recordApiCall('write', SHEET_NAMES.EVENTS, duration);
-    await invalidateCache(SHEET_NAMES.EVENTS);
+    await appendToCachedData(SHEET_NAMES.EVENTS, { 'Event ID': result.eventId, ...result });
     return result;
   };
 })();
@@ -1057,7 +1066,7 @@ export async function updateEvent(accessToken, sheetId, eventId, eventData) {
   await sheetsModule.updateRow(accessToken, sheetId, 'Events', rowIndex, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.EVENTS, duration);
-  await invalidateCache(SHEET_NAMES.EVENTS);
+  await updateCachedRow(SHEET_NAMES.EVENTS, 'Event ID', eventId, updatedEvent);
   return updatedEvent;
 }
 
@@ -1387,7 +1396,7 @@ export async function addList(accessToken, sheetId, listData) {
   const result = await sheetsModule.addList(accessToken, sheetId, listData);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.LISTS, duration);
-  await invalidateCache(SHEET_NAMES.LISTS);
+  await appendToCachedData(SHEET_NAMES.LISTS, { 'List ID': result.listId, ...result });
   return result;
 }
 
@@ -1422,7 +1431,7 @@ export async function updateList(accessToken, sheetId, listId, listData) {
   const result = await sheetsModule.updateList(accessToken, sheetId, listId, listData);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.LISTS, duration);
-  await invalidateCache(SHEET_NAMES.LISTS);
+  await updateCachedRow(SHEET_NAMES.LISTS, 'List ID', listId, result);
   return result;
 }
 
@@ -1451,7 +1460,8 @@ export async function deleteList(accessToken, sheetId, listId) {
   const result = await sheetsModule.deleteList(accessToken, sheetId, listId);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('delete', SHEET_NAMES.LISTS, duration);
-  await invalidateCache(SHEET_NAMES.LISTS);
+  await deleteCachedRow(SHEET_NAMES.LISTS, 'List ID', listId);
+  // Also delete from junction tables (cascade)
   await invalidateCache(SHEET_NAMES.CONTACT_LISTS);
   await invalidateCache(SHEET_NAMES.LIST_NOTES);
   return result;
@@ -1650,7 +1660,7 @@ export async function addNote(accessToken, sheetId, noteData, userEmail = null) 
   await sheetsModule.appendRow(accessToken, sheetId, SHEET_NAMES.NOTES, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.NOTES, duration);
-  await invalidateCache(SHEET_NAMES.NOTES);
+  await appendToCachedData(SHEET_NAMES.NOTES, { 'Note ID': noteId, ...newNote });
   return { noteId, ...newNote };
 }
 
@@ -1707,7 +1717,7 @@ export async function updateNote(accessToken, sheetId, noteId, noteData) {
   await sheetsModule.updateRow(accessToken, sheetId, 'Notes', rowIndex, values);
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('write', SHEET_NAMES.NOTES, duration);
-  await invalidateCache(SHEET_NAMES.NOTES);
+  await updateCachedRow(SHEET_NAMES.NOTES, 'Note ID', noteId, updatedNote);
   return updatedNote;
 }
 
@@ -1834,13 +1844,17 @@ export async function deleteNote(accessToken, sheetId, noteId) {
           },
         }
       );
-      await invalidateCache(table.cacheName);
+      // Delete from junction table cache
+      const mappingIds = mappingsToDelete.map((m) => m['Note ID']);
+      for (const id of mappingIds) {
+        await deleteCachedRow(table.cacheName, 'Note ID', id);
+      }
     }
   }
 
   const duration = Date.now() - startTime;
   monitoringService.recordApiCall('delete', SHEET_NAMES.NOTES, duration);
-  await invalidateCache(SHEET_NAMES.NOTES);
+  await deleteCachedRow(SHEET_NAMES.NOTES, 'Note ID', noteId);
   return { success: true, noteId };
 }
 
