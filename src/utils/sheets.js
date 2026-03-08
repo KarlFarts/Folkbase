@@ -26,6 +26,7 @@ import {
 import { logApiCall } from './apiUsageLogger.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
+import { generateId, ID_PREFIXES } from './idGenerator';
 
 const SHEETS_API_BASE = API_CONFIG.SHEETS_API_BASE;
 
@@ -283,40 +284,17 @@ export async function readSheetData(accessToken, sheetId, sheetName, refreshToke
 }
 
 /**
- * Generate unique Contact ID (C001, C002, etc.)
+ * Generate unique Contact ID (UUID-based, no API call required)
  */
-export async function generateContactID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
-
-  if (data.length === 0) return 'C001';
-
-  // Find highest existing ID
-  const ids = data
-    .map((row) => row['Contact ID'])
-    .filter((id) => id && id.startsWith('C'))
-    .map((id) => parseInt(id.substring(1), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `C${String(maxId + 1).padStart(3, '0')}`;
+export async function generateContactID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.CONTACT);
 }
 
 /**
- * Generate unique Touchpoint ID (T001, T002, etc.)
+ * Generate unique Touchpoint ID (UUID-based, no API call required)
  */
-export async function generateTouchpointID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEETS.TOUCHPOINTS);
-
-  if (data.length === 0) return 'T001';
-
-  const ids = data
-    .map((row) => row['Touchpoint ID'])
-    .filter((id) => id && id.startsWith('T'))
-    .map((id) => parseInt(id.substring(1), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `T${String(maxId + 1).padStart(3, '0')}`;
+export async function generateTouchpointID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.TOUCHPOINT);
 }
 
 /**
@@ -674,21 +652,10 @@ export async function updateTouchpoint(
 }
 
 /**
- * Generate unique Event ID (E001, E002, etc.)
+ * Generate unique Event ID (UUID-based, no API call required)
  */
-export async function generateEventID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEETS.EVENTS);
-
-  if (data.length === 0) return 'E001';
-
-  // Find highest existing ID
-  const ids = data
-    .map((e) => e['Event ID'])
-    .filter((id) => id && id.match(/^E\d+$/))
-    .map((id) => parseInt(id.substring(1)));
-
-  const maxId = Math.max(...ids, 0);
-  return `E${String(maxId + 1).padStart(3, '0')}`;
+export async function generateEventID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.EVENT);
 }
 
 /**
@@ -1092,20 +1059,10 @@ export async function getContactNotes(accessToken, sheetId, contactId) {
 }
 
 /**
- * Generate unique Note ID (N001, N002, etc.)
+ * Generate unique Note ID (UUID-based, no API call required)
  */
-export async function generateNoteID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEETS.NOTES);
-
-  if (data.length === 0) return 'N001';
-
-  const ids = data
-    .map((n) => n['Note ID'])
-    .filter((id) => id && id.match(/^N\d+$/))
-    .map((id) => parseInt(id.substring(1)));
-
-  const maxId = Math.max(...ids, 0);
-  return `N${String(maxId + 1).padStart(3, '0')}`;
+export async function generateNoteID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.NOTE);
 }
 
 // ============================================================================
@@ -1753,20 +1710,10 @@ export async function addNoteWithLink(
 }
 
 /**
- * Generate a unique List ID (LST001, LST002, etc.)
+ * Generate a unique List ID (UUID-based, no API call required)
  */
-export async function generateListID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEETS.LISTS);
-
-  if (data.length === 0) return 'LST001';
-
-  const ids = data
-    .map((l) => l['List ID'])
-    .filter((id) => id && id.match(/^LST\d+$/))
-    .map((id) => parseInt(id.substring(3)));
-
-  const maxId = Math.max(...ids, 0);
-  return `LST${String(maxId + 1).padStart(3, '0')}`;
+export async function generateListID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.LIST);
 }
 
 /**
