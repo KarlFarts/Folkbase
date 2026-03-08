@@ -367,11 +367,12 @@ export const SHEET_HEADERS = {
     'Description',
     'Target Audience',
     'Goals/Objectives',
-    // Attendance (5)
+    // Attendance (6)
     'Expected Attendees',
     'Confirmed Attendees',
     'Actual Attendance',
     'Attendees',
+    'Unresolved Attendees',
     'RSVP Deadline',
     // Logistics (4)
     'Organizer Contact ID',
@@ -864,7 +865,6 @@ export const API_QUOTAS = {
     ],
     documentationUrl: 'https://developers.google.com/sheets/api/limits',
   },
-
 };
 
 // API Usage Tracking Configuration
@@ -891,7 +891,6 @@ export const CACHE_CONFIG = {
   LOW_CHURN_TTL: 1800, // 30 minutes - for rarely changing data
   MAX_CACHE_SIZE_MB: 50, // Maximum cache size (not enforced yet)
 };
-
 
 export default {
   SHEET_NAMES,
