@@ -51,6 +51,7 @@ const STORAGE_KEY_ORG_DEPARTMENTS = 'dev_org_departments';
 const STORAGE_KEY_TASK_CHECKLIST = 'dev_task_checklist';
 const STORAGE_KEY_TASK_TIME_ENTRIES = 'dev_task_time_entries';
 const STORAGE_KEY_CALENDAR_EVENTS = 'touchpoint_dev_calendar_events';
+const STORAGE_KEY_MOMENTS = 'dev_moments';
 
 // ============================================================================
 // CONTACTS
@@ -650,6 +651,24 @@ export function getLocalTaskTimeEntries() {
 
 export function saveLocalTaskTimeEntries(entries) {
   localStorage.setItem(STORAGE_KEY_TASK_TIME_ENTRIES, JSON.stringify(entries));
+}
+
+// ============================================================================
+// MOMENTS
+// ============================================================================
+
+export function getLocalMoments() {
+  const stored = localStorage.getItem(STORAGE_KEY_MOMENTS);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalMoments(moments) {
+  localStorage.setItem(STORAGE_KEY_MOMENTS, JSON.stringify(moments));
 }
 
 // ============================================================================
