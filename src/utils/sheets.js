@@ -412,6 +412,35 @@ export async function logAuditEntry(accessToken, sheetId, entry) {
 }
 
 /**
+ * Log multiple audit entries in a single batch API call.
+ *
+ * @param {string} accessToken - Google OAuth access token
+ * @param {string} sheetId - Google Sheet ID
+ * @param {Array<Object>} entries - Array of audit entry objects
+ * @returns {Promise<Object>} Batch response
+ */
+export async function batchLogAuditEntries(accessToken, sheetId, entries) {
+  if (entries.length === 0) return { totalUpdatedRows: 0 };
+
+  const rows = entries.map((entry) => {
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    return [
+      timestamp,
+      entry.contactId,
+      entry.contactName,
+      entry.fieldChanged,
+      entry.oldValue || '',
+      entry.newValue || '',
+      entry.userEmail,
+    ];
+  });
+
+  return batchAppendRows(accessToken, sheetId, {
+    [SHEETS.AUDIT_LOG]: rows,
+  });
+}
+
+/**
  * Append data object as a row to a sheet
  * Converts object with field names to array of values matching header order
  */
@@ -530,11 +559,12 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
 
   await updateRow(accessToken, sheetId, SHEETS.CONTACTS, rowIndex, values);
 
-  // Log each changed field to audit (non-blocking)
+  // Batch log all changed fields to audit (non-blocking)
   try {
+    const auditEntries = [];
     for (const fieldName of Object.keys(newData)) {
       if (newData[fieldName] !== oldData[fieldName]) {
-        await logAuditEntry(accessToken, sheetId, {
+        auditEntries.push({
           contactId,
           contactName: newData['Name'] || oldData['Name'] || '',
           fieldChanged: fieldName,
@@ -543,6 +573,9 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
           userEmail,
         });
       }
+    }
+    if (auditEntries.length > 0) {
+      await batchLogAuditEntries(accessToken, sheetId, auditEntries);
     }
   } catch (auditErr) {
     console.error('Audit log failed for updateContact:', auditErr);
