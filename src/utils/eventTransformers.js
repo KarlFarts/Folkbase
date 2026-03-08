@@ -95,18 +95,29 @@ export function googleEventToCRMEvent(gcalEvent, contacts = []) {
   };
 
   // Match Google Calendar attendees to CRM contacts by email
-  if (gcalEvent.attendees && gcalEvent.attendees.length > 0 && contacts.length > 0) {
-    const matchedContactIds = gcalEvent.attendees
-      .map((attendee) => {
+  if (gcalEvent.attendees && gcalEvent.attendees.length > 0) {
+    const matchedContactIds = [];
+    const unresolvedNames = [];
+
+    gcalEvent.attendees.forEach((attendee) => {
+      if (contacts.length > 0) {
         const contact = contacts.find(
           (c) => c.Email && c.Email.toLowerCase() === attendee.email.toLowerCase()
         );
-        return contact?.['Contact ID'];
-      })
-      .filter(Boolean);
+        if (contact) {
+          matchedContactIds.push(contact['Contact ID']);
+          return;
+        }
+      }
+      // Unmatched — use displayName or fall back to email
+      unresolvedNames.push(attendee.displayName || attendee.email);
+    });
 
     if (matchedContactIds.length > 0) {
       crmEvent.Attendees = matchedContactIds.join(',');
+    }
+    if (unresolvedNames.length > 0) {
+      crmEvent['Unresolved Attendees'] = JSON.stringify(unresolvedNames);
     }
   }
 
