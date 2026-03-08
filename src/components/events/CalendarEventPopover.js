@@ -1,6 +1,15 @@
+import { useEffect, useRef } from 'react';
 import { X, ExternalLink, Users } from 'lucide-react';
 
 function CalendarEventPopover({ gcalEvent, onClose, onAddToFolkbase }) {
+  const cardRef = useRef(null);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      cardRef.current.focus();
+    }
+  }, []);
+
   if (!gcalEvent) return null;
 
   const startDateStr = gcalEvent.start?.dateTime || gcalEvent.start?.date;
@@ -22,7 +31,13 @@ function CalendarEventPopover({ gcalEvent, onClose, onAddToFolkbase }) {
 
   return (
     <div className="cep-overlay" onClick={onClose}>
-      <div className="cep-card" onClick={(e) => e.stopPropagation()}>
+      <div
+        className="cep-card"
+        ref={cardRef}
+        tabIndex={-1}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.key === 'Escape' && onClose()}
+      >
         <div className="cep-header">
           <h4 className="cep-title">{gcalEvent.summary || 'Untitled Event'}</h4>
           <button className="btn btn-ghost btn-sm cep-close" onClick={onClose} title="Close">

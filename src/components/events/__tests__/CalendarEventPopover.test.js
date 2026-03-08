@@ -1,9 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-
-vi.mock('../../../contexts/NotificationContext', () => ({
-  useNotification: () => ({ notify: { success: vi.fn(), error: vi.fn() } }),
-}));
-
 import CalendarEventPopover from '../CalendarEventPopover';
 
 const mockGcalEvent = {
@@ -51,6 +46,20 @@ describe('CalendarEventPopover', () => {
       />
     );
     fireEvent.click(screen.getByTitle('Close'));
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('calls onClose when overlay backdrop is clicked', () => {
+    const onClose = vi.fn();
+    const { container } = render(
+      <CalendarEventPopover
+        gcalEvent={mockGcalEvent}
+        onClose={onClose}
+        onAddToFolkbase={vi.fn()}
+      />
+    );
+    const overlay = container.querySelector('.cep-overlay');
+    fireEvent.click(overlay);
     expect(onClose).toHaveBeenCalled();
   });
 });
