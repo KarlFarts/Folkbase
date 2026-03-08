@@ -1,14 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { RefreshCw } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
-import { syncEvents } from '../utils/syncEngine';
 import EventCard from '../components/events/EventCard';
 import CalendarView from '../components/events/CalendarView';
 import TimelineView from '../components/events/TimelineView';
 import ImportEventModal from '../components/events/ImportEventModal';
-import SyncConflictModal from '../components/events/SyncConflictModal';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 import { useNotification } from '../contexts/NotificationContext';
 import { usePermissions } from '../hooks/usePermissions';
@@ -26,29 +23,10 @@ function EventsList({ onNavigate }) {
   const [viewMode, setViewMode] = useState('list');
   const [searchQuery, setSearchQuery] = useState('');
   const [showPastEvents, setShowPastEvents] = useState(false);
-  const [syncing, setSyncing] = useState(false);
   const [personalEvents, setPersonalEvents] = useState([]);
   const [calendarSyncEnabled, setCalendarSyncEnabled] = useState(false);
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [selectedGoogleEvent, setSelectedGoogleEvent] = useState(null);
-  const [conflicts, setConflicts] = useState([]);
-  const [currentConflictIndex, setCurrentConflictIndex] = useState(0);
-  const [syncStatus, setSyncStatus] = useState({
-    lastSyncedAt: null,
-    lastPushed: 0,
-    lastPulled: 0,
-  });
-
-  useEffect(() => {
-    const stored = localStorage.getItem('touchpoint_calendar_sync_status');
-    if (stored) {
-      try {
-        setSyncStatus(JSON.parse(stored));
-      } catch {
-        // Invalid stored status, use defaults
-      }
-    }
-  }, []);
 
   const loadEvents = useCallback(async () => {
     if (!sheetId || !accessToken) {
@@ -107,65 +85,6 @@ function EventsList({ onNavigate }) {
     loadEvents();
   }, [loadEvents]);
 
-  const handleConflictResolved = useCallback(() => {
-    if (currentConflictIndex < conflicts.length - 1) {
-      setCurrentConflictIndex(currentConflictIndex + 1);
-    } else {
-      setConflicts([]);
-      setCurrentConflictIndex(0);
-    }
-    loadEvents();
-  }, [currentConflictIndex, conflicts.length, loadEvents]);
-
-  const handleConflictModalClose = useCallback(() => {
-    setConflicts([]);
-    setCurrentConflictIndex(0);
-  }, []);
-
-  const handleSync = useCallback(async () => {
-    if (!accessToken || !sheetId || !calendarSyncEnabled) return;
-
-    setSyncing(true);
-    try {
-      const result = await syncEvents(accessToken, sheetId);
-
-      setPersonalEvents(result.personalEvents || []);
-
-      const eventsResult = await readSheetData(accessToken, sheetId, SHEETS.EVENTS, refreshAccessToken);
-      setEvents(eventsResult.data || []);
-
-      const messages = [];
-      if (result.pushed.length > 0) messages.push(`Pushed ${result.pushed.length} event(s) to Calendar`);
-      if (result.pulled.length > 0) messages.push(`Updated ${result.pulled.length} event(s) from Calendar`);
-      if (result.conflicts.length > 0) messages.push(`${result.conflicts.length} conflict(s) detected`);
-      if (result.errors.length > 0) messages.push(`${result.errors.length} error(s)`);
-
-      if (messages.length === 0) {
-        notify.success('Calendar synced — no changes');
-      } else if (result.errors.length > 0) {
-        notify.warning(messages.join(', '));
-      } else {
-        notify.success(messages.join(', '));
-      }
-
-      if (result.conflicts.length > 0) {
-        setConflicts(result.conflicts);
-        setCurrentConflictIndex(0);
-      }
-
-      const newStatus = {
-        lastSyncedAt: new Date().toISOString(),
-        lastPushed: result.pushed.length,
-        lastPulled: result.pulled.length,
-      };
-      setSyncStatus(newStatus);
-      localStorage.setItem('touchpoint_calendar_sync_status', JSON.stringify(newStatus));
-    } catch (error) {
-      notify.error('Calendar sync failed. Check your connection and try again.');
-    } finally {
-      setSyncing(false);
-    }
-  }, [accessToken, sheetId, calendarSyncEnabled, refreshAccessToken, notify]);
 
   const handleReauth = async () => {
     try {
@@ -299,38 +218,6 @@ function EventsList({ onNavigate }) {
           </button>
         </div>
 
-        {calendarSyncEnabled && (
-          <div className="el-sync-section">
-            {syncStatus.lastSyncedAt && (
-              <div className="el-sync-status">
-                <span>
-                  Synced{' '}
-                  {(() => {
-                    const now = new Date();
-                    const lastSync = new Date(syncStatus.lastSyncedAt);
-                    const diffMinutes = Math.floor((now - lastSync) / 60000);
-                    if (diffMinutes < 1) return 'just now';
-                    if (diffMinutes < 60) return `${diffMinutes} min ago`;
-                    const diffHours = Math.floor(diffMinutes / 60);
-                    if (diffHours < 24) return `${diffHours}h ago`;
-                    return lastSync.toLocaleDateString();
-                  })()}
-                </span>
-                {(syncStatus.lastPushed > 0 || syncStatus.lastPulled > 0) && (
-                  <span>
-                    {syncStatus.lastPushed > 0 && `↑${syncStatus.lastPushed}`}
-                    {syncStatus.lastPushed > 0 && syncStatus.lastPulled > 0 && ' '}
-                    {syncStatus.lastPulled > 0 && `↓${syncStatus.lastPulled}`}
-                  </span>
-                )}
-              </div>
-            )}
-            <button className="btn btn-secondary el-sync-btn" onClick={handleSync} disabled={syncing}>
-              <RefreshCw size={16} className={syncing ? 'spin' : ''} />
-              {syncing ? 'Syncing...' : 'Sync'}
-            </button>
-          </div>
-        )}
 
         <div className="el-search">
           <input
@@ -493,13 +380,6 @@ function EventsList({ onNavigate }) {
         contacts={contacts}
       />
 
-      <SyncConflictModal
-        isOpen={conflicts.length > 0}
-        onClose={handleConflictModalClose}
-        conflict={conflicts[currentConflictIndex]}
-        onResolved={handleConflictResolved}
-        contacts={contacts}
-      />
     </div>
   );
 }
