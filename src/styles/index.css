@@ -12452,3 +12452,102 @@ body {
   outline: none;
   border-color: var(--color-primary);
 }
+
+/* ========================================
+   CalendarEventPopover (cep-*)
+   ======================================== */
+
+.cep-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: transparent;
+}
+
+.cep-card {
+  position: absolute;
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  width: 280px;
+  z-index: 201;
+  /* Position is set inline by CalendarView */
+}
+
+.cep-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+}
+
+.cep-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.cep-close {
+  flex-shrink: 0;
+  padding: 2px;
+}
+
+.cep-body {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.cep-time {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.cep-description {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  margin: 0;
+  white-space: pre-line;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.cep-attendees {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.cep-attendees-icon {
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+
+.cep-attendees-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.cep-meeting-link {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--font-size-xs);
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.cep-meeting-link:hover {
+  text-decoration: underline;
+}
+
+.cep-footer {
+  padding: var(--spacing-xs) var(--spacing-sm) var(--spacing-sm);
+  border-top: 1px solid var(--color-border);
+}
