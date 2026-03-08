@@ -11,6 +11,7 @@ import {
 } from '../utils/devModeWrapper';
 import { crmEventToGoogleEvent } from '../utils/eventTransformers';
 import AttendeeSelector from '../components/events/AttendeeSelector';
+import TagsInput from '../components/TagsInput';
 
 function AddEvent({ onNavigate }) {
   const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
@@ -29,6 +30,7 @@ function AddEvent({ onNavigate }) {
     'Event Type': 'Meeting',
     Description: '',
     Attendees: [], // Array of Contact IDs
+    'Unresolved Attendees': '',
   });
 
   const loadContacts = useCallback(async () => {
@@ -38,12 +40,7 @@ function AddEvent({ onNavigate }) {
     }
 
     try {
-      const result = await readSheetData(
-        accessToken,
-        sheetId,
-        SHEETS.CONTACTS,
-        refreshAccessToken
-      );
+      const result = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS, refreshAccessToken);
       setContacts(result.data || []);
     } catch {
       // Silently fail - contacts are optional
@@ -282,6 +279,22 @@ function AddEvent({ onNavigate }) {
                 onChange={(ids) => handleInputChange('Attendees', ids)}
               />
             )}
+
+            {/* Unresolved / freeform attendees */}
+            <div className="add-form-field">
+              <label className="form-label" htmlFor="unresolved-attendees">
+                Other attendees (not in contacts)
+              </label>
+              <TagsInput
+                id="unresolved-attendees"
+                value={formData['Unresolved Attendees']}
+                onChange={(val) => handleInputChange('Unresolved Attendees', val)}
+                placeholder="Type a name and press Enter..."
+              />
+              <p className="form-hint">
+                Names you can resolve to contacts later in your review queue.
+              </p>
+            </div>
 
             {/* Actions */}
             <div className="add-form-actions">

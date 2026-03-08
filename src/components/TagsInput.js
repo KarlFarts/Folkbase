@@ -6,7 +6,7 @@ import { X } from 'lucide-react';
  * Value is a comma-separated string (matches existing data format).
  * Press Enter or comma to add a tag; click X on a chip to remove.
  */
-function TagsInput({ value, onChange, placeholder = 'Add tag...', suggestionsKey = null }) {
+function TagsInput({ value, onChange, placeholder = 'Add tag...', suggestionsKey = null, id }) {
   const [inputVal, setInputVal] = useState('');
 
   const tags = value
@@ -76,6 +76,7 @@ function TagsInput({ value, onChange, placeholder = 'Add tag...', suggestionsKey
         </span>
       ))}
       <input
+        id={id}
         type="text"
         className="tags-input-field"
         value={inputVal}
