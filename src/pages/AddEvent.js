@@ -7,14 +7,12 @@ import {
   readSheetData,
   SHEETS,
   generateEventID,
-  createCalendarEvent,
 } from '../utils/devModeWrapper';
-import { crmEventToGoogleEvent } from '../utils/eventTransformers';
 import AttendeeSelector from '../components/events/AttendeeSelector';
 import TagsInput from '../components/TagsInput';
 
 function AddEvent({ onNavigate }) {
-  const { accessToken, refreshAccessToken, hasCalendarAccess } = useAuth();
+  const { accessToken, refreshAccessToken } = useAuth();
   const sheetId = useActiveSheetId();
   const { canWrite } = usePermissions();
   const [contacts, setContacts] = useState([]);
@@ -90,12 +88,8 @@ function AddEvent({ onNavigate }) {
       // Import the addEvent function dynamically
       const { addEvent } = await import('../utils/devModeWrapper');
 
-      // Generate Event ID first (needed for calendar sync)
+      // Generate Event ID
       const eventId = await generateEventID(accessToken, sheetId);
-
-      // Check if calendar sync is enabled
-      const settings = JSON.parse(localStorage.getItem('touchpoint_calendar_settings') || '{}');
-      const calendarSyncEnabled = settings.enabled === true && (await hasCalendarAccess());
 
       // Convert attendee IDs to comma-separated string
       const eventData = {
@@ -106,22 +100,6 @@ function AddEvent({ onNavigate }) {
 
       // Sanitize input to prevent XSS and formula injection
       const sanitizedEventData = sanitizeFormData(eventData, SCHEMAS.event);
-
-      // If calendar sync is enabled, create Google Calendar event first
-      if (calendarSyncEnabled) {
-        try {
-          const googleEvent = crmEventToGoogleEvent(sanitizedEventData, contacts);
-          const createdEvent = await createCalendarEvent(accessToken, googleEvent, eventId);
-
-          // Add sync metadata to event data
-          sanitizedEventData['Google Calendar ID'] = createdEvent.id;
-          sanitizedEventData['Sync Source'] = 'CRM';
-          sanitizedEventData['Last Synced At'] = new Date().toISOString();
-        } catch {
-          // If calendar sync fails, still create the CRM event but warn the user
-          setError('Event created, but failed to sync to Google Calendar. You can sync it later.');
-        }
-      }
 
       await addEvent(accessToken, sheetId, sanitizedEventData, refreshAccessToken);
 
