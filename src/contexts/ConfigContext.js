@@ -71,8 +71,7 @@ export const ConfigProvider = ({ children }) => {
       localStorage.removeItem('user-avatar-color');
       localStorage.removeItem('user-avatar-icon');
       localStorage.removeItem('touchpoint_calendar_settings');
-      localStorage.removeItem('touchpoint_calendar_sync_status');
-      setConfig({ personalSheetId: null, isLoaded: true });
+setConfig({ personalSheetId: null, isLoaded: true });
     }
     localStorage.setItem('folkbase_config_email', email);
   };
