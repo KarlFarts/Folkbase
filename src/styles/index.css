@@ -12783,6 +12783,10 @@ body {
   font-size: var(--font-size-xs);
 }
 
+.moment-chip--readonly {
+  cursor: default;
+}
+
 .moment-chip-remove {
   background: none;
   border: none;

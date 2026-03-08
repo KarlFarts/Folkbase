@@ -68,6 +68,16 @@ const CONTENT_TABS = [
   { value: 'moments', label: 'Moments' },
 ];
 
+const EMPTY_MOMENT = {
+  Title: '',
+  Type: 'Vacation',
+  'Start Date': '',
+  'End Date': '',
+  Location: '',
+  Notes: '',
+  'Contact IDs': '',
+};
+
 function ContactProfile({ onNavigate }) {
   const { id: contactId } = useParams();
   const { user, accessToken } = useAuth();
@@ -85,18 +95,10 @@ function ContactProfile({ onNavigate }) {
   const [showNoteExtended, setShowNoteExtended] = useState(false);
   const [noteSearch, setNoteSearch] = useState('');
 
-  const [moments, setMoments] = React.useState([]);
+  const [moments, setMoments] = useState([]);
   const [showMomentModal, setShowMomentModal] = useState(false);
   const [editingMoment, setEditingMoment] = useState(null);
-  const [momentData, setMomentData] = useState({
-    Title: '',
-    Type: 'Vacation',
-    'Start Date': '',
-    'End Date': '',
-    Location: '',
-    Notes: '',
-    'Contact IDs': '',
-  });
+  const [momentData, setMomentData] = useState({ ...EMPTY_MOMENT });
   const [savingMoment, setSavingMoment] = useState(false);
   const [showDeleteMomentConfirm, setShowDeleteMomentConfirm] = useState(false);
   const [momentToDelete, setMomentToDelete] = useState(null);
@@ -233,16 +235,6 @@ function ContactProfile({ onNavigate }) {
     }
   };
 
-  const EMPTY_MOMENT = {
-    Title: '',
-    Type: 'Vacation',
-    'Start Date': '',
-    'End Date': '',
-    Location: '',
-    Notes: '',
-    'Contact IDs': '',
-  };
-
   const handleOpenAddMoment = () => {
     setEditingMoment(null);
     setMomentData({ ...EMPTY_MOMENT, 'Contact IDs': contactId });
@@ -282,10 +274,10 @@ function ContactProfile({ onNavigate }) {
         notify.success('Moment updated!');
       } else {
         const result = await addMoment(accessToken, sheetId, momentData);
-        if (result && result.momentId) {
+        if (result && (result.momentId || result['Moment ID'])) {
           setMoments((prev) => [
             ...prev,
-            { 'Moment ID': result.momentId, ...momentData },
+            { ...momentData, 'Moment ID': result['Moment ID'] || result.momentId, 'Created At': result['Created At'] },
           ]);
         }
         notify.success('Moment added!');

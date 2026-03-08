@@ -31,6 +31,7 @@ function formatDateRange(start, end) {
 export default function MomentsTab({
   moments,
   allContacts = [],
+  currentContactId,
   canWrite,
   onAdd,
   onEdit,
@@ -78,7 +79,8 @@ export default function MomentsTab({
           const taggedIds = (moment['Contact IDs'] || '')
             .split(',')
             .map((s) => s.trim())
-            .filter(Boolean);
+            .filter(Boolean)
+            .filter((id) => id !== currentContactId);
           const dateRange = formatDateRange(moment['Start Date'], moment['End Date']);
 
           return (

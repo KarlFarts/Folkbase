@@ -239,6 +239,8 @@ export const readSheetData = (function () {
         data = getLocalLocations();
       } else if (sheetName === 'Location Visits') {
         data = getLocalLocationVisits();
+      } else if (sheetName === SHEET_NAMES.MOMENTS || sheetName === 'Moments') {
+        data = getLocalMoments();
       } else {
         data = [];
       }
