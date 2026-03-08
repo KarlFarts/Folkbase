@@ -48,6 +48,7 @@ vi.mock('../../utils/devModeWrapper', () => ({
   deleteEvent: vi.fn(),
   updateCalendarEvent: vi.fn(),
   deleteCalendarEvent: vi.fn(),
+  createCalendarEvent: vi.fn().mockResolvedValue({ id: 'gcal123' }),
   SHEETS: { EVENTS: 'Events', CONTACTS: 'Contacts', ORGANIZATIONS: 'Organizations' },
 }));
 
@@ -67,6 +68,14 @@ describe('EventDetails unresolved attendees', () => {
 });
 
 describe('EventDetails Send Calendar Invites button', () => {
+  it('does not show "Send Calendar Invites" button for past events', async () => {
+    // The default mock uses EVT001 with date 2025-01-01 (past), no calendar settings set
+    render(<EventDetails onNavigate={vi.fn()} />);
+    await screen.findByText('John ????'); // wait for data to load
+    expect(screen.queryByText('Send Calendar Invites')).not.toBeInTheDocument();
+    expect(screen.queryByText('Update Calendar Invites')).not.toBeInTheDocument();
+  });
+
   it('shows "Send Calendar Invites" button for future events with attendees when calendar connected', async () => {
     // Mock localStorage to have calendar enabled
     localStorage.setItem(

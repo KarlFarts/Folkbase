@@ -6,7 +6,6 @@ import {
   Trash2,
   Check,
   Calendar as CalendarIcon,
-  RefreshCw,
   Clock,
   Link as LinkIcon,
   Target,
@@ -26,6 +25,7 @@ import {
   deleteEvent,
   updateCalendarEvent,
   deleteCalendarEvent,
+  createCalendarEvent,
   SHEETS,
 } from '../utils/devModeWrapper';
 import { useActiveSheetId } from '../utils/sheetResolver';
@@ -310,8 +310,10 @@ function EventDetails({ onNavigate }) {
 
       if (event['Google Calendar ID']) {
         await updateCalendarEvent(accessToken, event['Google Calendar ID'], googleEvent);
+        await updateEvent(accessToken, sheetId, id, {
+          'Last Synced At': new Date().toISOString(),
+        });
       } else {
-        const { createCalendarEvent } = await import('../utils/devModeWrapper');
         const created = await createCalendarEvent(accessToken, googleEvent, event['Event ID']);
         await updateEvent(accessToken, sheetId, id, {
           'Google Calendar ID': created.id,
@@ -319,10 +321,6 @@ function EventDetails({ onNavigate }) {
           'Last Synced At': new Date().toISOString(),
         });
       }
-
-      await updateEvent(accessToken, sheetId, id, {
-        'Last Synced At': new Date().toISOString(),
-      });
 
       const attendeesWithEmail = allContacts.filter((c) => {
         const ids = (event['Attendees'] || '').split(',').map((i) => i.trim());
@@ -495,7 +493,7 @@ function EventDetails({ onNavigate }) {
               {event['Google Calendar ID'] && (
                 <span
                   className="ed-sync-badge"
-                  title={`Invite sent via Google Calendar${event['Last Synced At'] ? ` (${new Date(event['Last Synced At']).toLocaleString()})` : ''}`}
+                  title={`${event['Sync Source'] === 'Imported' ? 'Imported from' : 'Invite sent via'} Google Calendar${event['Last Synced At'] ? ` (${new Date(event['Last Synced At']).toLocaleString()})` : ''}`}
                 >
                   {event['Sync Source'] === 'Imported' ? (
                     <>
