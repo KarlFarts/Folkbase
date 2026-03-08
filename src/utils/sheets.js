@@ -911,32 +911,18 @@ export async function copyMultipleContacts(
   targetSheetId,
   userEmail
 ) {
-  const results = [];
+  const settled = await Promise.allSettled(
+    contactIds.map((contactId) =>
+      copyContactToWorkspace(accessToken, sourceSheetId, contactId, targetSheetId, userEmail)
+        .then((result) => ({ success: true, contactId, result }))
+    )
+  );
 
-  for (const contactId of contactIds) {
-    try {
-      const result = await copyContactToWorkspace(
-        accessToken,
-        sourceSheetId,
-        contactId,
-        targetSheetId,
-        userEmail
-      );
-      results.push({
-        success: true,
-        contactId,
-        result,
-      });
-    } catch (error) {
-      results.push({
-        success: false,
-        contactId,
-        error: error.message,
-      });
-    }
-  }
-
-  return results;
+  return settled.map((s) =>
+    s.status === 'fulfilled'
+      ? s.value
+      : { success: false, contactId: 'unknown', error: s.reason?.message || 'Unknown error' }
+  );
 }
 
 /**
