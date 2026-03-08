@@ -42,6 +42,7 @@ const TasksPage = lazy(() => import('./pages/TasksPage'));
 const BackupRestorePage = lazy(() => import('./pages/BackupRestorePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import TokenExpiryNotifier from './components/TokenExpiryNotifier';
+import ReauthBanner from './components/ReauthBanner';
 import NotificationContainer from './components/NotificationToast';
 import KeyboardShortcutHandler from './components/KeyboardShortcutHandler';
 import BraindumpFAB from './components/BraindumpFAB';
@@ -262,6 +263,7 @@ function AppContent() {
         <div className="app-container">
           <Navbar onNavigate={navigateTo} onShowSetup={() => setShowSetup(true)} />
           <TokenExpiryNotifier />
+          <ReauthBanner />
           {migrationNeeded && (
             <MigrationBanner
               accessToken={accessToken}
