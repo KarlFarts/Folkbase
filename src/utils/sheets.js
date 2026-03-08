@@ -27,6 +27,7 @@ import { logApiCall } from './apiUsageLogger.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
 import { generateId, ID_PREFIXES } from './idGenerator';
+import { getCachedData, appendToCachedData } from './indexedDbCache';
 
 const SHEETS_API_BASE = API_CONFIG.SHEETS_API_BASE;
 
@@ -281,6 +282,21 @@ export async function readSheetData(accessToken, sheetId, sheetName, refreshToke
   };
 
   return sheetsApiCallWithRetry(apiCall, accessToken, refreshTokenCallback);
+}
+
+/**
+ * Read sheet data from cache if available, otherwise fall back to API.
+ * Used for dupe checking in junction tables where stale data is acceptable.
+ *
+ * @param {string} accessToken - Google OAuth access token
+ * @param {string} sheetId - Google Sheet ID
+ * @param {string} sheetName - Sheet name to read
+ * @returns {Promise<Object>} Sheet data with headers and data array
+ */
+export async function readSheetDataCachedFirst(accessToken, sheetId, sheetName) {
+  const cached = await getCachedData(sheetName);
+  if (cached) return cached;
+  return readSheetData(accessToken, sheetId, sheetName);
 }
 
 /**
@@ -936,8 +952,8 @@ export async function copyMultipleContacts(
 export async function linkNoteToContact(accessToken, sheetId, noteId, contactId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists
-  const { data: existingMappings } = await readSheetData(
+  // Check if mapping already exists (use cache-first for faster dupe checks)
+  const { data: existingMappings } = await readSheetDataCachedFirst(
     accessToken,
     sheetId,
     SHEETS.CONTACT_NOTES
@@ -964,6 +980,9 @@ export async function linkNoteToContact(accessToken, sheetId, noteId, contactId)
   const values = headers.map((h) => newMapping[h.name] || '');
 
   await appendRow(accessToken, sheetId, SHEETS.CONTACT_NOTES, values);
+
+  // Optimistically update cache
+  await appendToCachedData(SHEETS.CONTACT_NOTES, newMapping);
 
   return { success: true, mapping: newMapping };
 }
@@ -1131,8 +1150,12 @@ export async function generateNoteID(_accessToken, _sheetId) {
 export async function linkNoteToEvent(accessToken, sheetId, noteId, eventId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists
-  const { data: existingMappings } = await readSheetData(accessToken, sheetId, SHEETS.EVENT_NOTES);
+  // Check if mapping already exists (use cache-first for faster dupe checks)
+  const { data: existingMappings } = await readSheetDataCachedFirst(
+    accessToken,
+    sheetId,
+    SHEETS.EVENT_NOTES
+  );
 
   const exists = existingMappings.some(
     (en) => en['Note ID'] === noteId && en['Event ID'] === eventId
@@ -1153,6 +1176,9 @@ export async function linkNoteToEvent(accessToken, sheetId, noteId, eventId) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.EVENT_NOTES);
   const values = headers.map((h) => newMapping[h.name] || '');
   await appendRow(accessToken, sheetId, SHEETS.EVENT_NOTES, values);
+
+  // Optimistically update cache
+  await appendToCachedData(SHEETS.EVENT_NOTES, newMapping);
 
   return { success: true, mapping: newMapping };
 }
@@ -1237,7 +1263,12 @@ export async function getEventNotes(accessToken, sheetId, eventId, userEmail = n
 export async function linkNoteToList(accessToken, sheetId, noteId, listId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  const { data: existingMappings } = await readSheetData(accessToken, sheetId, SHEETS.LIST_NOTES);
+  // Check if mapping already exists (use cache-first for faster dupe checks)
+  const { data: existingMappings } = await readSheetDataCachedFirst(
+    accessToken,
+    sheetId,
+    SHEETS.LIST_NOTES
+  );
 
   const exists = existingMappings.some(
     (ln) => ln['Note ID'] === noteId && ln['List ID'] === listId
@@ -1256,6 +1287,9 @@ export async function linkNoteToList(accessToken, sheetId, noteId, listId) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.LIST_NOTES);
   const values = headers.map((h) => newMapping[h.name] || '');
   await appendRow(accessToken, sheetId, SHEETS.LIST_NOTES, values);
+
+  // Optimistic cache update
+  await appendToCachedData(SHEETS.LIST_NOTES, newMapping);
 
   return { success: true, mapping: newMapping };
 }
@@ -1339,7 +1373,12 @@ export async function getListNotes(accessToken, sheetId, listId, userEmail = nul
 export async function linkNoteToTask(accessToken, sheetId, noteId, taskId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  const { data: existingMappings } = await readSheetData(accessToken, sheetId, SHEETS.TASK_NOTES);
+  // Check if mapping already exists (use cache-first for faster dupe checks)
+  const { data: existingMappings } = await readSheetDataCachedFirst(
+    accessToken,
+    sheetId,
+    SHEETS.TASK_NOTES
+  );
 
   const exists = existingMappings.some(
     (tn) => tn['Note ID'] === noteId && tn['Task ID'] === taskId
@@ -1358,6 +1397,9 @@ export async function linkNoteToTask(accessToken, sheetId, noteId, taskId) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.TASK_NOTES);
   const values = headers.map((h) => newMapping[h.name] || '');
   await appendRow(accessToken, sheetId, SHEETS.TASK_NOTES, values);
+
+  // Optimistic cache update
+  await appendToCachedData(SHEETS.TASK_NOTES, newMapping);
 
   return { success: true, mapping: newMapping };
 }
@@ -1881,7 +1923,8 @@ export async function deleteList(accessToken, sheetId, listId) {
  * Add a contact to a list (creates a Contact Lists mapping)
  */
 export async function addContactToList(accessToken, sheetId, contactId, listId) {
-  const { data: existingMappings } = await readSheetData(
+  // Check if mapping already exists (use cache-first for faster dupe checks)
+  const { data: existingMappings } = await readSheetDataCachedFirst(
     accessToken,
     sheetId,
     SHEETS.CONTACT_LISTS
@@ -1905,6 +1948,9 @@ export async function addContactToList(accessToken, sheetId, contactId, listId) 
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.CONTACT_LISTS);
   const values = headers.map((h) => newMapping[h.name] || '');
   await appendRow(accessToken, sheetId, SHEETS.CONTACT_LISTS, values);
+
+  // Optimistic cache update
+  await appendToCachedData(SHEETS.CONTACT_LISTS, newMapping);
 
   return { success: true, mapping: newMapping };
 }
