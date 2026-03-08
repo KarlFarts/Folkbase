@@ -98,10 +98,26 @@ const {
 const { mockMetadata = null } = _devContacts;
 import { createActivity, ACTIVITY_TYPES, sortActivitiesByDate } from './activities';
 import { log } from './logger';
+import { queueFailedWrite } from './retryQueue';
+import { registerRetryHandler } from '../hooks/useRetryQueue';
 
 export { ACTIVITY_TYPES };
 
 export const isDevMode = () => import.meta.env.VITE_DEV_MODE === 'true';
+
+// Register retry handlers for link operations (runs at module load time)
+registerRetryHandler('link-note-contact', async (accessToken, sheetId, item) => {
+  await sheetsModule.linkNoteToContact(accessToken, sheetId, item.sourceId, item.targetId);
+});
+registerRetryHandler('link-note-event', async (accessToken, sheetId, item) => {
+  await sheetsModule.linkNoteToEvent(accessToken, sheetId, item.sourceId, item.targetId);
+});
+registerRetryHandler('link-note-list', async (accessToken, sheetId, item) => {
+  await sheetsModule.linkNoteToList(accessToken, sheetId, item.sourceId, item.targetId);
+});
+registerRetryHandler('link-note-task', async (accessToken, sheetId, item) => {
+  await sheetsModule.linkNoteToTask(accessToken, sheetId, item.sourceId, item.targetId);
+});
 
 const today = () => new Date().toISOString().split('T')[0];
 const nowIso = () => new Date().toISOString();
@@ -2345,7 +2361,29 @@ export const batchLinkNoteToEntities = (function () {
 
       return results;
     }
-    return originalFn(accessToken, sheetId, noteId, entityLinks);
+    // Production mode: call original and queue any failures for retry
+    const results = await originalFn(accessToken, sheetId, noteId, entityLinks);
+
+    // Queue failures for retry
+    const allResults = [
+      ...results.contacts.map((r) => ({ ...r, type: 'link-note-contact', sourceId: noteId, targetId: r.contactId || r.id })),
+      ...results.events.map((r) => ({ ...r, type: 'link-note-event', sourceId: noteId, targetId: r.eventId || r.id })),
+      ...results.lists.map((r) => ({ ...r, type: 'link-note-list', sourceId: noteId, targetId: r.listId || r.id })),
+      ...results.tasks.map((r) => ({ ...r, type: 'link-note-task', sourceId: noteId, targetId: r.taskId || r.id })),
+    ];
+
+    for (const r of allResults) {
+      if (r.success === false) {
+        queueFailedWrite({
+          type: r.type,
+          sourceId: r.sourceId,
+          targetId: r.targetId,
+          payload: { sheetId },
+        });
+      }
+    }
+
+    return results;
   };
 })();
 
