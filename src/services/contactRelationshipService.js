@@ -2,6 +2,7 @@ import { readSheetData, appendRow, updateRow, getSheetIdByName } from '../utils/
 import { SHEET_NAMES } from '../config/constants';
 import axios from 'axios';
 import { API_CONFIG } from '../config/constants';
+import { generateId, ID_PREFIXES } from '../utils/idGenerator';
 
 /**
  * Contact Relationship Service
@@ -95,40 +96,10 @@ const saveLocalRelationships = (relationships) => {
 };
 
 /**
- * Generate unique Relationship ID (REL001, REL002, etc.)
+ * Generate unique Relationship ID (REL-xxxxxxxx)
  */
-async function generateRelationshipID(accessToken, sheetId) {
-  if (isDevMode()) {
-    const relationships = getLocalRelationships();
-    if (relationships.length === 0) return 'REL001';
-
-    const ids = relationships
-      .map((r) => r['Relationship ID'])
-      .filter((id) => id && id.startsWith('REL'))
-      .map((id) => parseInt(id.substring(3), 10))
-      .filter((num) => !isNaN(num));
-
-    const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-    return `REL${String(maxId + 1).padStart(3, '0')}`;
-  }
-
-  // Production mode
-  const relationships = await readSheetData(
-    accessToken,
-    sheetId,
-    SHEET_NAMES.CONTACT_RELATIONSHIPS
-  );
-
-  if (relationships.length === 0) return 'REL001';
-
-  const ids = relationships
-    .map((r) => r['Relationship ID'])
-    .filter((id) => id && id.startsWith('REL'))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `REL${String(maxId + 1).padStart(3, '0')}`;
+async function generateRelationshipID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.RELATIONSHIP);
 }
 
 /**
@@ -187,8 +158,8 @@ export async function createRelationship(accessToken, sheetId, relationshipData,
   const timestamp = new Date().toISOString().split('T')[0];
 
   if (isDevMode()) {
+    const relationshipId = generateId(ID_PREFIXES.RELATIONSHIP);
     const relationships = getLocalRelationships();
-    const relationshipId = `REL${String(relationships.length + 1).padStart(3, '0')}`;
 
     const newRelationship = {
       'Relationship ID': relationshipId,

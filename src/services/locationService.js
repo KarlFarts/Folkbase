@@ -13,24 +13,13 @@ import {
   updateRow,
   logAuditEntry,
 } from '../utils/devModeWrapper';
+import { generateId, ID_PREFIXES } from '../utils/idGenerator';
 
 /**
- * Generate unique Location ID (LOC001, LOC002, etc.)
+ * Generate unique Location ID (LOC-xxxxxxxx)
  */
-export async function generateLocationID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.LOCATIONS);
-
-  if (data.length === 0) return 'LOC001';
-
-  // Find highest existing ID
-  const ids = data
-    .map((row) => row['Location ID'])
-    .filter((id) => id && id.startsWith('LOC'))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `LOC${String(maxId + 1).padStart(3, '0')}`;
+export async function generateLocationID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.LOCATION);
 }
 
 /**

@@ -14,6 +14,7 @@
 
 import { SHEET_NAMES } from '../config/constants';
 import { readSheetData, appendRow, updateRow, logAuditEntry } from '../utils/devModeWrapper';
+import { generateId, ID_PREFIXES } from '../utils/idGenerator';
 
 /**
  * Generate a secure random invitation token
@@ -26,40 +27,17 @@ export function generateInvitationToken() {
 }
 
 /**
- * Generate unique Workspace ID (WS001, WS002, etc.)
+ * Generate unique Workspace ID (WS-xxxxxxxx)
  */
-export async function generateWorkspaceID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.WORKSPACES);
-
-  if (data.length === 0) return 'WS001';
-
-  // Find highest existing ID
-  const ids = data
-    .map((row) => row['Workspace ID'])
-    .filter((id) => id && id.startsWith('WS'))
-    .map((id) => parseInt(id.substring(2), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `WS${String(maxId + 1).padStart(3, '0')}`;
+export async function generateWorkspaceID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.WORKSPACE);
 }
 
 /**
- * Generate unique Member ID (MEM001, MEM002, etc.)
+ * Generate unique Member ID (MEM-xxxxxxxx)
  */
-export async function generateMemberID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.WORKSPACE_MEMBERS);
-
-  if (data.length === 0) return 'MEM001';
-
-  const ids = data
-    .map((row) => row['Member ID'])
-    .filter((id) => id && id.startsWith('MEM'))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `MEM${String(maxId + 1).padStart(3, '0')}`;
+export async function generateMemberID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.MEMBER);
 }
 
 /**
@@ -616,21 +594,10 @@ export async function getUserWorkspaces(accessToken, sheetId, userEmail) {
 // ============================================================================
 
 /**
- * Generate unique Invitation ID (INV001, INV002, etc.)
+ * Generate unique Invitation ID (INV-xxxxxxxx)
  */
-export async function generateInvitationID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.WORKSPACE_INVITATIONS);
-
-  if (!data || data.length === 0) return 'INV001';
-
-  const ids = data
-    .map((row) => row['Invitation ID'])
-    .filter((id) => id && id.startsWith('INV'))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `INV${String(maxId + 1).padStart(3, '0')}`;
+export async function generateInvitationID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.INVITATION);
 }
 
 /**

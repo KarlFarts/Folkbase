@@ -13,24 +13,13 @@ import {
   updateRow,
   logAuditEntry,
 } from '../utils/devModeWrapper';
+import { generateId, ID_PREFIXES } from '../utils/idGenerator';
 
 /**
- * Generate unique Visit ID (VIS001, VIS002, etc.)
+ * Generate unique Visit ID (VIS-xxxxxxxx)
  */
-export async function generateVisitID(accessToken, sheetId) {
-  const { data } = await readSheetData(accessToken, sheetId, SHEET_NAMES.LOCATION_VISITS);
-
-  if (data.length === 0) return 'VIS001';
-
-  // Find highest existing ID
-  const ids = data
-    .map((row) => row['Visit ID'])
-    .filter((id) => id && id.startsWith('VIS'))
-    .map((id) => parseInt(id.substring(3), 10))
-    .filter((num) => !isNaN(num));
-
-  const maxId = ids.length > 0 ? Math.max(...ids) : 0;
-  return `VIS${String(maxId + 1).padStart(3, '0')}`;
+export async function generateVisitID(_accessToken, _sheetId) {
+  return generateId(ID_PREFIXES.VISIT);
 }
 
 /**
