@@ -7,7 +7,6 @@ vi.mock('../../contexts/AuthContext', () => ({
     accessToken: 'tok',
     user: { email: 'a@b.com' },
     refreshAccessToken: vi.fn(),
-    hasCalendarAccess: vi.fn().mockResolvedValue(false),
   }),
 }));
 vi.mock('../../utils/sheetResolver', () => ({ useActiveSheetId: () => 'sheet1' }));
