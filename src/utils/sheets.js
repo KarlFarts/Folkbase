@@ -1129,7 +1129,7 @@ export async function copyMultipleContacts(
 export async function linkNoteToContact(accessToken, sheetId, noteId, contactId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists (use cache-first for faster dupe checks)
+  // Check if mapping already exists (always read fresh — no cache, prevents stale dupe detection)
   const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
@@ -1328,7 +1328,7 @@ export async function generateNoteID(_accessToken, _sheetId) {
 export async function linkNoteToEvent(accessToken, sheetId, noteId, eventId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists (use cache-first for faster dupe checks)
+  // Check if mapping already exists (always read fresh — no cache, prevents stale dupe detection)
   const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
@@ -1442,7 +1442,7 @@ export async function getEventNotes(accessToken, sheetId, eventId, userEmail = n
 export async function linkNoteToList(accessToken, sheetId, noteId, listId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists (use cache-first for faster dupe checks)
+  // Check if mapping already exists (always read fresh — no cache, prevents stale dupe detection)
   const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
@@ -1553,7 +1553,7 @@ export async function getListNotes(accessToken, sheetId, listId, userEmail = nul
 export async function linkNoteToTask(accessToken, sheetId, noteId, taskId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
-  // Check if mapping already exists (use cache-first for faster dupe checks)
+  // Check if mapping already exists (always read fresh — no cache, prevents stale dupe detection)
   const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
@@ -2118,7 +2118,7 @@ export async function deleteList(accessToken, sheetId, listId) {
  * Add a contact to a list (creates a Contact Lists mapping)
  */
 export async function addContactToList(accessToken, sheetId, contactId, listId) {
-  // Check if mapping already exists (use cache-first for faster dupe checks)
+  // Check if mapping already exists (always read fresh — no cache, prevents stale dupe detection)
   const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
