@@ -82,7 +82,20 @@ function AddContact({ onNavigate }) {
     }
 
     try {
-      const dups = await detectDuplicates(accessToken, sheetId, formData);
+      // Compute the display name so it matches against legacy contacts that
+      // only store a single "Name" field.
+      const parts = [formData['First Name'], formData['Last Name']].filter(Boolean);
+      const displayName = formData['Display Name'] || parts.join(' ');
+
+      const dataForCheck = {
+        ...formData,
+        'Display Name': displayName,
+        Name: displayName,
+        Phone: formData['Phone Mobile'],
+        Email: formData['Email Personal'],
+      };
+
+      const dups = await detectDuplicates(accessToken, sheetId, dataForCheck);
       if (dups.length > 0) {
         setDuplicates(dups);
         setShowDuplicateWarning(true);
@@ -385,7 +398,9 @@ function AddContact({ onNavigate }) {
                   key={i}
                   className="add-form-dup-item"
                 >
-                  <div className="add-form-dup-name">{dup.existing['Name']}</div>
+                  <div className="add-form-dup-name">
+                    {dup.existing['Display Name'] || dup.existing['Name']}
+                  </div>
                   <div className="text-sm text-muted">
                     {dup.existing['Organization']}
                     {dup.existing['Organization'] && ' · '}

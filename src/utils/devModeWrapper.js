@@ -930,12 +930,20 @@ export const detectDuplicates = (function () {
       const contacts = getLocalContacts();
       const duplicates = [];
 
-      const newName = (contactData['Name'] || '').toLowerCase().trim();
-      const newPhones = (contactData['Phone'] || '')
+      const newName = (
+        contactData['Display Name'] ||
+        contactData['Name'] ||
+        ''
+      )
+        .toLowerCase()
+        .trim();
+
+      const newPhones = (contactData['Phone Mobile'] || contactData['Phone'] || '')
         .split(',')
         .map((p) => p.trim().replace(/\D/g, ''))
         .filter(Boolean);
-      const newEmails = (contactData['Email'] || '')
+
+      const newEmails = (contactData['Email Personal'] || contactData['Email'] || '')
         .split(',')
         .map((e) => e.toLowerCase().trim())
         .filter(Boolean);
@@ -943,23 +951,29 @@ export const detectDuplicates = (function () {
       for (const existing of contacts) {
         const matchReasons = [];
 
-        const existingName = (existing['Name'] || '').toLowerCase().trim();
-        if (newName && existingName === newName) {
+        const existingName = (
+          existing['Display Name'] ||
+          existing['Name'] ||
+          ''
+        )
+          .toLowerCase()
+          .trim();
+        if (newName && existingName && existingName === newName) {
           matchReasons.push('name');
         }
 
-        const existingPhones = (existing['Phone'] || '')
+        const existingPhones = (existing['Phone Mobile'] || existing['Phone'] || '')
           .split(',')
           .map((p) => p.trim().replace(/\D/g, ''))
           .filter(Boolean);
         for (const phone of newPhones) {
-          if (existingPhones.includes(phone)) {
+          if (phone.length >= 7 && existingPhones.includes(phone)) {
             matchReasons.push('phone');
             break;
           }
         }
 
-        const existingEmails = (existing['Email'] || '')
+        const existingEmails = (existing['Email Personal'] || existing['Email'] || '')
           .split(',')
           .map((e) => e.toLowerCase().trim())
           .filter(Boolean);

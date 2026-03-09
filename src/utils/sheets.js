@@ -810,12 +810,23 @@ export async function detectDuplicates(accessToken, sheetId, contactData) {
   const { data } = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
   const duplicates = [];
 
-  const newName = (contactData['Name'] || '').toLowerCase().trim();
-  const newPhones = (contactData['Phone'] || '')
+  // Support both legacy field names (Name/Phone/Email) and new field names
+  // (Display Name/Phone Mobile/Email Personal) so the check works regardless
+  // of which naming convention the caller uses.
+  const newName = (
+    contactData['Display Name'] ||
+    contactData['Name'] ||
+    ''
+  )
+    .toLowerCase()
+    .trim();
+
+  const newPhones = (contactData['Phone Mobile'] || contactData['Phone'] || '')
     .split(',')
     .map((p) => p.trim().replace(/\D/g, ''))
     .filter(Boolean);
-  const newEmails = (contactData['Email'] || '')
+
+  const newEmails = (contactData['Email Personal'] || contactData['Email'] || '')
     .split(',')
     .map((e) => e.toLowerCase().trim())
     .filter(Boolean);
@@ -823,26 +834,32 @@ export async function detectDuplicates(accessToken, sheetId, contactData) {
   for (const existing of data) {
     const matchReasons = [];
 
-    // Name match
-    const existingName = (existing['Name'] || '').toLowerCase().trim();
-    if (newName && existingName === newName) {
+    // Name match — check all name fields on the existing record
+    const existingName = (
+      existing['Display Name'] ||
+      existing['Name'] ||
+      ''
+    )
+      .toLowerCase()
+      .trim();
+    if (newName && existingName && existingName === newName) {
       matchReasons.push('name');
     }
 
     // Phone match
-    const existingPhones = (existing['Phone'] || '')
+    const existingPhones = (existing['Phone Mobile'] || existing['Phone'] || '')
       .split(',')
       .map((p) => p.trim().replace(/\D/g, ''))
       .filter(Boolean);
     for (const phone of newPhones) {
-      if (existingPhones.includes(phone)) {
+      if (phone.length >= 7 && existingPhones.includes(phone)) {
         matchReasons.push('phone');
         break;
       }
     }
 
     // Email match
-    const existingEmails = (existing['Email'] || '')
+    const existingEmails = (existing['Email Personal'] || existing['Email'] || '')
       .split(',')
       .map((e) => e.toLowerCase().trim())
       .filter(Boolean);
