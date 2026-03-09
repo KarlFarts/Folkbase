@@ -31,16 +31,16 @@ export const ID_PREFIXES = {
 
 /**
  * Generate a globally unique ID with the given prefix.
- * Format: PREFIX-xxxxxxxx (8 random hex characters)
+ * Format: PREFIX-xxxxxxxxxxxxxxxx (16 random hex characters)
  *
  * @param {string} prefix - The entity prefix (e.g., 'CON', 'TP', 'EVT')
- * @returns {string} A unique ID like 'CON-a7f3b2c1'
+ * @returns {string} A unique ID like 'CON-a7f3b2c1d4e5f6a8'
  */
 export function generateId(prefix) {
   if (!prefix) {
     throw new Error('ID prefix is required');
   }
-  const hex = Array.from(crypto.getRandomValues(new Uint8Array(4)))
+  const hex = Array.from(crypto.getRandomValues(new Uint8Array(8)))
     .map((b) => b.toString(16).padStart(2, '0'))
     .join('');
   return `${prefix}-${hex}`;

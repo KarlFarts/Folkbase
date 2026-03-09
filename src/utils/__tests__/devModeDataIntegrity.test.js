@@ -62,7 +62,7 @@ describe('Dev Mode Data Integrity', () => {
     it('generateEventID should produce EVT-uuid format', async () => {
       const { generateEventID } = await import('../devModeWrapper');
       const id = await generateEventID('fake-token', 'fake-sheet');
-      expect(id).toMatch(/^EVT-[0-9a-f]{8}$/);
+      expect(id).toMatch(/^EVT-[0-9a-f]{16}$/);
     });
 
     it('generateEventID should produce a unique ID each call', async () => {
@@ -89,7 +89,7 @@ describe('Dev Mode Data Integrity', () => {
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_EVENTS));
       expect(stored).toHaveLength(1);
-      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{8}$/);
+      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{16}$/);
       expect(stored[0]['Event Name']).toBe('Test Event');
     });
   });
@@ -98,7 +98,7 @@ describe('Dev Mode Data Integrity', () => {
     it('should generate TSK-uuid format for the first task ID', async () => {
       const { generateTaskID } = await import('../devModeWrapper');
       const id = await generateTaskID('fake-token', 'fake-sheet');
-      expect(id).toMatch(/^TSK-[0-9a-f]{8}$/);
+      expect(id).toMatch(/^TSK-[0-9a-f]{16}$/);
     });
 
     it('should generate unique TSK IDs on successive calls', async () => {
@@ -113,7 +113,7 @@ describe('Dev Mode Data Integrity', () => {
       const id = await generateTaskID('fake-token', 'fake-sheet');
       expect(id).not.toMatch(/^TASK\d+$/i);
       expect(id).not.toMatch(/^TSK\d{3}$/);
-      expect(id).toMatch(/^TSK-[0-9a-f]{8}$/);
+      expect(id).toMatch(/^TSK-[0-9a-f]{16}$/);
     });
   });
 
@@ -240,7 +240,7 @@ describe('Dev Mode Data Integrity', () => {
       });
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_EVENTS));
-      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{8}$/);
+      expect(stored[0]['Event ID']).toMatch(/^EVT-[0-9a-f]{16}$/);
       expect(stored[0]['Event Created Date']).toBeTruthy();
     });
 
@@ -252,10 +252,10 @@ describe('Dev Mode Data Integrity', () => {
         Status: 'pending',
       });
 
-      expect(task['Task ID']).toMatch(/^TSK-[0-9a-f]{8}$/);
+      expect(task['Task ID']).toMatch(/^TSK-[0-9a-f]{16}$/);
 
       const stored = JSON.parse(localStorage.getItem(STORAGE_KEY_TASKS));
-      expect(stored[0]['Task ID']).toMatch(/^TSK-[0-9a-f]{8}$/);
+      expect(stored[0]['Task ID']).toMatch(/^TSK-[0-9a-f]{16}$/);
     });
   });
 
