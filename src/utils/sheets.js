@@ -1705,36 +1705,40 @@ export async function getNoteWithEntities(accessToken, sheetId, noteId, userEmai
 export async function batchLinkNoteToEntities(accessToken, sheetId, noteId, entityLinks) {
   const { contactIds = [], eventIds = [], listIds = [], taskIds = [] } = entityLinks;
 
-  const allPromises = [
-    ...contactIds.map((contactId) =>
-      linkNoteToContact(accessToken, sheetId, noteId, contactId)
-        .then((result) => ({ type: 'contact', id: contactId, ...result }))
-        .catch((error) => ({ type: 'contact', id: contactId, success: false, error: error.message }))
-    ),
-    ...eventIds.map((eventId) =>
-      linkNoteToEvent(accessToken, sheetId, noteId, eventId)
-        .then((result) => ({ type: 'event', id: eventId, ...result }))
-        .catch((error) => ({ type: 'event', id: eventId, success: false, error: error.message }))
-    ),
-    ...listIds.map((listId) =>
-      linkNoteToList(accessToken, sheetId, noteId, listId)
-        .then((result) => ({ type: 'list', id: listId, ...result }))
-        .catch((error) => ({ type: 'list', id: listId, success: false, error: error.message }))
-    ),
-    ...taskIds.map((taskId) =>
-      linkNoteToTask(accessToken, sheetId, noteId, taskId)
-        .then((result) => ({ type: 'task', id: taskId, ...result }))
-        .catch((error) => ({ type: 'task', id: taskId, success: false, error: error.message }))
-    ),
-  ];
-
-  const settled = await Promise.allSettled(allPromises);
-
   const results = { contacts: [], events: [], lists: [], tasks: [] };
-  for (const item of settled) {
-    const val = item.status === 'fulfilled' ? item.value : { ...item.reason, success: false };
-    const key = `${val.type}s`;
-    if (results[key]) results[key].push(val);
+
+  // Sequential to prevent concurrent dupe-check races on the same junction table
+  for (const contactId of contactIds) {
+    try {
+      const result = await linkNoteToContact(accessToken, sheetId, noteId, contactId);
+      results.contacts.push({ type: 'contact', id: contactId, ...result });
+    } catch (error) {
+      results.contacts.push({ type: 'contact', id: contactId, success: false, error: error.message });
+    }
+  }
+  for (const eventId of eventIds) {
+    try {
+      const result = await linkNoteToEvent(accessToken, sheetId, noteId, eventId);
+      results.events.push({ type: 'event', id: eventId, ...result });
+    } catch (error) {
+      results.events.push({ type: 'event', id: eventId, success: false, error: error.message });
+    }
+  }
+  for (const listId of listIds) {
+    try {
+      const result = await linkNoteToList(accessToken, sheetId, noteId, listId);
+      results.lists.push({ type: 'list', id: listId, ...result });
+    } catch (error) {
+      results.lists.push({ type: 'list', id: listId, success: false, error: error.message });
+    }
+  }
+  for (const taskId of taskIds) {
+    try {
+      const result = await linkNoteToTask(accessToken, sheetId, noteId, taskId);
+      results.tasks.push({ type: 'task', id: taskId, ...result });
+    } catch (error) {
+      results.tasks.push({ type: 'task', id: taskId, success: false, error: error.message });
+    }
   }
 
   return results;
