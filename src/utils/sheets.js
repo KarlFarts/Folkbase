@@ -1176,6 +1176,7 @@ export async function unlinkNoteFromContact(accessToken, sheetId, noteId, contac
     ],
   });
 
+  await invalidateCache(SHEETS.CONTACT_NOTES);
   return { success: true, noteId, contactId };
 }
 
@@ -1368,6 +1369,7 @@ export async function unlinkNoteFromEvent(accessToken, sheetId, noteId, eventId)
     ],
   });
 
+  await invalidateCache(SHEETS.EVENT_NOTES);
   return { success: true, noteId, eventId };
 }
 
@@ -1479,6 +1481,7 @@ export async function unlinkNoteFromList(accessToken, sheetId, noteId, listId) {
     ],
   });
 
+  await invalidateCache(SHEETS.LIST_NOTES);
   return { success: true, noteId, listId };
 }
 
@@ -1589,6 +1592,7 @@ export async function unlinkNoteFromTask(accessToken, sheetId, noteId, taskId) {
     ],
   });
 
+  await invalidateCache(SHEETS.TASK_NOTES);
   return { success: true, noteId, taskId };
 }
 
@@ -2135,6 +2139,7 @@ export async function removeContactFromList(accessToken, sheetId, contactId, lis
     ],
   });
 
+  await invalidateCache(SHEETS.CONTACT_LISTS);
   return { success: true, contactId, listId };
 }
 
