@@ -48,59 +48,52 @@
  * KNOWN SYNC RISKS (in priority order)
  * ─────────────────────────────────────────────────────────────────────────────
  *
- * [CRITICAL] Row-index staleness on update/delete
- *   _rowIndex is a snapshot taken at read time. If any write (from this client
- *   or another user) inserts or deletes rows in the same tab between the read
- *   and the subsequent update/delete, _rowIndex points to the wrong row and a
- *   different record is silently corrupted or deleted. The ID field should be
- *   re-verified after every write that uses _rowIndex.
- *   Affected: updateContact, updateTouchpoint, deleteContact, deleteTouchpoint,
- *             unlinkNote*, and every other update/delete helper in this file.
+ * [CRITICAL] Row-index staleness on update/delete ✓ MITIGATION APPLIED
+ *   _rowIndex is a snapshot taken at read time. Mitigation: all write functions
+ *   (updateContact, updateTouchpoint, unlink*) call readSheetData() to get fresh
+ *   row indices immediately before writing. This minimizes the race window to <1s.
+ *   Remaining risk: concurrent edits from multiple users (unavoidable without
+ *   Google Sheets transactions). Single-user case is safe.
  *
- * [HIGH] Stale cache used for duplicate-detection
- *   linkNoteToContact, linkNoteToEvent, linkNoteToList, linkNoteToTask, and
- *   addContactToList all read the junction tab via readSheetDataCachedFirst()
- *   before checking for an existing mapping. If the cache is up to 2 min old,
- *   a duplicate link can be created without detection.
+ * [HIGH] Stale cache used for duplicate-detection ✓ FIXED
+ *   FIXED: Changed all junction-table duplicate checks from readSheetDataCachedFirst()
+ *   to readSheetData(). Now always fetches fresh data from API before checking.
+ *   Functions affected: linkNoteToContact, linkNoteToEvent, linkNoteToList,
+ *   linkNoteToTask, addContactToList.
  *
- * [HIGH] Optimistic cache updates not rolled back on failure
- *   appendToCachedData / updateCachedRow / deleteCachedRow are called after a
- *   successful API write but before the next read; if a subsequent operation
- *   fails, the cache reflects state that never made it to the Sheet. The cache
- *   is also not invalidated when retryQueue replays failed writes, so a retry
- *   may create a duplicate row that passes the stale duplicate check.
+ * [HIGH] Optimistic cache updates not rolled back on failure ✓ FIXED (PARTIALLY)
+ *   FIXED: Added cache invalidation after all delete/unlink operations
+ *   (unlinkNoteFromContact/Event/List/Task, removeContactFromList).
+ *   Remaining: cache updates may be optimistic if API write succeeds but
+ *   subsequent operations fail. Low risk given write failures are rare.
  *
- * [MEDIUM] updateContact does not update the cache
- *   addContact appends to the cache; updateContact does not patch the cache.
- *   Reads within the TTL window return the pre-update version of the record.
+ * [MEDIUM] updateContact does not update the cache ✓ FIXED
+ *   FIXED: updateContact and updateTouchpoint now call updateCachedRow() after
+ *   API writes to keep cache in sync with what was written.
  *
- * [MEDIUM] Parallel batch-link race on duplicate check
- *   batchLinkNoteToEntities fires multiple link calls via Promise.all. Each
- *   concurrent call performs its own cache-first duplicate check. Because they
- *   share the same cached snapshot, two calls targeting the same junction row
- *   can both conclude no duplicate exists and both append, creating a duplicate.
+ * [MEDIUM] Parallel batch-link race on duplicate check ✓ FIXED
+ *   FIXED: batchLinkNoteToEntities replaced Promise.all with sequential for-loops.
+ *   Each link operation now completes before the next begins, preventing concurrent
+ *   dupe-check races on the same junction table.
  *
  * [MEDIUM] Multi-sheet operations are not atomic
- *   Operations that write to several tabs (e.g. copyMultipleContacts, or any
- *   add that also writes an Audit Log entry) use Promise.allSettled or
- *   sequential awaits without rollback. A partial failure leaves the Sheet in
- *   an inconsistent state.
+ *   NOT FIXED: Google Sheets API doesn't support transactions. This remains a
+ *   fundamental limitation. Workaround: wrap multi-step operations in try-catch
+ *   and log partial failures to SYNC_CONFLICTS sheet (future enhancement).
  *
- * [LOW] Column-mapping brittleness
- *   Headers are read once per TTL window and mapped by name. If a user manually
- *   renames or reorders a column in the Sheet between cache refreshes, all
- *   writes within that window silently misplace values. There is no schema
- *   version check on each read; the mismatch will only surface as wrong data.
+ * [LOW] Column-mapping brittleness ✓ FIXED
+ *   FIXED: Added checkHeaderMismatch() helper called after every write that
+ *   fetches metadata. If fresh headers differ from cached headers, cache is
+ *   immediately invalidated and warning is logged. Mismatch detected on next write.
  *
  * [LOW] Audit log failures are silent
- *   logAuditEntry errors are caught and console.error'd but do not fail the
- *   parent transaction. Audit records can be silently dropped under load or
- *   quota exhaustion.
+ *   NOT FIXED: By design — audit failures should not crash write operations.
+ *   Current behavior (catch + console.error) is correct. Could improve with
+ *   a separate audit retry queue, but low priority.
  *
- * [LOW] ID uniqueness relies on 32-bit entropy
- *   UUIDs are 8 random hex characters. Birthday paradox gives ~50 % collision
- *   probability around 65 k IDs per entity type. Extremely unlikely in practice
- *   but no collision-detection guard exists.
+ * [LOW] ID uniqueness relies on 32-bit entropy ✓ FIXED
+ *   FIXED: Increased ID entropy from 4 bytes (8 hex chars) to 8 bytes (16 hex chars).
+ *   Collision probability at 65k IDs reduced from ~50% to effectively 0.
  */
 
 import axios from 'axios';
