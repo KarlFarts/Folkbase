@@ -2,7 +2,7 @@
 
 ## Auth & Onboarding
 - [x] **SetupWizard** (3 steps: Welcome/Auth, Profile, Completion) — `src/components/SetupWizard/`
-- [ ] **Login/OAuth flow** (Google sign-in in navbar)
+- [x] **Login/OAuth flow** — N/A: unauthenticated users see dedicated `SignInPage`; Navbar only renders post-auth
 
 ## Main Layout & Navigation
 - [x] **Navbar** — `src/components/Navbar.js` — card-surface bar, card-chip nav links, ChevronDown rotation to CSS class
@@ -172,7 +172,7 @@
 
 - [x] **index.css** — `cl-*`, `cp-*`, `op-*`, `el-*`, `ed-*`, `tl-*`, `add-form-*`, `focus-mode-*`, `lp-*`, `export-*`, `ws-*`, `dm-*`, `sp-*`, `tp-*`, `lm-*`, `skeleton-*`, `tm-*`, `bem-*`, `timeline-dot-icon`, `info-box`, `br-*`, `us-*`, `arm-*`, `rl-*`, `cm-*`, `rm-*`, `rg-*`, `tem-*`, `ccm-*`, `timer-*`, `lc-*`, `qab-*`, `us-count-badge`, `uc-*`, `itw-*`, `ub-*`, `ue-*`, `ra-*`, `pcw-*`, `sb-*`, `sw-*`, `ph-*`, `pt-*`, `ca-*`, `soc-*`, `edu-*`, `emp-*`, `dis-*`, `tpm-*`, `cam-*`, `cmm-*`, `bcm2-*`, `cf-*`, `cnm-*`, `bcm-*`, `lem-*`, `qcb-*`, `led-*`, `ec-*`, `cv-*`, `tv-*`, `atm-*`, `ats-*`, `agm-*`, `resm-*`, `iem-*`, `scm-*`, `iss-*`, `ltm-*`, `ltqm-*`, `dm-*` (org), `ef-*`, `fs-*` sections added; breadcrumbs updated
 - [x] **Dashboard.css** — HeroWelcome alias, hero-top scoping
-- [ ] **themes.css** — color palette/tokens (`src/styles/themes.css`)
+- [x] **themes.css** — already pure CSS custom properties, no inline styles to migrate
 
 ## Stats
 

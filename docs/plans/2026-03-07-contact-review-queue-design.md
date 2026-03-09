@@ -141,10 +141,10 @@ Add nav entry point from `ContactList.js` (a button or link — exact placement 
 
 ## Security checklist
 
-- [ ] All writes go through `sanitizeFormData(data, SCHEMAS.contact)` before `updateContact`
-- [ ] Raw braindump text goes through `sanitizeStringInput(text, INPUT_LIMITS.veryLongText)` before `addNote`
-- [ ] No eval, no innerHTML, no dangerouslySetInnerHTML
-- [ ] Entity detection reads only from contacts/events already loaded — no external lookups
+- [x] All writes go through `sanitizeFormData(data, SCHEMAS.contact)` before `updateContact` — N/A: implementation saves braindump as Note only, no direct contact field writes
+- [x] Raw braindump text goes through `sanitizeStringInput(text, INPUT_LIMITS.veryLongText)` before `addNote` — verified at ContactReviewPage.js:171
+- [x] No eval, no innerHTML, no dangerouslySetInnerHTML — confirmed not present
+- [x] Entity detection reads only from contacts/events already loaded — no external lookups — confirmed, `useEntityDetection` uses local context only
 
 ---
 
