@@ -5373,6 +5373,12 @@ input[type="checkbox"] {
   border-radius: var(--radius-sm);
 }
 
+.contacts-dropdown-divider {
+  height: 1px;
+  background: var(--border-color-default);
+  margin: var(--spacing-xs) 0;
+}
+
 .contacts-dropdown-item.active {
   color: var(--color-accent-hover);
   background: rgba(107, 142, 111, 0.08);

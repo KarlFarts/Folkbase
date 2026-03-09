@@ -26,7 +26,9 @@ const ContactsDropdown = ({ mobileMenuOpen, setMobileMenuOpen }) => {
     return (
       path.startsWith('/contacts') ||
       path.startsWith('/organizations') ||
-      path.startsWith('/locations')
+      path.startsWith('/locations') ||
+      path.startsWith('/import') ||
+      path.startsWith('/export')
     );
   };
 
@@ -68,6 +70,19 @@ const ContactsDropdown = ({ mobileMenuOpen, setMobileMenuOpen }) => {
             onClick={() => handleNavigate('/locations')}
           >
             Locations
+          </button>
+          <div className="contacts-dropdown-divider" />
+          <button
+            className={`contacts-dropdown-item ${location.pathname.startsWith('/import') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/import')}
+          >
+            Import
+          </button>
+          <button
+            className={`contacts-dropdown-item ${location.pathname.startsWith('/export') ? 'active' : ''}`}
+            onClick={() => handleNavigate('/export')}
+          >
+            Export
           </button>
         </div>
       )}

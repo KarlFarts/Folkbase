@@ -120,11 +120,11 @@ function ExportPage({ onNavigate }) {
     try {
       if (format === 'csv') {
         const csv = generateCSV(filteredContacts, selectedFields);
-        const filename = generateFilename('touchpoint-contacts', 'csv');
+        const filename = generateFilename('folkbase-contacts', 'csv');
         downloadFile(csv, filename, 'text/csv');
       } else if (format === 'vcard') {
         const vcard = generateVCard(filteredContacts);
-        const filename = generateFilename('touchpoint-contacts', 'vcf');
+        const filename = generateFilename('folkbase-contacts', 'vcf');
         downloadFile(vcard, filename, 'text/vcard');
       }
     } catch {
