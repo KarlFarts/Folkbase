@@ -11,6 +11,7 @@
  */
 
 import { findFolkbaseFolder } from './driveFolder';
+import { notifyAuthError } from './authErrorHandler.js';
 
 /**
  * Escape a string for safe use inside a Drive API query string literal.
@@ -76,6 +77,9 @@ async function findSheetsInFolder(accessToken, folderId) {
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        notifyAuthError();
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error?.message || `HTTP ${response.status}`);
     }
@@ -93,6 +97,7 @@ async function findSheetsInFolder(accessToken, folderId) {
       success: false,
       sheets: [],
       error: error.message,
+      isAuthError: error.isAuthError || false,
     };
   }
 }
@@ -107,6 +112,11 @@ export async function findExistingSheets(accessToken) {
   try {
     // Step 1: Look for Folkbase folder
     const folderResult = await findFolkbaseFolder(accessToken);
+
+    // Propagate auth errors immediately — no point falling through to root search
+    if (!folderResult.success && folderResult.isAuthError) {
+      return { success: false, sheets: [], error: folderResult.error, isAuthError: true };
+    }
 
     if (folderResult.success && folderResult.folder) {
       // Folder exists - search for sheets inside it
@@ -143,8 +153,14 @@ export async function findExistingSheets(accessToken) {
     );
 
     if (!response.ok) {
+      const isAuthError = response.status === 401 || response.status === 403;
+      if (isAuthError) {
+        notifyAuthError();
+      }
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+      const err = new Error(errorData.error?.message || `HTTP ${response.status}`);
+      err.isAuthError = isAuthError;
+      throw err;
     }
 
     const data = await response.json();
@@ -164,6 +180,7 @@ export async function findExistingSheets(accessToken) {
       success: false,
       sheets: [],
       error: error.message,
+      isAuthError: error.isAuthError || false,
     };
   }
 }

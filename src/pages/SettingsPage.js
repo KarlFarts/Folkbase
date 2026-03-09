@@ -220,6 +220,11 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       const result = await findExistingSheets(accessToken);
 
       if (!result.success) {
+        if (result.isAuthError) {
+          notify.error('Drive permissions required. Click "Reconnect Now" to re-authorize.');
+          setMigrationStatus({ scanning: false, migrating: false, sheets: [], error: null });
+          return;
+        }
         throw new Error(result.error || 'Failed to scan for sheets');
       }
 

@@ -131,8 +131,8 @@ const CompletionStep = ({ wizardData, onUpdate, onComplete }) => {
       });
 
       setPhase('done');
-    } catch {
-      setError('Failed to set up your sheet. Please try again.');
+    } catch (err) {
+      setError(err.message || 'Failed to set up your sheet. Please try again.');
       setPhase('error');
     }
   }, [wizardData, onUpdate, setStepStatus]);

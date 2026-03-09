@@ -260,8 +260,10 @@ const WorkspaceDashboard = ({ onNavigate }) => {
         const shareUrl = `https://drive.google.com/drive/folders/${folderResult.folder.id}`;
         window.open(shareUrl, '_blank');
         notify.success('Opening folder in Google Drive...');
+      } else if (folderResult.isAuthError) {
+        notify.error('Drive permissions required. Click "Reconnect Now" to re-authorize.');
       } else {
-        notify.error('Could not find Folkbase folder');
+        notify.error('Could not find Folkbase folder.');
       }
     } catch {
       notify.error('Failed to open the Folkbase folder. Check your connection and try again.');

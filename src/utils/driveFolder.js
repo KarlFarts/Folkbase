@@ -5,6 +5,8 @@
  * This folder contains the main database sheet plus exports, backups, imports, etc.
  */
 
+import { notifyAuthError } from './authErrorHandler.js';
+
 export const FOLKBASE_FOLDER_NAME = 'Folkbase';
 
 /**
@@ -69,6 +71,15 @@ export async function findFolkbaseFolder(accessToken) {
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        notifyAuthError();
+        const errorData = await response.json().catch(() => ({}));
+        return {
+          success: false,
+          error: errorData.error?.message || `HTTP ${response.status}`,
+          isAuthError: true,
+        };
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error?.message || `HTTP ${response.status}`);
     }
@@ -173,6 +184,9 @@ export async function moveFileToFolder(accessToken, fileId, folderId) {
     );
 
     if (!fileResponse.ok) {
+      if (fileResponse.status === 401 || fileResponse.status === 403) {
+        notifyAuthError();
+      }
       const errorData = await fileResponse.json().catch(() => ({}));
       throw new Error(errorData.error?.message || `HTTP ${fileResponse.status}`);
     }
@@ -192,6 +206,9 @@ export async function moveFileToFolder(accessToken, fileId, folderId) {
     );
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        notifyAuthError();
+      }
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error?.message || `HTTP ${response.status}`);
     }
@@ -305,7 +322,7 @@ export async function createWorkspaceSheet(accessToken, workspaceName) {
 
   if (headerRequests.length > 0) {
     const batchUrl = `https://sheets.googleapis.com/v4/spreadsheets/${newSheetId}/values:batchUpdate`;
-    await fetch(batchUrl, {
+    const headerRes = await fetch(batchUrl, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -316,6 +333,12 @@ export async function createWorkspaceSheet(accessToken, workspaceName) {
         data: headerRequests,
       }),
     });
+    if (!headerRes.ok) {
+      const errData = await headerRes.json().catch(() => ({}));
+      throw new Error(
+        `Failed to write column headers: ${errData.error?.message || `HTTP ${headerRes.status}`}`
+      );
+    }
   }
 
   // 3. Move into Folkbase folder
