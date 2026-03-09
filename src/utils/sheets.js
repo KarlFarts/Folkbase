@@ -117,7 +117,7 @@ import { notifyRateLimit } from './rateLimitHandler.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
 import { generateId, ID_PREFIXES } from './idGenerator';
-import { getCachedData, appendToCachedData } from './indexedDbCache';
+import { getCachedData, appendToCachedData, updateCachedRow, deleteCachedRow, invalidateCache } from './indexedDbCache';
 
 const SHEETS_API_BASE = API_CONFIG.SHEETS_API_BASE;
 
@@ -693,6 +693,13 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
 
   await updateRow(accessToken, sheetId, SHEETS.CONTACTS, rowIndex, values);
 
+  // Keep cache consistent with what was just written
+  const updatedFields = headers.reduce((acc, h) => {
+    acc[h.name] = values[headers.indexOf(h)];
+    return acc;
+  }, {});
+  await updateCachedRow(SHEETS.CONTACTS, 'Contact ID', contactId, updatedFields);
+
   // Batch log all changed fields to audit (non-blocking)
   try {
     const auditEntries = [];
@@ -804,6 +811,13 @@ export async function updateTouchpoint(
   });
 
   await updateRow(accessToken, sheetId, SHEETS.TOUCHPOINTS, rowIndex, values);
+
+  // Keep cache consistent with what was just written
+  const updatedFields = headers.reduce((acc, h) => {
+    acc[h.name] = values[headers.indexOf(h)];
+    return acc;
+  }, {});
+  await updateCachedRow(SHEETS.TOUCHPOINTS, 'Touchpoint ID', touchpointId, updatedFields);
 
   // Update contact's Last Contact Date if Contact ID was added
   const oldContactId = oldData['Contact ID'];
