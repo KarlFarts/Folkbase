@@ -577,7 +577,7 @@ function TasksPage({ onNavigate }) {
         onConfirm={() => handleDeleteTask(confirmDeleteTaskId)}
         onCancel={() => setConfirmDeleteTaskId(null)}
         title="Delete Task"
-        message="Are you sure you want to delete this task?"
+        message={`Delete "${tasks.find((t) => t['Task ID'] === confirmDeleteTaskId)?.Title || 'this task'}"? This cannot be undone.`}
         confirmLabel="Delete"
         variant="danger"
       />

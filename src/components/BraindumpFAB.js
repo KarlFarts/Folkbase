@@ -6,6 +6,7 @@ import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { addNote } from '../utils/devModeWrapper';
 import { getUIPreferences } from '../services/braindumpPreferences';
+import ConfirmDialog from './ConfirmDialog';
 import './BraindumpFAB.css';
 
 /**
@@ -24,6 +25,7 @@ function BraindumpFAB() {
   const [content, setContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const textareaRef = useRef(null);
 
   // Load visibility preference
@@ -104,10 +106,15 @@ function BraindumpFAB() {
 
   const handleCancel = () => {
     if (content && content.trim().length > 0) {
-      const shouldDiscard = window.confirm('Discard braindump?');
-      if (!shouldDiscard) return;
+      setShowDiscardConfirm(true);
+      return;
     }
+    setContent('');
+    setIsExpanded(false);
+  };
 
+  const handleConfirmDiscard = () => {
+    setShowDiscardConfirm(false);
     setContent('');
     setIsExpanded(false);
   };
@@ -138,6 +145,14 @@ function BraindumpFAB() {
 
   return (
     <>
+      <ConfirmDialog
+        isOpen={showDiscardConfirm}
+        onConfirm={handleConfirmDiscard}
+        onCancel={() => setShowDiscardConfirm(false)}
+        title="Discard Braindump"
+        message="Discard your unsaved braindump? This text will be lost."
+        confirmLabel="Discard"
+      />
       <div className={`braindump-fab ${isExpanded ? 'expanded' : ''}`}>
         {!isExpanded ? (
           <button

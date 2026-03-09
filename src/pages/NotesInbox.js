@@ -1178,7 +1178,11 @@ function NotesInbox({ onNavigate }) {
         onConfirm={() => handleDeleteNote(confirmDeleteNoteId)}
         onCancel={() => setConfirmDeleteNoteId(null)}
         title="Delete Note"
-        message="Are you sure you want to delete this note?"
+        message={(() => {
+          const note = notes.find((n) => n['Note ID'] === confirmDeleteNoteId);
+          const preview = note?.Content ? note.Content.slice(0, 80) + (note.Content.length > 80 ? '…' : '') : 'this note';
+          return `Delete "${preview}"? This cannot be undone.`;
+        })()}
         confirmLabel="Delete"
         variant="danger"
       />

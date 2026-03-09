@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Plus, Phone, Mail, MapPin } from 'lucide-react';
 import WindowTemplate from '../WindowTemplate';
 import EmptyState from '../EmptyState';
+import ConfirmDialog from '../ConfirmDialog';
 import {
   getContactMethods,
   addContactMethod,
@@ -34,6 +35,7 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [formData, setFormData] = useState({
     Type: 'Phone',
     Label: '',
@@ -120,12 +122,10 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
     }
   };
 
-  const handleDelete = async (methodId) => {
-    if (!confirm('Delete this contact method?')) return;
-
+  const handleConfirmDelete = async () => {
     setSaving(true);
     try {
-      await deleteContactMethod(accessToken, activeSheetId, methodId);
+      await deleteContactMethod(accessToken, activeSheetId, confirmDeleteId);
       showNotification('Contact method deleted', 'success');
       loadMethods();
     } catch (error) {
@@ -133,6 +133,7 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
       console.error('Error deleting contact method:', error);
     } finally {
       setSaving(false);
+      setConfirmDeleteId(null);
     }
   };
 
@@ -243,7 +244,7 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
                                 <Pencil size={14} />
                               </button>
                               <button
-                                onClick={() => handleDelete(method['Contact Method ID'])}
+                                onClick={() => setConfirmDeleteId(method['Contact Method ID'])}
                                 className="btn btn-ghost btn-sm"
                                 title="Delete"
                                 disabled={saving}
@@ -267,6 +268,15 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
           })}
         </div>
       )}
+
+      <ConfirmDialog
+        isOpen={!!confirmDeleteId}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setConfirmDeleteId(null)}
+        title="Delete Contact Method"
+        message="Delete this contact method? This cannot be undone."
+        confirmLabel="Delete"
+      />
 
       <WindowTemplate
         isOpen={isModalOpen}

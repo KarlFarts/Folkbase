@@ -4,6 +4,7 @@ import { AlertTriangle, ExternalLink, Unlink } from 'lucide-react';
 import { useWorkspace } from '../contexts/WorkspaceContext';
 import { useNotification } from '../contexts/NotificationContext';
 import { getAllLinkedWorkspaces, unlinkContact } from '../services/contactLinkService';
+import ConfirmDialog from './ConfirmDialog';
 import './ContactWorkspaceBadges.css';
 
 /**
@@ -32,6 +33,7 @@ const ContactWorkspaceBadges = ({
   const [linkedWorkspaces, setLinkedWorkspaces] = useState([]);
   const [loading, setLoading] = useState(true);
   const [unlinking, setUnlinking] = useState(null);
+  const [confirmUnlink, setConfirmUnlink] = useState(null);
 
   useEffect(() => {
     loadLinkedWorkspaces();
@@ -70,17 +72,14 @@ const ContactWorkspaceBadges = ({
     navigate(`/contacts/${workspace.contactId}`);
   };
 
-  const handleUnlink = async (workspace, e) => {
+  const handleUnlink = (workspace, e) => {
     e.stopPropagation();
+    setConfirmUnlink(workspace);
+  };
 
-    if (
-      !confirm(
-        `Remove sync link with ${workspace.name}? Changes will no longer sync between workspaces.`
-      )
-    ) {
-      return;
-    }
-
+  const handleConfirmUnlink = async () => {
+    const workspace = confirmUnlink;
+    setConfirmUnlink(null);
     setUnlinking(workspace.linkId);
     try {
       await unlinkContact(workspace.linkId);
@@ -114,6 +113,15 @@ const ContactWorkspaceBadges = ({
   }
 
   return (
+    <>
+    <ConfirmDialog
+      isOpen={!!confirmUnlink}
+      onConfirm={handleConfirmUnlink}
+      onCancel={() => setConfirmUnlink(null)}
+      title="Remove Sync Link"
+      message={`Remove sync link with ${confirmUnlink?.name}? Changes will no longer sync between workspaces.`}
+      confirmLabel="Remove"
+    />
     <div className="contact-workspace-badges">
       <div className="badges-header">
         <h4 className="badges-title">Also in:</h4>
@@ -161,6 +169,7 @@ const ContactWorkspaceBadges = ({
         ))}
       </div>
     </div>
+    </>
   );
 };
 

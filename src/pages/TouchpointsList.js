@@ -3,7 +3,7 @@ import { Pencil, Trash2, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { usePermissions } from '../hooks/usePermissions';
-import { readSheetData, addTouchpoint, updateTouchpoint, SHEETS } from '../utils/devModeWrapper';
+import { readSheetData, addTouchpoint, updateTouchpoint, deleteTouchpoint, SHEETS } from '../utils/devModeWrapper';
 import ContactSelector from '../components/ContactSelector';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 
@@ -250,15 +250,7 @@ function TouchpointsList({ onNavigate }) {
     try {
       setSaving(true);
 
-      // Mark as deleted using soft delete
-      await updateTouchpoint(
-        accessToken,
-        sheetId,
-        deletingTouchpoint['Touchpoint ID'],
-        deletingTouchpoint,
-        { ...deletingTouchpoint, Notes: `[DELETED] ${deletingTouchpoint.Notes || ''}` },
-        user.email
-      );
+      await deleteTouchpoint(accessToken, sheetId, deletingTouchpoint['Touchpoint ID']);
 
       setShowDeleteConfirm(false);
       setDeletingTouchpoint(null);
