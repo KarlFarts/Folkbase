@@ -12,6 +12,7 @@ import {
 } from '../utils/devModeWrapper';
 import ConfirmDialog from './ConfirmDialog';
 import '../styles/index.css';
+import { sanitizeFormData } from '../utils/inputSanitizer';
 
 /**
  * ListManager Component
@@ -76,14 +77,18 @@ function ListManager({ contactId, onClose, accessToken, sheetId, embedded, readO
   };
 
   const handleCreateList = async () => {
-    if (!newListName.trim()) return;
+    if (!newListName.trim()) {
+      setError('List name is required');
+      return;
+    }
 
     try {
       setError(null);
-      const result = await addList(accessToken, sheetId, {
-        'List Name': newListName.trim(),
-        Description: newListDesc.trim(),
-      });
+      const sanitizedList = sanitizeFormData(
+        { 'List Name': newListName.trim(), Description: newListDesc.trim() },
+        {}
+      );
+      const result = await addList(accessToken, sheetId, sanitizedList);
 
       setLists((prev) => [...prev, result]);
       setNewListName('');

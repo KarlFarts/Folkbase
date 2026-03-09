@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS } from '../../utils/inputSanitizer';
 
 /**
  * EducationManager - Manage contact's educational background (junction table)
@@ -90,15 +91,15 @@ function EducationManager({ contactId, readOnly = false }) {
 
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         Institution: formData.Institution,
         Degree: formData.Degree,
         'Field of Study': formData['Field of Study'],
         'Start Year': formData['Start Year'],
         'End Year': formData['End Year'],
-        'Is Current': formData['Is Current'] ? 'TRUE' : 'FALSE',
-      };
+      }, SCHEMAS.education);
+      saveData['Is Current'] = formData['Is Current'] ? 'TRUE' : 'FALSE';
 
       if (editingId) {
         await updateContactEducation(accessToken, activeSheetId, editingId, saveData);

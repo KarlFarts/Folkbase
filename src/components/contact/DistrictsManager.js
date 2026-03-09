@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS } from '../../utils/inputSanitizer';
 
 const DISTRICT_TYPES = [
   'Congressional',
@@ -94,13 +95,13 @@ function DistrictsManager({ contactId, readOnly = false }) {
 
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         'District Type': formData['District Type'],
         'District Name': formData['District Name'],
         Representative: formData.Representative,
         Notes: formData.Notes,
-      };
+      }, SCHEMAS.district);
 
       if (editingId) {
         await updateContactDistrict(accessToken, activeSheetId, editingId, saveData);

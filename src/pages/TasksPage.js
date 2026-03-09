@@ -17,6 +17,7 @@ import { getUserWorkspaces } from '../utils/devModeWrapper';
 import { ListPageSkeleton } from '../components/SkeletonLoader';
 import ConfirmDialog from '../components/ConfirmDialog';
 import WindowTemplate from '../components/WindowTemplate';
+import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 
 function TasksPage({ onNavigate }) {
   const { accessToken, user } = useAuth();
@@ -81,9 +82,14 @@ function TasksPage({ onNavigate }) {
 
   const handleAddTask = async () => {
     if (!guardWrite('tasks')) return;
+    if (!taskForm.Title.trim()) {
+      notify.warning('Task title is required');
+      return;
+    }
     setSaving(true);
     try {
-      await addTask(accessToken, sheetId, taskForm);
+      const cleanTask = sanitizeFormData(taskForm, SCHEMAS.task);
+      await addTask(accessToken, sheetId, cleanTask);
       notify.success('Task created successfully!');
       setShowAddModal(false);
       resetForm();
@@ -97,9 +103,14 @@ function TasksPage({ onNavigate }) {
 
   const handleUpdateTask = async () => {
     if (!guardWrite('tasks')) return;
+    if (!taskForm.Title.trim()) {
+      notify.warning('Task title is required');
+      return;
+    }
     setSaving(true);
     try {
-      await updateTask(accessToken, sheetId, editingTask['Task ID'], taskForm);
+      const cleanTask = sanitizeFormData(taskForm, SCHEMAS.task);
+      await updateTask(accessToken, sheetId, editingTask['Task ID'], cleanTask);
       notify.success('Task updated successfully!');
       setEditingTask(null);
       resetForm();

@@ -14,6 +14,7 @@ import { SHEET_NAMES } from '../../config/constants';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS, validateDateRange } from '../../utils/inputSanitizer';
 
 /**
  * EmploymentManager - Manage contact's employment history (junction table)
@@ -106,9 +107,17 @@ function EmploymentManager({ contactId, readOnly = false }) {
       return;
     }
 
+    if (!formData['Is Current']) {
+      const dateErr = validateDateRange(formData['Start Date'], formData['End Date']);
+      if (dateErr) {
+        showNotification(dateErr, 'error');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         'Organization ID': formData['Organization ID'],
         Organization: formData.Organization,
@@ -116,8 +125,8 @@ function EmploymentManager({ contactId, readOnly = false }) {
         Department: formData.Department,
         'Start Date': formData['Start Date'],
         'End Date': formData['End Date'],
-        'Is Current': formData['Is Current'] ? 'TRUE' : 'FALSE',
-      };
+      }, SCHEMAS.employment);
+      saveData['Is Current'] = formData['Is Current'] ? 'TRUE' : 'FALSE';
 
       if (editingId) {
         await updateContactEmployment(accessToken, activeSheetId, editingId, saveData);
