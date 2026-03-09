@@ -91,6 +91,16 @@ function AppContent() {
     }
   }, [user?.email, ensureConfigForUser]);
 
+  // Allow ?setup=true to force the setup wizard open (used by post-join prompt)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('setup') === 'true' && user && accessToken && !config.personalSheetId) {
+      setShowSetup(true);
+      // Clean up the URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [user, accessToken, config.personalSheetId]);
+
   // Auto-reconnect: search Drive for existing Folkbase sheets when user is signed in but has no sheet
   useEffect(() => {
     const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';

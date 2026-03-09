@@ -234,6 +234,20 @@ const JoinWorkspace = () => {
             <p>
               You're now a member of <strong>{workspace.name}</strong>.
             </p>
+            {!config?.personalSheetId && (
+              <div className="wizard-info-box" style={{ marginTop: 16, marginBottom: 16 }}>
+                <strong>Tip:</strong> Set up your own personal contact manager too — it keeps your
+                workspace accessible even if you clear your browser or switch devices.
+                <div style={{ marginTop: 8 }}>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => navigate('/?setup=true')}
+                  >
+                    Set Up Personal Sheet
+                  </button>
+                </div>
+              </div>
+            )}
             <button onClick={() => navigate('/workspaces')} className="button-primary">
               Go to Workspace Dashboard
             </button>
@@ -243,14 +257,14 @@ const JoinWorkspace = () => {
       case 'needs_sharing':
         return (
           <div className="join-workspace-message">
-            <h2>Almost there!</h2>
+            <h2>One More Step</h2>
             <p>
-              You've been added as a member of <strong>{workspace?.name}</strong>. However, the
-              workspace owner hasn't shared the sheet with you yet, so you can't access the data.
+              You've been added as a member of <strong>{workspace?.name}</strong>, but the workspace
+              sheet needs to be shared with your Google account before you can access the data.
             </p>
             <p>
-              <strong>Next step:</strong> Ask the workspace owner to open the Workspace Dashboard
-              and click "Share Sheet with All Members".
+              <strong>What to do:</strong> Let the workspace owner know you've joined. They can open
+              their Workspace Dashboard — sharing happens automatically when they view the workspace.
             </p>
             <button onClick={() => navigate('/workspaces')} className="button-primary">
               Go to Workspace Dashboard
