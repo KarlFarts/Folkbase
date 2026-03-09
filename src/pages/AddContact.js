@@ -7,6 +7,7 @@ import { readSheetMetadata, addContact, detectDuplicates, SHEETS } from '../util
 import { sanitizeFormData, SCHEMAS, INPUT_LIMITS, validateEmail } from '../utils/inputSanitizer';
 import TagsInput from '../components/TagsInput';
 import { usePermissions } from '../hooks/usePermissions';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 
 function AddContact({ onNavigate }) {
   const { user, accessToken } = useAuth();
@@ -42,6 +43,21 @@ function AddContact({ onNavigate }) {
   // Duplicate detection
   const [duplicates, setDuplicates] = useState([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+
+  const isDirty =
+    !saving &&
+    !!(
+      formData['First Name'] ||
+      formData['Last Name'] ||
+      formData['Phone Mobile'] ||
+      formData['Email Personal'] ||
+      formData.Organization ||
+      formData.Role ||
+      formData.Bio ||
+      formData.Tags ||
+      formData.District
+    );
+  useUnsavedChanges(isDirty);
 
   useEffect(() => {
     loadMetadata();

@@ -6,6 +6,7 @@ import { readSheetData, addOrganization, SHEETS } from '../utils/devModeWrapper'
 import { detectDuplicateOrganizations } from '../services/organizationService';
 import { sanitizeFormData, SCHEMAS, validateEmail } from '../utils/inputSanitizer';
 import { usePermissions } from '../hooks/usePermissions';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 
 function AddOrganization({ onNavigate }) {
   const { user, accessToken } = useAuth();
@@ -35,6 +36,21 @@ function AddOrganization({ onNavigate }) {
   // Duplicate detection
   const [duplicates, setDuplicates] = useState([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+
+  const isDirty =
+    !saving &&
+    !!(
+      formData.Name ||
+      formData.Website ||
+      formData.Phone ||
+      formData.Email ||
+      formData.Address ||
+      formData.Industry ||
+      formData.Notes ||
+      formData.Tags ||
+      formData['Founded Date']
+    );
+  useUnsavedChanges(isDirty);
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });

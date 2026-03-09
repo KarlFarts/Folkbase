@@ -16,6 +16,7 @@ vi.mock('../../contexts/NotificationContext', () => ({
 vi.mock('../../hooks/usePermissions', () => ({
   usePermissions: () => ({ canWrite: () => true, guardWrite: () => true }),
 }));
+vi.mock('../../hooks/useUnsavedChanges', () => ({ useUnsavedChanges: () => {} }));
 vi.mock('../../utils/devModeWrapper', () => ({
   readSheetData: vi.fn().mockResolvedValue({ data: [] }),
   generateEventID: vi.fn().mockResolvedValue('EVT001'),

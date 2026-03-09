@@ -6,6 +6,7 @@ import { readSheetData, addLocation, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateLocations } from '../services/locationService';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 import { usePermissions } from '../hooks/usePermissions';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 
 function AddLocation({ onNavigate }) {
   const { user, accessToken } = useAuth();
@@ -34,6 +35,21 @@ function AddLocation({ onNavigate }) {
   // Duplicate detection
   const [duplicates, setDuplicates] = useState([]);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
+
+  const isDirty =
+    !saving &&
+    !!(
+      formData.Name ||
+      formData.Address ||
+      formData.Phone ||
+      formData.Website ||
+      formData['Business Hours'] ||
+      formData.Notes ||
+      formData.Tags ||
+      formData['Accessibility Notes'] ||
+      formData.Capacity
+    );
+  useUnsavedChanges(isDirty);
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });

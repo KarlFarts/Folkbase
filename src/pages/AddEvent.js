@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
 import { usePermissions } from '../hooks/usePermissions';
+import { useUnsavedChanges } from '../hooks/useUnsavedChanges';
 import {
   readSheetData,
   SHEETS,
@@ -30,6 +31,18 @@ function AddEvent({ onNavigate }) {
     Attendees: [], // Array of Contact IDs
     'Unresolved Attendees': '',
   });
+
+  const isDirty =
+    !loading &&
+    !success &&
+    !!(
+      formData['Event Name'] ||
+      formData['Event Date'] ||
+      formData['Event Location'] ||
+      formData.Description ||
+      formData.Attendees?.length
+    );
+  useUnsavedChanges(isDirty);
 
   const loadContacts = useCallback(async () => {
     if (!accessToken || !sheetId) {
