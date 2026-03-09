@@ -8,6 +8,7 @@ import {
   joinWorkspaceViaInvitation,
 } from '../services/workspaceHierarchyServiceSheets';
 import { readSheetData, SHEETS } from '../utils/devModeWrapper';
+import { shareFileWithUser } from '../utils/driveSharing';
 
 const JoinWorkspace = () => {
   const navigate = useNavigate();
@@ -128,9 +129,19 @@ const JoinWorkspace = () => {
       await reloadWorkspaces();
       switchToWorkspace(result.workspace);
 
-      // Probe the workspace sheet — if 403, owner hasn't shared it yet
+      // Auto-share the workspace sheet with the joining user
       const workspaceSheetId =
         result.workspace?.['Sheet ID'] || result.workspace?.sheet_id || ownerSheetId;
+      try {
+        await shareFileWithUser(accessToken, workspaceSheetId, user.email, 'writer');
+      } catch (shareErr) {
+        // Sharing requires the *owner's* token, which we don't have here.
+        // The joiner's token can only share files they own.
+        // If this fails, fall back to the existing needs_sharing flow.
+        console.warn('Auto-share failed (expected if joiner is not the owner):', shareErr.message);
+      }
+
+      // Verify access by probing the sheet
       try {
         await readSheetData(accessToken, workspaceSheetId, SHEETS.CONTACTS);
         setStatus('joined');
