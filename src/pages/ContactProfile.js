@@ -351,17 +351,21 @@ function ContactProfile({ onNavigate }) {
         user.email
       );
 
-      await logActivity(
-        contactId,
-        ACTIVITY_TYPES.TOUCHPOINT_LOGGED,
-        `${state.touchpointData.Type}: ${state.touchpointData.Notes ? state.touchpointData.Notes.substring(0, 50) + (state.touchpointData.Notes.length > 50 ? '...' : '') : 'No notes'}`,
-        {
-          relatedId: result?.touchpointId || '',
-          relatedType: 'touchpoint',
-          touchpointType: state.touchpointData.Type,
-          outcome: state.touchpointData.Outcome,
-        }
-      );
+      try {
+        await logActivity(
+          contactId,
+          ACTIVITY_TYPES.TOUCHPOINT_LOGGED,
+          `${state.touchpointData.Type}: ${state.touchpointData.Notes ? state.touchpointData.Notes.substring(0, 50) + (state.touchpointData.Notes.length > 50 ? '...' : '') : 'No notes'}`,
+          {
+            relatedId: result?.touchpointId || '',
+            relatedType: 'touchpoint',
+            touchpointType: state.touchpointData.Type,
+            outcome: state.touchpointData.Outcome,
+          }
+        );
+      } catch (actErr) {
+        console.error('Failed to log activity for touchpoint:', actErr);
+      }
 
       actions.toggleLogModal(false);
       actions.resetTouchpointData();
@@ -404,16 +408,20 @@ function ContactProfile({ onNavigate }) {
         console.error('addNote did not return a noteId:', result);
       }
 
-      await logActivity(
-        contactId,
-        ACTIVITY_TYPES.NOTE_ADDED,
-        `Note added: ${state.noteFormData.Content.substring(0, 50)}${state.noteFormData.Content.length > 50 ? '...' : ''}`,
-        {
-          relatedId: result?.noteId || '',
-          relatedType: 'note',
-          noteType: state.noteFormData['Note Type'],
-        }
-      );
+      try {
+        await logActivity(
+          contactId,
+          ACTIVITY_TYPES.NOTE_ADDED,
+          `Note added: ${state.noteFormData.Content.substring(0, 50)}${state.noteFormData.Content.length > 50 ? '...' : ''}`,
+          {
+            relatedId: result?.noteId || '',
+            relatedType: 'note',
+            noteType: state.noteFormData['Note Type'],
+          }
+        );
+      } catch (actErr) {
+        console.error('Failed to log activity for note:', actErr);
+      }
 
       const [newNotes, newActivities] = await Promise.all([
         getContactNotes(accessToken, sheetId, contactId, user?.email),
@@ -482,17 +490,21 @@ function ContactProfile({ onNavigate }) {
         newTouchpoints.sort((a, b) => (b['Date'] || '').localeCompare(a['Date'] || ''))
       );
 
-      await logActivity(
-        contactId,
-        ACTIVITY_TYPES.CONTACT_UPDATED,
-        `Updated touchpoint: ${state.editFormData.Type}`,
-        {
-          relatedId: state.editingTouchpoint['Touchpoint ID'],
-          relatedType: 'touchpoint',
-          touchpointType: state.editFormData.Type,
-          outcome: state.editFormData.Outcome,
-        }
-      );
+      try {
+        await logActivity(
+          contactId,
+          ACTIVITY_TYPES.CONTACT_UPDATED,
+          `Updated touchpoint: ${state.editFormData.Type}`,
+          {
+            relatedId: state.editingTouchpoint['Touchpoint ID'],
+            relatedType: 'touchpoint',
+            touchpointType: state.editFormData.Type,
+            outcome: state.editFormData.Outcome,
+          }
+        );
+      } catch (actErr) {
+        console.error('Failed to log activity for touchpoint edit:', actErr);
+      }
 
       actions.toggleEditModal(false);
       actions.setEditingTouchpoint(null);
@@ -585,16 +597,20 @@ function ContactProfile({ onNavigate }) {
         linkConfig.targetWorkspace.contactId = result.contactId;
       }
 
-      await logActivity(
-        contactId,
-        ACTIVITY_TYPES.ADDED_TO_WORKSPACE,
-        `Added to workspace: ${targetWorkspace.name}`,
-        {
-          relatedId: workspaceId,
-          relatedType: 'workspace',
-          workspaceName: targetWorkspace.name,
-        }
-      );
+      try {
+        await logActivity(
+          contactId,
+          ACTIVITY_TYPES.ADDED_TO_WORKSPACE,
+          `Added to workspace: ${targetWorkspace.name}`,
+          {
+            relatedId: workspaceId,
+            relatedType: 'workspace',
+            workspaceName: targetWorkspace.name,
+          }
+        );
+      } catch (actErr) {
+        console.error('Failed to log activity for workspace copy:', actErr);
+      }
 
       const newActivities = await getContactActivities(contactId);
       actions.setActivities(newActivities);

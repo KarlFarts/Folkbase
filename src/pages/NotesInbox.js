@@ -171,17 +171,21 @@ function NotesInbox({ onNavigate }) {
       setNotes((prevNotes) => {
         const freshNotesMap = new Map(freshData.notes.map((n) => [n['Note ID'], n]));
 
-        // Update existing notes (skip ones being edited)
-        const updatedNotes = prevNotes.map((note) => {
-          // Skip notes being edited locally (use ref to avoid dependency)
+        // Update existing notes (skip ones being edited, drop ones deleted on server)
+        const updatedNotes = prevNotes.reduce((acc, note) => {
+          // Keep notes being edited locally (use ref to avoid dependency)
           if (editingNoteIdsRef.current.has(note['Note ID'])) {
-            return note;
+            acc.push(note);
+            return acc;
           }
 
-          // Update with fresh data if available
+          // Update with fresh data if available; omit note if deleted on server
           const freshNote = freshNotesMap.get(note['Note ID']);
-          return freshNote || note;
-        });
+          if (freshNote) {
+            acc.push(freshNote);
+          }
+          return acc;
+        }, []);
 
         // Add new notes that don't exist locally
         const prevNoteIds = new Set(prevNotes.map((n) => n['Note ID']));

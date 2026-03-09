@@ -570,12 +570,13 @@ function ContactList({ onNavigate }) {
           const contact = updatedContacts[i];
           const original = selectedContacts[i];
           await updateContact(accessToken, sheetId, contact['Contact ID'], original, { Tags: contact.Tags }, user?.email);
-          setContacts((prevContacts) =>
-            prevContacts.map((c) => (c['Contact ID'] === contact['Contact ID'] ? contact : c))
-          );
           setBulkActionProgress(((i + 1) / updatedContacts.length) * 100);
         }
 
+        // Apply all state changes atomically only after every API call succeeds
+        setContacts((prev) =>
+          prev.map((c) => updatedContacts.find((u) => u['Contact ID'] === c['Contact ID']) || c)
+        );
         setUpdateNotification(
           `Tagged ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''}`
         );
@@ -607,12 +608,13 @@ function ContactList({ onNavigate }) {
           const contact = updatedContacts[i];
           const original = selectedContacts[i];
           await updateContact(accessToken, sheetId, contact['Contact ID'], original, { Status: status }, user?.email);
-          setContacts((prevContacts) =>
-            prevContacts.map((c) => (c['Contact ID'] === contact['Contact ID'] ? contact : c))
-          );
           setBulkActionProgress(((i + 1) / updatedContacts.length) * 100);
         }
 
+        // Apply all state changes atomically only after every API call succeeds
+        setContacts((prev) =>
+          prev.map((c) => updatedContacts.find((u) => u['Contact ID'] === c['Contact ID']) || c)
+        );
         setUpdateNotification(
           `Updated status for ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''}`
         );
