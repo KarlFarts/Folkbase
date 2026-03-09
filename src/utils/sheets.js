@@ -620,7 +620,9 @@ export async function updateData(accessToken, sheetId, sheetName, rowIndex, data
   // Build values array in correct column order
   const values = headers.map((h) => data[h.name] || '');
 
-  return updateRow(accessToken, sheetId, sheetName, rowIndex, values);
+  const result = await updateRow(accessToken, sheetId, sheetName, rowIndex, values);
+  await invalidateCache(sheetName);
+  return result;
 }
 
 /**
@@ -648,6 +650,7 @@ export async function deleteData(accessToken, sheetId, sheetName, rowIndex) {
     ],
   });
 
+  await invalidateCache(sheetName);
   return response.data;
 }
 
@@ -2014,6 +2017,11 @@ export async function updateList(accessToken, sheetId, listId, listData) {
   });
 
   await updateRow(accessToken, sheetId, SHEETS.LISTS, rowIndex, values);
+  const updatedFields = headers.reduce((acc, h) => {
+    acc[h.name] = values[headers.indexOf(h)];
+    return acc;
+  }, {});
+  await updateCachedRow(SHEETS.LISTS, 'List ID', listId, updatedFields);
   return { listId, ...listData };
 }
 
@@ -2098,6 +2106,11 @@ export async function deleteList(accessToken, sheetId, listId) {
     ],
   });
 
+  await Promise.all([
+    invalidateCache(SHEETS.LIST_NOTES),
+    invalidateCache(SHEETS.CONTACT_LISTS),
+    invalidateCache(SHEETS.LISTS),
+  ]);
   return { success: true, listId };
 }
 
