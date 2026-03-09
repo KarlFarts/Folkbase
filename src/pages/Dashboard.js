@@ -90,8 +90,12 @@ function Dashboard({ onNavigate }) {
   useEffect(() => {
     isMountedRef.current = true;
     loadData();
+
+    // Auto-refresh every 60 seconds so dashboard stats stay current
+    const intervalId = setInterval(loadData, 60_000);
     return () => {
       isMountedRef.current = false;
+      clearInterval(intervalId);
     };
   }, [loadData]);
 

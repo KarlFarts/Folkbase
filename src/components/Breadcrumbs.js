@@ -1,21 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useWorkspace } from '../contexts/WorkspaceContext';
-import { useAuth } from '../contexts/AuthContext';
-import { useActiveSheetId } from '../utils/sheetResolver';
-import { readSheetData, SHEETS } from '../utils/devModeWrapper';
+import { useBreadcrumb } from '../contexts/BreadcrumbContext';
 
 function Breadcrumbs() {
   const location = useLocation();
   const navigate = useNavigate();
   const { activeWorkspace } = useWorkspace();
-  const { accessToken } = useAuth();
-  const sheetId = useActiveSheetId();
+  const { entityName } = useBreadcrumb();
 
-  // State for dynamic entity names (contacts, events)
-  const [entityName, setEntityName] = useState(null);
-
-  // Extract entity ID from URL for contact or event profile pages
+  // Extract entity type from URL for contact or event profile pages
   const getEntityInfo = useCallback(() => {
     const pathname = location.pathname;
     const contactMatch = pathname.match(/^\/contacts\/([^/]+)$/);
@@ -29,34 +23,6 @@ function Breadcrumbs() {
     }
     return null;
   }, [location.pathname]);
-
-  // Fetch entity name when on a profile page
-  useEffect(() => {
-    const entityInfo = getEntityInfo();
-
-    const fetchEntityName = async () => {
-      if (!entityInfo || !accessToken || !sheetId) {
-        setEntityName(null);
-        return;
-      }
-
-      try {
-        if (entityInfo.type === 'contact') {
-          const result = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
-          const contact = result.data.find((c) => c['Contact ID'] === entityInfo.id);
-          setEntityName(contact?.Name || null);
-        } else if (entityInfo.type === 'event') {
-          const result = await readSheetData(accessToken, sheetId, SHEETS.EVENTS);
-          const event = result.data.find((e) => e['Event ID'] === entityInfo.id);
-          setEntityName(event?.Name || event?.Title || null);
-        }
-      } catch {
-        setEntityName(null);
-      }
-    };
-
-    fetchEntityName();
-  }, [location.pathname, accessToken, sheetId, getEntityInfo]);
 
   // Generate breadcrumbs from route
   const generateBreadcrumbs = () => {

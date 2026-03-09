@@ -33,10 +33,12 @@ import { crmEventToGoogleEvent } from '../utils/eventTransformers';
 import ContactCard from '../components/ContactCard';
 import NotesDisplaySection from '../components/notes/NotesDisplaySection';
 import ConfirmDialog from '../components/ConfirmDialog';
+import { useBreadcrumb } from '../contexts/BreadcrumbContext';
 
 function EventDetails({ onNavigate }) {
   const { id } = useParams();
   const { accessToken, refreshAccessToken, user, hasCalendarAccess } = useAuth();
+  const { setEntityName } = useBreadcrumb();
   const sheetId = useActiveSheetId();
   const { notify } = useNotification();
   const { canWrite } = usePermissions();
@@ -102,6 +104,7 @@ function EventDetails({ onNavigate }) {
       }
 
       setEvent(foundEvent);
+      setEntityName(foundEvent['Event Name'] || null);
       setAllContacts(contactsResult.data || []);
 
       if (foundEvent['Attendees']) {
@@ -144,6 +147,12 @@ function EventDetails({ onNavigate }) {
   useEffect(() => {
     loadEventDetails();
   }, [loadEventDetails]);
+
+  // Clear breadcrumb name when leaving the event details page
+  useEffect(() => {
+    return () => setEntityName(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const check = async () => {
@@ -999,7 +1008,7 @@ function EventDetails({ onNavigate }) {
           <div className="card ed-modal-card">
             <div className="card-header">
               <h3>Add Event Note</h3>
-              <button className="btn btn-ghost btn-sm" onClick={() => setShowNoteModal(false)}>
+              <button className="btn btn-ghost btn-sm" onClick={() => { setShowNoteModal(false); setNoteForm({ Content: '', 'Note Type': 'Event Note', Visibility: 'Workspace-Wide', 'Shared With': '' }); }}>
                 <X size={16} />
               </button>
             </div>
@@ -1058,7 +1067,7 @@ function EventDetails({ onNavigate }) {
               )}
             </div>
             <div className="card-footer ed-modal-footer">
-              <button className="btn btn-secondary" onClick={() => setShowNoteModal(false)}>
+              <button className="btn btn-secondary" onClick={() => { setShowNoteModal(false); setNoteForm({ Content: '', 'Note Type': 'Event Note', Visibility: 'Workspace-Wide', 'Shared With': '' }); }}>
                 Cancel
               </button>
               <button
@@ -1081,7 +1090,7 @@ function EventDetails({ onNavigate }) {
               <h3>Log Touchpoints</h3>
               <button
                 className="btn btn-ghost btn-sm"
-                onClick={() => setShowBulkTouchpointModal(false)}
+                onClick={() => { setShowBulkTouchpointModal(false); setBulkTouchpointData({ notes: '', type: 'Meeting', outcome: '', selectedAttendees: new Set() }); }}
               >
                 <X size={16} />
               </button>
@@ -1167,7 +1176,7 @@ function EventDetails({ onNavigate }) {
               <div className="ed-modal-footer-row">
                 <button
                   className="btn btn-secondary"
-                  onClick={() => setShowBulkTouchpointModal(false)}
+                  onClick={() => { setShowBulkTouchpointModal(false); setBulkTouchpointData({ notes: '', type: 'Meeting', outcome: '', selectedAttendees: new Set() }); }}
                   disabled={savingBulkTouchpoints}
                 >
                   Cancel

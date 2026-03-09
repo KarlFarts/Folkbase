@@ -49,6 +49,7 @@ import KeyboardShortcutHandler from './components/KeyboardShortcutHandler';
 import BraindumpFAB from './components/BraindumpFAB';
 import InstallPrompt from './components/InstallPrompt';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { BreadcrumbProvider } from './contexts/BreadcrumbContext';
 import { MonitoringProvider } from './contexts/MonitoringContext';
 import { MonitoringPanel } from './components/MonitoringPanel';
 import { needsMigration } from './services/migrationService';
@@ -436,7 +437,9 @@ function App() {
     <AuthProvider>
       <NotificationProvider>
         <WorkspaceProvider>
-          {isDevMode ? <MonitoringProvider>{content}</MonitoringProvider> : content}
+          <BreadcrumbProvider>
+            {isDevMode ? <MonitoringProvider>{content}</MonitoringProvider> : content}
+          </BreadcrumbProvider>
         </WorkspaceProvider>
       </NotificationProvider>
     </AuthProvider>

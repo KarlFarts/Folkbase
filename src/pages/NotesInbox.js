@@ -134,6 +134,13 @@ function NotesInbox({ onNavigate }) {
     loadData();
   }, [loadData]);
 
+  // Re-fetch when a note is added from another page (e.g. ContactProfile)
+  useEffect(() => {
+    const onNotesChanged = () => loadData();
+    window.addEventListener('folkbase:notes-changed', onNotesChanged);
+    return () => window.removeEventListener('folkbase:notes-changed', onNotesChanged);
+  }, [loadData]);
+
   // Auto-refresh service to poll for changes every 60 seconds
   useEffect(() => {
     if (!accessToken || !sheetId) return;
@@ -418,6 +425,11 @@ function NotesInbox({ onNavigate }) {
     }
     if (errorCount > 0) {
       notify.warning(`Failed to commit ${errorCount} note(s)`);
+    }
+
+    // Keep the detail panel in sync if the selected note was just committed
+    if (selectedNote && noteIds.includes(selectedNote['Note ID'])) {
+      setSelectedNote({ ...selectedNote, Status: 'Processed' });
     }
 
     setShowBulkCommitModal(false);
