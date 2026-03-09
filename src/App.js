@@ -54,6 +54,7 @@ import { needsMigration } from './services/migrationService';
 import MigrationBanner from './components/MigrationBanner';
 import { useActiveSheetId } from './utils/sheetResolver';
 import { useRetryQueue } from './hooks/useRetryQueue';
+import { findExistingSheets, hasDriveScope } from './utils/sheetDiscovery';
 
 // Lazy load setup wizard (only loaded when needed)
 const SetupWizard = lazy(() => import('./components/SetupWizard/SetupWizard'));
@@ -62,11 +63,13 @@ const NoWorkspaceLandingPage = lazy(() => import('./pages/NoWorkspaceLandingPage
 
 function AppContent() {
   const { user, accessToken, loading } = useAuth();
-  const { config, ensureConfigForUser } = useConfig();
+  const { config, saveConfig, ensureConfigForUser } = useConfig();
   const { userWorkspaces } = useWorkspace();
   const navigate = useNavigate();
   const [showSetup, setShowSetup] = useState(false);
   const [signInError, setSignInError] = useState(null);
+  const [reconnecting, setReconnecting] = useState(false);
+  const [discoveredSheets, setDiscoveredSheets] = useState(null);
   const [migrationNeeded, setMigrationNeeded] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const activeSheetId = useActiveSheetId();
@@ -78,7 +81,7 @@ function AppContent() {
   useTheme();
 
   // Initialize retry queue for failed write operations
-  const { failedCount } = useRetryQueue(accessToken, activeSheetId);
+  const { failedCount: _failedCount } = useRetryQueue(accessToken, activeSheetId);
 
   // When a different user signs in, clear the previous user's sheet config
   // so they get routed to setup instead of hitting a 403 on someone else's sheet
@@ -87,6 +90,41 @@ function AppContent() {
       ensureConfigForUser(user.email);
     }
   }, [user?.email, ensureConfigForUser]);
+
+  // Auto-reconnect: search Drive for existing Folkbase sheets when user is signed in but has no sheet
+  useEffect(() => {
+    const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+    if (isDevMode || !user || !accessToken || config.personalSheetId) return;
+
+    let cancelled = false;
+    const tryReconnect = async () => {
+      setReconnecting(true);
+      try {
+        const hasScope = await hasDriveScope(accessToken);
+        if (!hasScope || cancelled) {
+          setReconnecting(false);
+          return;
+        }
+        const result = await findExistingSheets(accessToken);
+        if (cancelled) return;
+
+        if (result.success && result.sheets.length === 1) {
+          // Exactly one sheet found — silently reconnect
+          saveConfig({ personalSheetId: result.sheets[0].id });
+        } else if (result.success && result.sheets.length > 1) {
+          // Multiple sheets found — store for picker UI
+          setDiscoveredSheets(result.sheets);
+        }
+        // If zero sheets found, fall through to existing landing page
+      } catch (err) {
+        console.error('Auto-reconnect failed:', err);
+      } finally {
+        if (!cancelled) setReconnecting(false);
+      }
+    };
+    tryReconnect();
+    return () => { cancelled = true; };
+  }, [user, accessToken, config.personalSheetId]);
 
   // Check if migration is needed — only after setup is complete and sheet exists
   useEffect(() => {
@@ -105,11 +143,11 @@ function AppContent() {
 
   // Show loading until both config and auth are ready
   // This prevents race condition where dashboard shows before auth state resolves
-  if (!config.isLoaded || loading) {
+  if (!config.isLoaded || loading || reconnecting) {
     return (
       <div className="loading-container">
         <div className="loading-spinner"></div>
-        <p>Loading Folkbase...</p>
+        <p>{reconnecting ? 'Looking for your data...' : 'Loading Folkbase...'}</p>
       </div>
     );
   }
@@ -143,6 +181,33 @@ function AppContent() {
 
   // Only block if no personal sheet AND no workspace access AND not in the middle of joining
   const needsSetup = !isDevMode && !config.personalSheetId && !hasWorkspaceAccess && !isPendingJoin;
+
+  // Multiple sheets discovered — show picker instead of landing page
+  if (!isDevMode && !config.personalSheetId && discoveredSheets && discoveredSheets.length > 1) {
+    return (
+      <div className="loading-container" style={{ maxWidth: 480, margin: '80px auto', textAlign: 'left' }}>
+        <h2>Welcome back!</h2>
+        <p style={{ marginBottom: 16 }}>We found multiple Folkbase sheets in your Drive. Which one would you like to use?</p>
+        {discoveredSheets.map((sheet) => (
+          <div key={sheet.id} className="discovered-sheet-card" style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', border: '1px solid var(--border-color)', borderRadius: 8 }}>
+            <div>
+              <strong>{sheet.name}</strong>
+              <br />
+              <small style={{ color: 'var(--text-secondary)' }}>Modified: {new Date(sheet.modifiedTime).toLocaleDateString()}</small>
+            </div>
+            <button className="btn btn-primary btn-sm" onClick={() => saveConfig({ personalSheetId: sheet.id })}>
+              Use This
+            </button>
+          </div>
+        ))}
+        <p style={{ marginTop: 16 }}>
+          <button className="btn btn-secondary btn-sm" onClick={() => setDiscoveredSheets(null)}>
+            Or set up a new sheet
+          </button>
+        </p>
+      </div>
+    );
+  }
 
   if (showSetup) {
     return (
