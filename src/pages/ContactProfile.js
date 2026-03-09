@@ -34,6 +34,7 @@ import SyncConflictResolver from '../components/SyncConflictResolver';
 import ListManager from '../components/ListManager';
 import WindowTemplate from '../components/WindowTemplate';
 import { FIELD_GROUPS, getFieldsByGroup } from '../utils/fieldDefinitions';
+import { sanitizeFormData, SCHEMAS, validateEmail } from '../utils/inputSanitizer';
 
 // Imported components
 import ProfileHeader from '../components/contact/ProfileHeader';
@@ -216,16 +217,24 @@ function ContactProfile({ onNavigate }) {
         actions.setIsEditing(false);
         return;
       }
+      if (changedData['Email Personal'] !== undefined) {
+        const emailErr = validateEmail(changedData['Email Personal']);
+        if (emailErr) {
+          notify.warning(emailErr);
+          return;
+        }
+      }
+      const sanitizedChanges = sanitizeFormData(changedData, SCHEMAS.contact);
       await updateContact(
         accessToken,
         sheetId,
         contactId,
         state.contact,
-        changedData,
+        sanitizedChanges,
         user.email
       );
       // Merge changes back into contact state
-      actions.setContact({ ...state.contact, ...changedData });
+      actions.setContact({ ...state.contact, ...sanitizedChanges });
       actions.setIsEditing(false);
       actions.clearDirtyFields();
     } catch (err) {
@@ -263,18 +272,19 @@ function ContactProfile({ onNavigate }) {
     }
     try {
       setSavingMoment(true);
+      const cleanMoment = sanitizeFormData(momentData, SCHEMAS.moment);
       if (editingMoment) {
-        await updateMoment(accessToken, sheetId, editingMoment['Moment ID'], momentData);
+        await updateMoment(accessToken, sheetId, editingMoment['Moment ID'], cleanMoment);
         setMoments((prev) =>
           prev.map((m) =>
             m['Moment ID'] === editingMoment['Moment ID']
-              ? { ...m, ...momentData }
+              ? { ...m, ...cleanMoment }
               : m
           )
         );
         notify.success('Moment updated!');
       } else {
-        const result = await addMoment(accessToken, sheetId, momentData);
+        const result = await addMoment(accessToken, sheetId, cleanMoment);
         if (result && (result.momentId || result['Moment ID'])) {
           setMoments((prev) => [
             ...prev,
@@ -318,14 +328,15 @@ function ContactProfile({ onNavigate }) {
   const handleLogTouchpoint = async () => {
     try {
       actions.setSaving(true);
+      const rawTouchpoint = {
+        'Contact ID': contactId,
+        'Contact Name': state.contact['Name'],
+        ...state.touchpointData,
+      };
       const result = await addTouchpoint(
         accessToken,
         sheetId,
-        {
-          'Contact ID': contactId,
-          'Contact Name': state.contact['Name'],
-          ...state.touchpointData,
-        },
+        sanitizeFormData(rawTouchpoint, SCHEMAS.touchpoint),
         user.email
       );
 
@@ -363,13 +374,16 @@ function ContactProfile({ onNavigate }) {
       const result = await addNote(
         accessToken,
         sheetId,
-        {
-          Content: state.noteFormData.Content,
-          'Note Type': state.noteFormData['Note Type'],
-          Status: state.noteFormData.Status,
-          Tags: state.noteFormData.Tags || '',
-          Visibility: state.noteFormData.Visibility || 'Private',
-        },
+        sanitizeFormData(
+          {
+            Content: state.noteFormData.Content,
+            'Note Type': state.noteFormData['Note Type'],
+            Status: state.noteFormData.Status,
+            Tags: state.noteFormData.Tags || '',
+            Visibility: state.noteFormData.Visibility || 'Private',
+          },
+          SCHEMAS.note
+        ),
         user?.email
       );
 

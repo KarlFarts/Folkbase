@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { readSheetMetadata, addContact, detectDuplicates, SHEETS } from '../utils/devModeWrapper';
-import { sanitizeFormData, SCHEMAS, INPUT_LIMITS } from '../utils/inputSanitizer';
+import { sanitizeFormData, SCHEMAS, INPUT_LIMITS, validateEmail } from '../utils/inputSanitizer';
 import TagsInput from '../components/TagsInput';
 import { usePermissions } from '../hooks/usePermissions';
 
@@ -17,6 +17,7 @@ function AddContact({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Form data
   const [formData, setFormData] = useState({
@@ -67,6 +68,7 @@ function AddContact({ onNavigate }) {
 
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
+    if (fieldErrors[field]) setFieldErrors((prev) => ({ ...prev, [field]: null }));
   };
 
   const checkDuplicates = async () => {
@@ -93,8 +95,14 @@ function AddContact({ onNavigate }) {
   };
 
   const handleSubmit = async (forceSave = false) => {
+    const errors = {};
     if (!formData['First Name'].trim() && !formData['Last Name'].trim()) {
-      notify.warning('First Name or Last Name is required');
+      errors['First Name'] = 'First Name or Last Name is required';
+    }
+    const emailErr = validateEmail(formData['Email Personal']);
+    if (emailErr) errors['Email Personal'] = emailErr;
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -200,7 +208,7 @@ function AddContact({ onNavigate }) {
               <input
                 id="contact-first-name"
                 type="text"
-                className="form-input"
+                className={`form-input${fieldErrors['First Name'] ? ' form-error' : ''}`}
                 value={formData['First Name']}
                 onChange={(e) => handleChange('First Name', e.target.value)}
                 placeholder="John"
@@ -208,6 +216,9 @@ function AddContact({ onNavigate }) {
                 autoFocus
                 aria-required="true"
               />
+              {fieldErrors['First Name'] && (
+                <div className="form-error-message">{fieldErrors['First Name']}</div>
+              )}
             </div>
 
             <div className="form-group">
@@ -268,12 +279,15 @@ function AddContact({ onNavigate }) {
               <input
                 id="contact-email-personal"
                 type="email"
-                className="form-input"
+                className={`form-input${fieldErrors['Email Personal'] ? ' form-error' : ''}`}
                 value={formData['Email Personal']}
                 onChange={(e) => handleChange('Email Personal', e.target.value)}
                 placeholder="john@example.com"
                 maxLength={INPUT_LIMITS.shortText}
               />
+              {fieldErrors['Email Personal'] && (
+                <div className="form-error-message">{fieldErrors['Email Personal']}</div>
+              )}
             </div>
           </div>
 

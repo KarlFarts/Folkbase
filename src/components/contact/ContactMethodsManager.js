@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS, validateEmail } from '../../utils/inputSanitizer';
 
 const METHOD_TYPES = ['Phone', 'Email', 'Address', 'Fax', 'Other'];
 
@@ -94,16 +95,24 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
       return;
     }
 
+    if (formData.Type === 'Email') {
+      const emailErr = validateEmail(formData.Value);
+      if (emailErr) {
+        showNotification(emailErr, 'error');
+        return;
+      }
+    }
+
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         Type: formData.Type,
         Label: formData.Label,
         Value: formData.Value,
-        'Is Primary': formData['Is Primary'] ? 'TRUE' : 'FALSE',
         Notes: formData.Notes,
-      };
+      }, SCHEMAS.contactMethod);
+      saveData['Is Primary'] = formData['Is Primary'] ? 'TRUE' : 'FALSE';
 
       if (editingId) {
         await updateContactMethod(accessToken, activeSheetId, editingId, saveData);

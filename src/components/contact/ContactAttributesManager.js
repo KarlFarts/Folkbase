@@ -12,6 +12,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS } from '../../utils/inputSanitizer';
 
 const ATTRIBUTE_CATEGORIES = [
   'Skill',
@@ -96,13 +97,13 @@ function ContactAttributesManager({ contactId, readOnly = false }) {
 
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         Category: formData.Category,
         Value: formData.Value,
         Notes: formData.Notes,
         'Date Added': formData['Date Added'],
-      };
+      }, SCHEMAS.attribute);
 
       if (editingId) {
         await updateContactAttribute(accessToken, activeSheetId, editingId, saveData);

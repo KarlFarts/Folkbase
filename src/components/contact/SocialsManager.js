@@ -13,6 +13,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { sanitizeUrl } from '../../utils/sanitize';
 import { useNotification } from '../../contexts/NotificationContext';
 import { useActiveSheetId } from '../../utils/sheetResolver';
+import { sanitizeFormData, SCHEMAS } from '../../utils/inputSanitizer';
 
 const PLATFORMS = ['Facebook', 'Twitter', 'Instagram', 'LinkedIn', 'TikTok', 'YouTube', 'Other'];
 
@@ -91,14 +92,14 @@ function SocialsManager({ contactId, readOnly = false }) {
 
     setSaving(true);
     try {
-      const saveData = {
+      const saveData = sanitizeFormData({
         'Contact ID': contactId,
         Platform: formData.Platform,
         Handle: formData.Handle,
         URL: formData.URL,
-        'Is Primary': formData['Is Primary'] ? 'TRUE' : 'FALSE',
         Notes: formData.Notes,
-      };
+      }, SCHEMAS.social);
+      saveData['Is Primary'] = formData['Is Primary'] ? 'TRUE' : 'FALSE';
 
       if (editingId) {
         await updateContactSocial(accessToken, activeSheetId, editingId, saveData);

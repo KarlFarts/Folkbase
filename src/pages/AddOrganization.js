@@ -4,7 +4,7 @@ import { useActiveSheetId } from '../utils/sheetResolver';
 import { useNotification } from '../contexts/NotificationContext';
 import { readSheetData, addOrganization, SHEETS } from '../utils/devModeWrapper';
 import { detectDuplicateOrganizations } from '../services/organizationService';
-import { sanitizeFormData, SCHEMAS } from '../utils/inputSanitizer';
+import { sanitizeFormData, SCHEMAS, validateEmail } from '../utils/inputSanitizer';
 import { usePermissions } from '../hooks/usePermissions';
 
 function AddOrganization({ onNavigate }) {
@@ -64,6 +64,12 @@ function AddOrganization({ onNavigate }) {
   const handleSubmit = async (forceSave = false) => {
     if (!formData.Name.trim()) {
       notify.warning('Organization name is required');
+      return;
+    }
+
+    const emailErr = validateEmail(formData.Email);
+    if (emailErr) {
+      notify.warning(emailErr);
       return;
     }
 
