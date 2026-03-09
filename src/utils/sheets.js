@@ -13,6 +13,94 @@
  * DO:     import { readSheetData } from './devModeWrapper';
  *
  * The wrapper is transparent - same API, just works with localStorage in dev mode.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * SYNC STRATEGY
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * Overall pattern: write-through with optimistic IndexedDB cache
+ *
+ * Reads
+ * -----
+ * Most reads go through readSheetDataCachedFirst() which checks IndexedDB before
+ * hitting the Sheets API. TTLs are 2 min for high-churn tabs (Contacts,
+ * Touchpoints, Notes, Events, Tasks) and 30 min for low-churn tabs (Lists,
+ * Import*). A plain readSheetData() call always hits the API.
+ *
+ * Writes
+ * ------
+ * Every write goes directly to the Sheets API (no write queue). After the API
+ * call succeeds, the cache is updated optimistically:
+ *   - appendToCachedData()  — used after append/add operations
+ *   - updateCachedRow()     — used after update operations (some paths omit this)
+ *   - deleteCachedRow()     — used after delete operations (some paths omit this)
+ * Cache is NOT proactively invalidated after writes; stale entries expire by TTL.
+ *
+ * Row identity
+ * ------------
+ * Rows are identified by a stable ID field (e.g. "Contact ID", "Note ID") that
+ * is read during the initial data fetch and stored on the in-memory object.
+ * The physical row index (_rowIndex = spreadsheet row number) is captured at read
+ * time and used for update/delete API calls. This index is NOT re-verified before
+ * the write.
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
+ * KNOWN SYNC RISKS (in priority order)
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * [CRITICAL] Row-index staleness on update/delete
+ *   _rowIndex is a snapshot taken at read time. If any write (from this client
+ *   or another user) inserts or deletes rows in the same tab between the read
+ *   and the subsequent update/delete, _rowIndex points to the wrong row and a
+ *   different record is silently corrupted or deleted. The ID field should be
+ *   re-verified after every write that uses _rowIndex.
+ *   Affected: updateContact, updateTouchpoint, deleteContact, deleteTouchpoint,
+ *             unlinkNote*, and every other update/delete helper in this file.
+ *
+ * [HIGH] Stale cache used for duplicate-detection
+ *   linkNoteToContact, linkNoteToEvent, linkNoteToList, linkNoteToTask, and
+ *   addContactToList all read the junction tab via readSheetDataCachedFirst()
+ *   before checking for an existing mapping. If the cache is up to 2 min old,
+ *   a duplicate link can be created without detection.
+ *
+ * [HIGH] Optimistic cache updates not rolled back on failure
+ *   appendToCachedData / updateCachedRow / deleteCachedRow are called after a
+ *   successful API write but before the next read; if a subsequent operation
+ *   fails, the cache reflects state that never made it to the Sheet. The cache
+ *   is also not invalidated when retryQueue replays failed writes, so a retry
+ *   may create a duplicate row that passes the stale duplicate check.
+ *
+ * [MEDIUM] updateContact does not update the cache
+ *   addContact appends to the cache; updateContact does not patch the cache.
+ *   Reads within the TTL window return the pre-update version of the record.
+ *
+ * [MEDIUM] Parallel batch-link race on duplicate check
+ *   batchLinkNoteToEntities fires multiple link calls via Promise.all. Each
+ *   concurrent call performs its own cache-first duplicate check. Because they
+ *   share the same cached snapshot, two calls targeting the same junction row
+ *   can both conclude no duplicate exists and both append, creating a duplicate.
+ *
+ * [MEDIUM] Multi-sheet operations are not atomic
+ *   Operations that write to several tabs (e.g. copyMultipleContacts, or any
+ *   add that also writes an Audit Log entry) use Promise.allSettled or
+ *   sequential awaits without rollback. A partial failure leaves the Sheet in
+ *   an inconsistent state.
+ *
+ * [LOW] Column-mapping brittleness
+ *   Headers are read once per TTL window and mapped by name. If a user manually
+ *   renames or reorders a column in the Sheet between cache refreshes, all
+ *   writes within that window silently misplace values. There is no schema
+ *   version check on each read; the mismatch will only surface as wrong data.
+ *
+ * [LOW] Audit log failures are silent
+ *   logAuditEntry errors are caught and console.error'd but do not fail the
+ *   parent transaction. Audit records can be silently dropped under load or
+ *   quota exhaustion.
+ *
+ * [LOW] ID uniqueness relies on 32-bit entropy
+ *   UUIDs are 8 random hex characters. Birthday paradox gives ~50 % collision
+ *   probability around 65 k IDs per entity type. Extremely unlikely in practice
+ *   but no collision-detection guard exists.
  */
 
 import axios from 'axios';
@@ -1000,7 +1088,7 @@ export async function linkNoteToContact(accessToken, sheetId, noteId, contactId)
   const linkedDate = new Date().toISOString().split('T')[0];
 
   // Check if mapping already exists (use cache-first for faster dupe checks)
-  const { data: existingMappings } = await readSheetDataCachedFirst(
+  const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
     SHEETS.CONTACT_NOTES
@@ -1198,7 +1286,7 @@ export async function linkNoteToEvent(accessToken, sheetId, noteId, eventId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
   // Check if mapping already exists (use cache-first for faster dupe checks)
-  const { data: existingMappings } = await readSheetDataCachedFirst(
+  const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
     SHEETS.EVENT_NOTES
@@ -1311,7 +1399,7 @@ export async function linkNoteToList(accessToken, sheetId, noteId, listId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
   // Check if mapping already exists (use cache-first for faster dupe checks)
-  const { data: existingMappings } = await readSheetDataCachedFirst(
+  const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
     SHEETS.LIST_NOTES
@@ -1421,7 +1509,7 @@ export async function linkNoteToTask(accessToken, sheetId, noteId, taskId) {
   const linkedDate = new Date().toISOString().split('T')[0];
 
   // Check if mapping already exists (use cache-first for faster dupe checks)
-  const { data: existingMappings } = await readSheetDataCachedFirst(
+  const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
     SHEETS.TASK_NOTES
@@ -1971,7 +2059,7 @@ export async function deleteList(accessToken, sheetId, listId) {
  */
 export async function addContactToList(accessToken, sheetId, contactId, listId) {
   // Check if mapping already exists (use cache-first for faster dupe checks)
-  const { data: existingMappings } = await readSheetDataCachedFirst(
+  const { data: existingMappings } = await readSheetData(
     accessToken,
     sheetId,
     SHEETS.CONTACT_LISTS
