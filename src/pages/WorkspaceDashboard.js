@@ -56,6 +56,23 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       );
       setWorkspaceMembers(members);
 
+      // Auto-share sheet with any members who may not have access yet
+      const sheetId = selectedWorkspace.sheet_id || selectedWorkspace['Sheet ID'];
+      if (sheetId && members.length > 0) {
+        const memberEmails = members
+          .map((m) => m['Member Email'] || m.member_email)
+          .filter((email) => email && email !== user?.email);
+        // Fire-and-forget — don't block dashboard load
+        Promise.all(
+          memberEmails.map((email) =>
+            shareFileWithUser(accessToken, sheetId, email, 'writer').catch((err) => {
+              // Sharing may fail if already shared or user doesn't exist — that's fine
+              console.warn(`Auto-share with ${email} failed:`, err.message);
+            })
+          )
+        ).catch(() => {});
+      }
+
       // Load contact count from the workspace's Google Sheet
       const contacts = await readSheetData(
         accessToken,
@@ -245,7 +262,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
       } else {
         notify.error('Could not find Folkbase folder');
       }
-    } catch (error) {
+    } catch {
       notify.error('Failed to open the Folkbase folder. Check your connection and try again.');
     }
   };
