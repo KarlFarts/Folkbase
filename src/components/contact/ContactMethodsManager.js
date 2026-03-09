@@ -46,6 +46,7 @@ function ContactMethodsManager({ contactId, readOnly = false }) {
 
   useEffect(() => {
     loadMethods();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadMethods = async () => {

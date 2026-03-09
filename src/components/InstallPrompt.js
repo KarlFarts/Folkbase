@@ -76,6 +76,7 @@ function InstallPrompt() {
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleInstall = async () => {
@@ -88,9 +89,9 @@ function InstallPrompt() {
     const { outcome } = await deferredPrompt.userChoice;
 
     if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
+      console.warn('User accepted the install prompt');
     } else {
-      console.log('User dismissed the install prompt');
+      console.warn('User dismissed the install prompt');
     }
 
     // Clear the prompt

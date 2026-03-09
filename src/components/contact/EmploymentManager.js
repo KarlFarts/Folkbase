@@ -43,6 +43,7 @@ function EmploymentManager({ contactId, readOnly = false }) {
   useEffect(() => {
     loadEmployment();
     loadOrganizations();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadEmployment = async () => {

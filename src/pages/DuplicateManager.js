@@ -31,7 +31,7 @@ function DuplicateManager({ onNavigate }) {
         const result = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
         setContacts(result.data || []);
         setError('');
-      } catch (err) {
+      } catch {
         setError('Failed to load contacts. Check your connection and try again.');
       } finally {
         setLoading(false);
@@ -56,7 +56,7 @@ function DuplicateManager({ onNavigate }) {
       if (found.length === 0) {
         setScanInfo('No duplicate contacts found — your contact list looks clean.');
       }
-    } catch (err) {
+    } catch {
       setError('Scan failed. Please try again.');
     } finally {
       setScanning(false);
@@ -114,7 +114,7 @@ function DuplicateManager({ onNavigate }) {
       // Remove from duplicates list and close preview
       setDuplicates(duplicates.filter((d) => d !== selectedDuplicate));
       setSelectedDuplicate(null);
-    } catch (err) {
+    } catch {
       setError('Failed to link duplicates. Check your connection and try again.');
     } finally {
       setMerging(false);
@@ -158,7 +158,7 @@ function DuplicateManager({ onNavigate }) {
       setLinkedPairs(
         linkedPairs.filter((p) => !(p.contact1Id === contact1Id && p.contact2Id === contact2Id))
       );
-    } catch (err) {
+    } catch {
       setError('Failed to unlink duplicates. Check your connection and try again.');
     } finally {
       setMerging(false);

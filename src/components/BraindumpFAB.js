@@ -64,6 +64,7 @@ function BraindumpFAB() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpanded, location]);
 
   // Auto-focus textarea when expanded

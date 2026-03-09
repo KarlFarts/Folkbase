@@ -38,6 +38,7 @@ function EducationManager({ contactId, readOnly = false }) {
 
   useEffect(() => {
     loadEducation();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadEducation = async () => {

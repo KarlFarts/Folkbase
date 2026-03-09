@@ -14,6 +14,7 @@ import { logApiCall } from './apiUsageLogger.js';
 import { canMakeRequest } from '../services/apiUsageStats.js';
 import { warn } from './logger.js';
 import { notifyAuthError } from './authErrorHandler.js';
+import { notifyRateLimit } from './rateLimitHandler.js';
 
 const CALENDAR_API_BASE = 'https://www.googleapis.com/calendar/v3/calendars/primary/events';
 
@@ -29,9 +30,14 @@ function createCalendarClient(accessToken) {
     },
   });
 
+  const MAX_RATE_LIMIT_RETRIES = 3;
+
   client.interceptors.request.use(
     (config) => {
       config.metadata = { startTime: Date.now() };
+
+      // Skip pre-check on retries — we're already past the rate-limit gate
+      if (config.__isRetry) return config;
 
       const rateLimitCheck = canMakeRequest('google-calendar', 1);
       if (!rateLimitCheck.allowed) {
@@ -45,6 +51,8 @@ function createCalendarClient(accessToken) {
         });
         const error = new Error(`Rate limit would be exceeded: ${rateLimitCheck.reason}`);
         error.rateLimitInfo = rateLimitCheck;
+        error.isRateLimit = true;
+        notifyRateLimit();
         return Promise.reject(error);
       }
 
@@ -63,7 +71,23 @@ function createCalendarClient(accessToken) {
       });
       return response;
     },
-    (error) => {
+    async (error) => {
+      // Exponential backoff retry for 429 Too Many Requests
+      if (error.response?.status === 429 && error.config) {
+        const retryCount = error.config.__retryCount || 0;
+        if (retryCount < MAX_RATE_LIMIT_RETRIES) {
+          error.config.__retryCount = retryCount + 1;
+          error.config.__isRetry = true;
+          const delay = Math.pow(2, retryCount) * 1000; // 1 s, 2 s, 4 s
+          await new Promise((resolve) => setTimeout(resolve, delay));
+          error.config.metadata = { startTime: Date.now() };
+          return client(error.config);
+        }
+        // All retries exhausted — mark and notify
+        error.isRateLimit = true;
+        notifyRateLimit();
+      }
+
       const startTime = error.config?.metadata?.startTime || Date.now();
       const duration = Date.now() - startTime;
       logApiCall('google-calendar', error.config?.method || 'unknown', {

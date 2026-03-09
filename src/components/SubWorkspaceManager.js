@@ -38,6 +38,7 @@ const SubWorkspaceManager = ({ workspace, onWorkspaceSelect }) => {
 
   useEffect(() => {
     loadWorkspaceData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspace, accessToken, sheetId]);
 
   const loadWorkspaceData = async () => {
@@ -214,6 +215,7 @@ const WorkspaceTreeNode = ({
     if (isExpanded && hasChildren && childWorkspaces.length === 0) {
       loadChildren();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isExpanded]);
 
   const loadChildren = async () => {

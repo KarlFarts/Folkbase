@@ -48,12 +48,13 @@ export function useEntityDetection(text, context, debounceDelay = 300) {
       // Run detection (synchronous for now, but structured for async if needed)
       const results = detectEntities(debouncedText, context);
       setDetectedEntities(results);
-    } catch (err) {
+    } catch {
       setError('Entity detection failed. Please try again.');
       setDetectedEntities(null);
     } finally {
       setIsDetecting(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cacheKey, debouncedText, context?.contacts?.length, context?.events?.length]);
 
   return {

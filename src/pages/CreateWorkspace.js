@@ -60,6 +60,7 @@ const CreateWorkspace = () => {
     if (parentId) {
       loadParentWorkspace(parentId);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Load contacts and lists when entering Step 2
@@ -81,6 +82,7 @@ const CreateWorkspace = () => {
       };
       loadLists();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentStep, config?.personalSheetId, accessToken]);
 
   const filteredContacts = useMemo(() => {

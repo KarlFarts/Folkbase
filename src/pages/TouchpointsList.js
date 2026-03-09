@@ -308,6 +308,7 @@ function TouchpointsList({ onNavigate }) {
     }
 
     return result;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sortedTouchpoints, searchQuery, typeFilter, outcomeFilter, dateRange]);
 
   const clearFilters = () => {

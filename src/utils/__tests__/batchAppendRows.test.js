@@ -45,7 +45,7 @@ describe('batchAppendRows', () => {
     await batchAppendRows('token', 'sheet123', rowsBySheet);
 
     expect(mockPost).toHaveBeenCalledTimes(1);
-    const [url, body, options] = mockPost.mock.calls[0];
+    const [url, body, _options] = mockPost.mock.calls[0];
     expect(url).toContain('batchUpdate');
     expect(body.data.length).toBe(2);
     expect(body.data[0].range).toBe('Contact Notes');

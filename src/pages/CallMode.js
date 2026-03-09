@@ -74,10 +74,11 @@ export default function CallMode({ onNavigate }) {
       setTimeout(() => {
         onNavigate('contact-profile', contactId);
       }, 1000);
-    } catch (error) {
+    } catch {
       notify.error('Failed to save call. Please try again.');
       setClosing(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, contact, elapsedSeconds, notes, accessToken, sheetId, user.email, onNavigate]);
 
   if (loading) {

@@ -153,6 +153,7 @@ export function AuthProvider({ children }) {
     // CSP headers, HTTPS-only, and no XSS vulnerabilities.
     state: generateOAuthState(),
   });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const googleLogin = isDevMode() ? () => {} : googleLoginHook;
 
   const signInWithGoogle = useCallback(

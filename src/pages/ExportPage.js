@@ -37,6 +37,7 @@ function ExportPage({ onNavigate }) {
 
   useEffect(() => {
     loadContacts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   const loadContacts = async () => {

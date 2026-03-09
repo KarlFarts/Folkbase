@@ -96,11 +96,12 @@ export default function MeetingMode({ onNavigate }) {
       setTimeout(() => {
         onNavigate('dashboard');
       }, 1000);
-    } catch (error) {
+    } catch {
       // Silent failure expected
       notify.error('Failed to save meeting. Please try again.');
       setClosing(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     selectedAttendees,
     contacts,

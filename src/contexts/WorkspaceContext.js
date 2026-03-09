@@ -84,6 +84,7 @@ export const WorkspaceProvider = ({ children }) => {
     };
 
     loadUserWorkspaces();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, accessToken, config.personalSheetId]);
 
   const switchToWorkspace = useCallback((workspace) => {

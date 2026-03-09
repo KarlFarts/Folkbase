@@ -35,7 +35,7 @@ const WelcomeAuthStep = ({ wizardData, onUpdate, onNext }) => {
         const result = await findExistingSheets(accessToken);
         setDiscoveredSheets(result.success ? result.sheets : []);
         if (!result.success) setDiscoveryError(result.error);
-      } catch (err) {
+      } catch {
         setDiscoveredSheets([]);
         setDiscoveryError('Sheet discovery failed. Check your connection and try again.');
       } finally {

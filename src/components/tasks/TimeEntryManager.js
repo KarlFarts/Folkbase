@@ -41,6 +41,7 @@ function TimeEntryManager({ taskId, readOnly = false }) {
   useEffect(() => {
     loadTimeEntries();
     loadContacts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, accessToken, activeSheetId]);
 
   const loadTimeEntries = async () => {

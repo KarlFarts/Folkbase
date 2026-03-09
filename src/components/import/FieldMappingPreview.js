@@ -129,7 +129,7 @@ function FieldMappingPreview({
 
         return updated;
       });
-    } catch (error) {
+    } catch {
       notify.error('Failed to load template. Check your connection and try again.');
     }
   };
@@ -172,7 +172,7 @@ function FieldMappingPreview({
           lastUsed: new Date().toISOString().split('T')[0],
           useCount: 1,
         });
-      } catch (error) {
+      } catch {
         // Don't block import if template save fails
         notify.warning('Template save failed. Your import will continue without saving the template.');
       }

@@ -42,6 +42,7 @@ const TasksPage = lazy(() => import('./pages/TasksPage'));
 const BackupRestorePage = lazy(() => import('./pages/BackupRestorePage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 import TokenExpiryNotifier from './components/TokenExpiryNotifier';
+import RateLimitNotifier from './components/RateLimitNotifier';
 import ReauthBanner from './components/ReauthBanner';
 import NotificationContainer from './components/NotificationToast';
 import KeyboardShortcutHandler from './components/KeyboardShortcutHandler';
@@ -134,6 +135,7 @@ function AppContent() {
     };
     tryReconnect();
     return () => { cancelled = true; };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, accessToken, config.personalSheetId]);
 
   // Check if migration is needed — only after setup is complete and sheet exists
@@ -338,6 +340,7 @@ function AppContent() {
         <div className="app-container">
           <Navbar onNavigate={navigateTo} onShowSetup={() => setShowSetup(true)} />
           <TokenExpiryNotifier />
+          <RateLimitNotifier />
           <ReauthBanner />
           {migrationNeeded && (
             <MigrationBanner

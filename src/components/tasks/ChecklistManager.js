@@ -42,6 +42,7 @@ function ChecklistManager({ taskId, readOnly = false }) {
   useEffect(() => {
     loadChecklistItems();
     loadContacts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId, accessToken, activeSheetId]);
 
   const loadChecklistItems = async () => {

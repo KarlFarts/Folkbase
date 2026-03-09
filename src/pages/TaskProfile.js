@@ -25,6 +25,7 @@ export default function TaskProfile({ onNavigate }) {
     if (id && accessToken && activeSheetId) {
       loadTask();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, accessToken, activeSheetId]);
 
   const loadTask = async () => {

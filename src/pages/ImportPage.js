@@ -66,7 +66,7 @@ function ImportPage({ onNavigate }) {
 
       setParsedData(result);
       setCurrentStep(STEPS.MAPPING);
-    } catch (err) {
+    } catch {
       setError('Failed to parse file. Make sure it is a valid CSV or Excel file and try again.');
     } finally {
       setIsProcessing(false);
@@ -97,6 +97,7 @@ function ImportPage({ onNavigate }) {
         handleValidationConfirmed(mapping, validation.validatedContacts);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [parsedData]
   );
 
@@ -128,7 +129,7 @@ function ImportPage({ onNavigate }) {
           // No duplicates, proceed directly to import
           handleDuplicatesResolved([]);
         }
-      } catch (err) {
+      } catch {
         setError('Duplicate detection failed. Check your connection and try again.');
         setCurrentStep(STEPS.VALIDATION);
       } finally {
@@ -136,6 +137,7 @@ function ImportPage({ onNavigate }) {
         setProgress(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [accessToken, sheetId]
   );
 
@@ -183,13 +185,14 @@ function ImportPage({ onNavigate }) {
           setImportResults(results);
           setCurrentStep(STEPS.COMPLETE);
         }
-      } catch (err) {
+      } catch {
         setError('Import failed. Check your connection and try again.');
         setCurrentStep(STEPS.DUPLICATES);
       } finally {
         setProgress(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [accessToken, sheetId, user?.email, fieldMapping, validationData]
   );
 

@@ -27,7 +27,8 @@ export default function QuickCommitButton({ note, onCommit, disabled = false, cl
   const timersRef = useRef([]);
 
   useEffect(() => {
-    return () => timersRef.current.forEach(clearTimeout);
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
   }, []);
 
   const handleQuickCommit = async () => {

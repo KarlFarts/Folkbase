@@ -7,6 +7,7 @@ import {
   Database,
   Info,
   Download,
+  FolderSync,
   HardDrive,
   CheckCircle,
   XCircle,
@@ -158,7 +159,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
           sheetTitle: response.data.properties?.title,
           tokenExpiresIn: expiresInMinutes,
         });
-      } catch (error) {
+      } catch {
         setSheetsStatus({
           loading: false,
           connected: false,
@@ -200,7 +201,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
     try {
       await signInWithGoogle(true);
       window.location.reload();
-    } catch (error) {
+    } catch {
       notify.error('Failed to reconnect Google. Please try again.');
     } finally {
       setReconnecting(false);
@@ -237,7 +238,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
       } else {
         notify.success(`Found ${unmigrated.length} sheet(s) to migrate`);
       }
-    } catch (error) {
+    } catch {
       setMigrationStatus({
         scanning: false,
         migrating: false,
@@ -297,7 +298,7 @@ function SettingsPage({ onShowSetup, onNavigate }) {
           `Migrated ${successCount} sheet(s), ${failCount} failed. Check console for details.`
         );
       }
-    } catch (error) {
+    } catch {
       setMigrationStatus((prev) => ({ ...prev, migrating: false, error: 'Migration failed. Check your connection and try again.' }));
       notify.error('Migration failed. Check your connection and try again.');
     }

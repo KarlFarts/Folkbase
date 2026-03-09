@@ -79,14 +79,13 @@ export function useRetryQueue(accessToken, sheetId) {
     }
   }, [accessToken, sheetId, notify]);
 
-  // Process on mount (once only)
-  // Intentionally exclude processQueue from deps to avoid re-running on every render
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // Process on mount (once only) — intentionally exclude processQueue from deps
   useEffect(() => {
     if (!hasProcessedRef.current) {
       hasProcessedRef.current = true;
       processQueue();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   return { failedCount, processQueue };

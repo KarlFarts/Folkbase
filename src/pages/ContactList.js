@@ -305,6 +305,7 @@ function ContactList({ onNavigate }) {
 
   useEffect(() => {
     loadContacts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   const loadContacts = async (isManualRefresh = false) => {
@@ -389,6 +390,7 @@ function ContactList({ onNavigate }) {
     if (autoRefreshServiceRef.current) {
       autoRefreshServiceRef.current.resetChecksum();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   // Sort handler for table column clicks
@@ -764,6 +766,7 @@ function ContactList({ onNavigate }) {
         setBulkActionProgress(0);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [selectedIds, contacts, userWorkspaces, accessToken, sheetId, user]
   );
 

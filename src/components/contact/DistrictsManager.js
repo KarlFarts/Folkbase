@@ -46,6 +46,7 @@ function DistrictsManager({ contactId, readOnly = false }) {
 
   useEffect(() => {
     loadDistricts();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadDistricts = async () => {

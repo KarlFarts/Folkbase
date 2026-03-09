@@ -48,6 +48,7 @@ function ContactAttributesManager({ contactId, readOnly = false }) {
 
   useEffect(() => {
     loadAttributes();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadAttributes = async () => {

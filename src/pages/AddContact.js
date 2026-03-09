@@ -44,6 +44,7 @@ function AddContact({ onNavigate }) {
 
   useEffect(() => {
     loadMetadata();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   const loadMetadata = async () => {

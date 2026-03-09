@@ -41,6 +41,7 @@ const WorkspaceDashboard = ({ onNavigate }) => {
     if (selectedWorkspace) {
       loadWorkspaceDetails();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedWorkspace]);
 
   const loadWorkspaceDetails = async () => {

@@ -196,6 +196,7 @@ function ContactProfile({ onNavigate }) {
     } finally {
       actions.setLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, contactId, sheetId, actions]);
 
   useEffect(() => {

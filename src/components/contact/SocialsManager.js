@@ -41,6 +41,7 @@ function SocialsManager({ contactId, readOnly = false }) {
 
   useEffect(() => {
     loadSocials();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contactId, accessToken, activeSheetId]);
 
   const loadSocials = async () => {

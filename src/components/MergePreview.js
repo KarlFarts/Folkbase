@@ -53,6 +53,7 @@ function MergePreview({ contact1, contact2, matchDetails, onConfirm, onCancel })
 
   React.useEffect(() => {
     initializeSelection();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contact1, contact2, relevantFields]);
 
   const formatFieldValue = (value) => {

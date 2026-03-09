@@ -37,6 +37,7 @@ const ContactWorkspaceBadges = ({
 
   useEffect(() => {
     loadLinkedWorkspaces();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workspaceType, workspaceId, contactId]);
 
   const loadLinkedWorkspaces = async () => {

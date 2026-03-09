@@ -51,6 +51,7 @@ function BraindumpPage() {
   // Load contacts and events
   useEffect(() => {
     loadData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId]);
 
   // Load draft on mount

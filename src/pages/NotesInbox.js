@@ -367,7 +367,7 @@ function NotesInbox({ onNavigate }) {
           ...noteUpdates,
         });
       }
-    } catch (err) {
+    } catch {
       notify.error('Failed to commit note. Please try again.');
     }
   };

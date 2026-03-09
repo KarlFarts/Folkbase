@@ -131,6 +131,7 @@ export default function RelationshipManager({
     } finally {
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accessToken, sheetId, actualEntityId, actualEntityType, isMultiEntity]);
 
   // Load relationships and entities

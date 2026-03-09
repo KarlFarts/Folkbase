@@ -109,7 +109,7 @@ function QuickSyncPage({ onNavigate }) {
           setNewContacts(newOnes);
           setState(STATES.REVIEWING);
         }
-      } catch (error) {
+      } catch {
         setParseError('Failed to parse file. Make sure it is a valid CSV or Excel file and try again.');
         setState(STATES.IDLE);
       }
@@ -147,12 +147,13 @@ function QuickSyncPage({ onNavigate }) {
         setRecentlyAdded((prev) => [...prev, enrichedContact]);
         setStats((prev) => ({ ...prev, added: prev.added + 1 }));
         setNewContacts((prev) => prev.filter((c) => c.Name !== contact.Name));
-      } catch (error) {
+      } catch {
         notify.error('Failed to add contact. Check your connection and try again.');
       } finally {
         setAddingContactId(null);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [accessToken, sheetId, user?.email]
   );
 
