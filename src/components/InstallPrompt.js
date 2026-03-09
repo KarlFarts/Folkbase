@@ -30,18 +30,22 @@ function InstallPrompt() {
       return;
     }
 
-    // For iOS, show manual install instructions after a few uses
-    if (isIOS) {
-      const visitCount = parseInt(
-        localStorage.getItem('folkbase_visit_count') ||
-          localStorage.getItem('touchpoint_visit_count') ||
-          '0',
-        10,
-      );
-      localStorage.setItem('folkbase_visit_count', (visitCount + 1).toString());
+    // Increment visit count once per page load and return the previous count.
+    // Reads legacy 'touchpoint_*' key as a fallback for existing users.
+    const visitCount = parseInt(
+      localStorage.getItem('folkbase_visit_count') ||
+        localStorage.getItem('touchpoint_visit_count') ||
+        '0',
+      10,
+    );
+    localStorage.setItem('folkbase_visit_count', (visitCount + 1).toString());
 
-      // Show after 5 visits (not on first few)
-      if (visitCount >= 4) {
+    // Show after 5 visits (not on first few)
+    const shouldShow = visitCount >= 4;
+
+    // For iOS, show manual install instructions after enough visits
+    if (isIOS) {
+      if (shouldShow) {
         setTimeout(() => {
           setShowPrompt(true);
         }, 3000);
@@ -49,22 +53,11 @@ function InstallPrompt() {
       return;
     }
 
-    // For Chrome/Edge, capture the beforeinstallprompt event
+    // For Chrome/Edge, capture the beforeinstallprompt event and show after enough visits
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-
-      // Show prompt after a delay (not immediately on first visit)
-      const visitCount = parseInt(
-        localStorage.getItem('folkbase_visit_count') ||
-          localStorage.getItem('touchpoint_visit_count') ||
-          '0',
-        10,
-      );
-      localStorage.setItem('folkbase_visit_count', (visitCount + 1).toString());
-
-      // Show after 5 visits (not on first few)
-      if (visitCount >= 4) {
+      if (shouldShow) {
         setTimeout(() => {
           setShowPrompt(true);
         }, 3000);
@@ -86,13 +79,7 @@ function InstallPrompt() {
     deferredPrompt.prompt();
 
     // Wait for the user's response
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.warn('User accepted the install prompt');
-    } else {
-      console.warn('User dismissed the install prompt');
-    }
+    await deferredPrompt.userChoice;
 
     // Clear the prompt
     setDeferredPrompt(null);

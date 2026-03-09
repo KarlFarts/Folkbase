@@ -19,15 +19,6 @@ if (!envValidation.valid) {
   throw new Error(envValidation.message);
 }
 
-// Log environment mode
-if (envValidation.mode === 'development') {
-  // eslint-disable-next-line no-console
-  console.log('[DEV] Running in DEVELOPMENT mode');
-} else {
-  // eslint-disable-next-line no-console
-  console.log('[INFO] Running in PRODUCTION mode');
-}
-
 // Initialize error reporting (Sentry, etc.)
 initErrorReporting({ service: 'sentry' });
 

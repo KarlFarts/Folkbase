@@ -10,70 +10,55 @@
  * 3. Call initErrorReporting() in your app startup
  */
 
+import { error as logError } from './logger.js';
+
 /**
  * Initialize error reporting service
  * @param {Object} options - Configuration options
  * @param {string} options.service - Error service to use ('sentry', 'custom')
  * @param {Function} options.customReporter - Custom error reporter function
- * @returns {boolean} True if initialized successfully
  */
 export function initErrorReporting(options = {}) {
   const { service = 'sentry', customReporter } = options;
 
   // Skip error reporting in development mode
   if (import.meta.env.VITE_DEV_MODE === 'true') {
-    // eslint-disable-next-line no-console
-    console.log('[DEV] Error reporting disabled in development mode');
-    return false;
+    return;
   }
 
-  try {
-    if (service === 'sentry') {
-      return initSentry();
-    } else if (service === 'custom' && customReporter) {
-      return initCustomReporter(customReporter);
-    } else {
-      console.warn(`Unknown error reporting service: ${service}`);
-      return false;
-    }
-  } catch (err) {
-    console.error('Failed to initialize error reporting:', err);
-    return false;
+  if (service === 'sentry') {
+    initSentry().catch((err) => {
+      console.error('Failed to initialize error reporting:', err);
+    });
+  } else if (service === 'custom' && customReporter) {
+    initCustomReporter(customReporter);
+  } else {
+    console.warn(`Unknown error reporting service: ${service}`);
   }
 }
 
 /**
  * Initialize Sentry error reporting
- * @returns {boolean} True if initialized successfully
  */
 async function initSentry() {
   const dsn = import.meta.env.VITE_SENTRY_DSN;
 
   // Sentry is optional - skip if DSN not configured
   if (!dsn) {
-    // eslint-disable-next-line no-console
-    console.log('[INFO] Sentry DSN not configured - error reporting disabled');
-    // eslint-disable-next-line no-console
-    console.log('   Set VITE_SENTRY_DSN to enable error tracking');
-    return false;
+    return;
   }
 
-  // Check if @sentry/react is installed
-  // Use try-catch to handle missing package gracefully
-  try {
-    // Only try to load Sentry if we're in the browser
-    if (typeof window === 'undefined') {
-      return false;
-    }
+  if (typeof window === 'undefined') {
+    return;
+  }
 
+  try {
     // Try to dynamically import Sentry (string concat defeats Vite's static analysis)
     const sentryModule = '@sentry/' + 'react';
     const Sentry = await import(/* @vite-ignore */ sentryModule).catch(() => null);
 
     if (!Sentry) {
-      console.warn('[WARN] Sentry not installed (optional)');
-      console.warn('   To enable error tracking: npm install @sentry/react');
-      return false;
+      return;
     }
 
     Sentry.init({
@@ -93,79 +78,41 @@ async function initSentry() {
         if (import.meta.env.VITE_DEV_MODE === 'true') {
           return null;
         }
-        const user = getCurrentUser();
-        if (user) {
-          event.user = { email: user.email, id: user.uid };
-        }
         return event;
       },
     });
 
-    // Set up error logger integration
+    // Wire Sentry into the logger's error reporter so all logger.error() calls
+    // are forwarded to Sentry automatically.
     const { setErrorReporter } = await import('./logger.js');
     setErrorReporter((error, context) => {
       Sentry.captureException(error, { extra: context });
     });
-
-    // eslint-disable-next-line no-console
-    console.log('[INFO] Sentry error reporting initialized');
-    return true;
   } catch (err) {
     console.warn('Failed to initialize Sentry:', err.message);
-    return false;
   }
 }
 
 /**
  * Initialize custom error reporter
  * @param {Function} reporter - Custom reporter function (error, context) => void
- * @returns {boolean} True if initialized successfully
  */
 function initCustomReporter(reporter) {
   if (typeof reporter !== 'function') {
     console.error('Custom reporter must be a function');
-    return false;
+    return;
   }
 
   import('./logger.js').then(({ setErrorReporter }) => {
     setErrorReporter(reporter);
   });
-
-  // eslint-disable-next-line no-console
-  console.log('[INFO] Custom error reporter initialized');
-  return true;
 }
 
 /**
- * Get current user from auth context (helper for Sentry context)
- * @returns {Object|null} Current user object or null
- */
-function getCurrentUser() {
-  try {
-    const authData = sessionStorage.getItem('googleAccessToken');
-    if (!authData) return null;
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Manually capture an error to the reporting service
+ * Capture an error to the configured reporting service (Sentry, custom, or console).
  * @param {Error} error - Error to capture
  * @param {Object} context - Additional context
  */
-export async function captureError(error, context = {}) {
-  console.error('Error captured:', error, context);
-}
-
-/**
- * Capture a message (non-error event) to the reporting service
- * @param {string} message - Message to capture
- * @param {string} level - Severity level ('info', 'warning', 'error')
- * @param {Object} context - Additional context
- */
-export async function captureMessage(message, level = 'info', context = {}) {
-  // eslint-disable-next-line no-console
-  console.log(`[${level}] ${message}`, context);
+export function captureError(error, context = {}) {
+  logError(error, context);
 }

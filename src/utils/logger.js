@@ -1,4 +1,4 @@
-const isDevMode = () => import.meta.env.VITE_DEV_MODE === 'true';
+import { isDevMode } from './devMode.js';
 
 /**
  * Logger utility for conditional console logging based on dev mode
