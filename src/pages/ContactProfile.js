@@ -46,6 +46,7 @@ import {
 } from '../components/contact/TouchpointModal';
 import { TouchpointHistoryCard, NotesCard } from '../components/contact/ContactActivities';
 import { useContactProfile } from '../hooks/useContactProfile';
+import { useBreadcrumb } from '../contexts/BreadcrumbContext';
 import RelationshipManager from '../components/RelationshipManager';
 import { ProfileSkeleton } from '../components/SkeletonLoader';
 import EventCard from '../components/events/EventCard';
@@ -88,6 +89,7 @@ function ContactProfile({ onNavigate }) {
   const { canWrite } = usePermissions();
 
   const { state, actions } = useContactProfile();
+  const { setEntityName } = useBreadcrumb();
 
   const [contactEvents, setContactEvents] = React.useState([]);
   const [allContacts, setAllContacts] = React.useState([]);
@@ -172,6 +174,7 @@ function ContactProfile({ onNavigate }) {
       );
 
       actions.setContact(foundContact);
+      setEntityName(foundContact.Name || null);
       actions.setTouchpoints(
         touchpointsResult.sort((a, b) => (b['Date'] || '').localeCompare(a['Date'] || ''))
       );
@@ -204,6 +207,12 @@ function ContactProfile({ onNavigate }) {
     loadContact();
   }, [loadContact]);
 
+  // Clear breadcrumb name when leaving the contact profile
+  useEffect(() => {
+    return () => setEntityName(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleSaveEdit = async () => {
     try {
       actions.setSaving(true);
@@ -234,7 +243,9 @@ function ContactProfile({ onNavigate }) {
         user.email
       );
       // Merge changes back into contact state
-      actions.setContact({ ...state.contact, ...sanitizedChanges });
+      const updatedContact = { ...state.contact, ...sanitizedChanges };
+      actions.setContact(updatedContact);
+      if (sanitizedChanges.Name) setEntityName(sanitizedChanges.Name);
       actions.setIsEditing(false);
       actions.clearDirtyFields();
     } catch (err) {
@@ -414,6 +425,7 @@ function ContactProfile({ onNavigate }) {
       actions.toggleNoteModal(false);
       actions.resetNoteFormData();
       setShowNoteExtended(false);
+      window.dispatchEvent(new Event('folkbase:notes-changed'));
       notify.success('Note added successfully!');
     } catch (err) {
       console.error('Failed to add note:', err);
@@ -1027,7 +1039,10 @@ function ContactProfile({ onNavigate }) {
         <LogTouchpointModal
           touchpointData={state.touchpointData}
           setTouchpointData={actions.setTouchpointData}
-          onClose={() => actions.toggleLogModal(false)}
+          onClose={() => {
+            actions.toggleLogModal(false);
+            actions.resetTouchpointData();
+          }}
           onSave={handleLogTouchpoint}
           saving={state.saving}
         />
@@ -1126,6 +1141,7 @@ function ContactProfile({ onNavigate }) {
           isOpen={state.showNoteModal}
           onClose={() => {
             actions.toggleNoteModal(false);
+            actions.resetNoteFormData();
             setShowNoteExtended(false);
           }}
           title={`Write Note for ${state.contact?.Name}`}
@@ -1136,6 +1152,7 @@ function ContactProfile({ onNavigate }) {
                 className="btn btn-secondary"
                 onClick={() => {
                   actions.toggleNoteModal(false);
+                  actions.resetNoteFormData();
                   setShowNoteExtended(false);
                 }}
                 disabled={state.saving}

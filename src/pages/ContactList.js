@@ -566,11 +566,10 @@ function ContactList({ onNavigate }) {
           Tags: c['Tags'] ? `${c['Tags']}, ${tag}` : tag,
         }));
 
-        // Update sheet with selected contacts
         for (let i = 0; i < updatedContacts.length; i++) {
           const contact = updatedContacts[i];
-          // In a real app, you'd batch these updates
-          // For now, we'll update locally
+          const original = selectedContacts[i];
+          await updateContact(accessToken, sheetId, contact['Contact ID'], original, { Tags: contact.Tags }, user?.email);
           setContacts((prevContacts) =>
             prevContacts.map((c) => (c['Contact ID'] === contact['Contact ID'] ? contact : c))
           );
@@ -589,7 +588,7 @@ function ContactList({ onNavigate }) {
         setBulkActionProgress(0);
       }
     },
-    [selectedIds, contacts]
+    [selectedIds, contacts, accessToken, sheetId, user]
   );
 
   const handleChangeStatus = useCallback(
@@ -604,9 +603,10 @@ function ContactList({ onNavigate }) {
           Status: status,
         }));
 
-        // Update contacts
         for (let i = 0; i < updatedContacts.length; i++) {
           const contact = updatedContacts[i];
+          const original = selectedContacts[i];
+          await updateContact(accessToken, sheetId, contact['Contact ID'], original, { Status: status }, user?.email);
           setContacts((prevContacts) =>
             prevContacts.map((c) => (c['Contact ID'] === contact['Contact ID'] ? contact : c))
           );
@@ -625,7 +625,7 @@ function ContactList({ onNavigate }) {
         setBulkActionProgress(0);
       }
     },
-    [selectedIds, contacts]
+    [selectedIds, contacts, accessToken, sheetId, user]
   );
 
   const handleDeleteContacts = useCallback(() => {
