@@ -1,4 +1,39 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react';
+
+// OAuth popup callback detection — runs before React mounts.
+// When requestCalendarAccess() opens a popup that redirects back to this origin,
+// the popup re-loads this app. We detect that case here, relay the token to the
+// opener via postMessage, then close the popup. The parent window's message
+// listener in AuthContext picks this up and resolves the requestCalendarAccess promise.
+if (window.opener && window.location.hash) {
+  const hashParams = new URLSearchParams(window.location.hash.substring(1));
+  const token = hashParams.get('access_token');
+  if (token) {
+    window.opener.postMessage(
+      {
+        type: 'oauth-callback',
+        token,
+        state: hashParams.get('state'),
+        expiresIn: hashParams.get('expires_in'),
+        error: null,
+      },
+      window.location.origin
+    );
+    window.close();
+  } else if (hashParams.get('error')) {
+    window.opener.postMessage(
+      {
+        type: 'oauth-callback',
+        token: null,
+        state: hashParams.get('state'),
+        expiresIn: null,
+        error: hashParams.get('error_description') || hashParams.get('error'),
+      },
+      window.location.origin
+    );
+    window.close();
+  }
+}
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { useConfig } from './contexts/ConfigContext';

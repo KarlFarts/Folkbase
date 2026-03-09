@@ -51,6 +51,10 @@ function TokenExpiryNotifier() {
         const message = `Session expires in ${minutes} minute${minutes !== 1 ? 's' : ''}`;
 
         if (warningLevel === 'critical') {
+          // At ≤1 minute remaining, trigger a silent refresh automatically.
+          // The user is clearly active (they triggered the interval check), so
+          // a silent iframe refresh avoids a failed API request without interrupting them.
+          handleRefresh();
           notificationIdRef.current = notify.urgent(message, {
             action: { label: 'Refresh Now', onClick: handleRefresh },
           });

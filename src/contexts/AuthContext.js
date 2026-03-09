@@ -88,8 +88,12 @@ export function AuthProvider({ children }) {
 
         setUser(newUser);
 
-        // Store token with expiration metadata
-        // Google OAuth tokens typically expire in 1 hour (3600 seconds)
+        // Store token with expiration metadata.
+        // Stored in sessionStorage (cleared on tab/browser close) rather than
+        // localStorage (persists indefinitely) or an httpOnly cookie (requires a
+        // backend to set Set-Cookie). For a pure client-side SPA, sessionStorage
+        // is the correct tradeoff: immune to cross-tab theft, cleared on close,
+        // and unavailable after a new browser session forces re-auth.
         const expiresAt = Date.now() + tokenResponse.expires_in * 1000;
         sessionStorage.setItem('googleAccessToken', token);
         sessionStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
@@ -434,6 +438,50 @@ export function AuthProvider({ children }) {
     return () => registerAuthErrorHandler(null);
   }, []);
 
+  // Mid-session account-switch guard.
+  // When the user tabs away and back, verify that the access token still belongs
+  // to the signed-in account by checking Google's tokeninfo endpoint. If the sub
+  // (user ID) has changed — or the token is revoked — force sign-out so stale
+  // state from a previous account is never silently used.
+  const lastTokenCheckRef = useRef(0);
+  useEffect(() => {
+    if (isDevMode() || !user || !accessToken) return;
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState !== 'visible') return;
+
+      // Throttle: only re-check if more than 60 seconds have passed since last check
+      const now = Date.now();
+      if (now - lastTokenCheckRef.current < 60_000) return;
+      lastTokenCheckRef.current = now;
+
+      try {
+        const response = await fetch('https://oauth2.googleapis.com/tokeninfo', {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+
+        if (!response.ok) {
+          // Token revoked or expired — force sign-out
+          warn('Token validation failed on visibility restore, signing out');
+          await logout();
+          return;
+        }
+
+        const info = await response.json();
+        if (info.sub && info.sub !== user.uid) {
+          // Token belongs to a different Google account
+          warn('Account mismatch detected on visibility restore, signing out');
+          await logout();
+        }
+      } catch {
+        // Network error — don't sign out, let the next API call surface the issue
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [user, accessToken]);
+
   // Auto-clear needsReauth when a new token arrives (refresh succeeded)
   useEffect(() => {
     if (accessToken && prevTokenRef.current !== null && prevTokenRef.current !== accessToken) {
@@ -537,8 +585,7 @@ export function AuthProvider({ children }) {
           // Update token with new scope
           setAccessToken(token);
           sessionStorage.setItem('googleAccessToken', token);
-          // Update expiration metadata (tokens typically expire in 3600 seconds)
-          const expiresAt = Date.now() + 3600 * 1000;
+          const expiresAt = Date.now() + (parseInt(event.data.expiresIn) || 3600) * 1000;
           sessionStorage.setItem('googleAccessTokenExpiresAt', expiresAt.toString());
 
           log('Calendar access granted');
