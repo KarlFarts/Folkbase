@@ -119,6 +119,34 @@ import { warn } from './logger.js';
 import { generateId, ID_PREFIXES } from './idGenerator';
 import { getCachedData, appendToCachedData, updateCachedRow, deleteCachedRow, invalidateCache } from './indexedDbCache';
 
+/**
+ * Compare freshly-fetched headers against what's in the cache.
+ * If they differ, invalidate the cache for that sheet and warn.
+ * Called from every write function that already fetches metadata.
+ *
+ * @param {string} sheetName - Sheet name (from SHEETS constants)
+ * @param {Array<{name: string}>} freshHeaders - Headers returned by readSheetMetadata
+ */
+async function checkHeaderMismatch(sheetName, freshHeaders) {
+  try {
+    const cached = await getCachedData(sheetName);
+    if (!cached || !cached.headers) return;
+
+    const cachedSig = cached.headers.map((h) => h.name).join('\x00');
+    const freshSig = freshHeaders.map((h) => h.name).join('\x00');
+    if (cachedSig !== freshSig) {
+      warn(
+        `[Sync] Header mismatch on "${sheetName}" — cache invalidated. ` +
+          `Cached: [${cached.headers.map((h) => h.name).join(', ')}] ` +
+          `Fresh: [${freshHeaders.map((h) => h.name).join(', ')}]`
+      );
+      await invalidateCache(sheetName);
+    }
+  } catch (err) {
+    console.error('[Sync] checkHeaderMismatch failed:', err);
+  }
+}
+
 const SHEETS_API_BASE = API_CONFIG.SHEETS_API_BASE;
 
 // Sheet tab names (re-export for backward compatibility)
@@ -636,6 +664,7 @@ export async function deleteData(accessToken, sheetId, sheetName, rowIndex) {
 export async function addContact(accessToken, sheetId, contactData, userEmail) {
   // Get metadata to know column order
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.CONTACTS);
+  await checkHeaderMismatch(SHEETS.CONTACTS, headers);
 
   // Generate ID and timestamps
   const contactId = await generateContactID(accessToken, sheetId);
@@ -674,6 +703,7 @@ export async function addContact(accessToken, sheetId, contactData, userEmail) {
  */
 export async function updateContact(accessToken, sheetId, contactId, oldData, newData, userEmail) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.CONTACTS);
+  await checkHeaderMismatch(SHEETS.CONTACTS, headers);
   const { data } = await readSheetData(accessToken, sheetId, SHEETS.CONTACTS);
 
   // Find the row
@@ -730,6 +760,7 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
  */
 export async function addTouchpoint(accessToken, sheetId, touchpointData) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.TOUCHPOINTS);
+  await checkHeaderMismatch(SHEETS.TOUCHPOINTS, headers);
 
   // Generate ID
   const touchpointId = await generateTouchpointID(accessToken, sheetId);
@@ -788,6 +819,7 @@ export async function updateTouchpoint(
   userEmail
 ) {
   const { headers } = await readSheetMetadata(accessToken, sheetId, SHEETS.TOUCHPOINTS);
+  await checkHeaderMismatch(SHEETS.TOUCHPOINTS, headers);
   const { data } = await readSheetData(accessToken, sheetId, SHEETS.TOUCHPOINTS);
 
   // Find the row
