@@ -708,13 +708,23 @@ export async function updateContact(accessToken, sheetId, contactId, oldData, ne
 
   const rowIndex = contact._rowIndex;
 
-  // Build updated row
+  // Build updated row.
+  //
+  // Concurrent-write strategy: last-write-wins per field.
+  // We use the freshly-fetched `contact` (from the readSheetData call above) as
+  // the base for any field that the caller did not explicitly include in newData.
+  // This preserves changes that another tab may have saved after this form was
+  // opened — only the fields the user actually edited are overwritten.
+  //
+  // If two tabs edit the SAME field concurrently, the second save wins (no conflict
+  // detection). If they edit DIFFERENT fields, both changes are preserved.
   const values = headers.map((h) => {
     const fieldName = h.name;
     if (fieldName === 'Contact ID') return contactId;
-    if (fieldName === 'Date Added') return oldData['Date Added'] || '';
-    if (fieldName === 'Last Contact Date') return oldData['Last Contact Date'] || '';
-    return newData[fieldName] !== undefined ? newData[fieldName] : oldData[fieldName] || '';
+    // Preserve auto-set timestamps from the current sheet state, not the stale form snapshot.
+    if (fieldName === 'Date Added') return contact['Date Added'] || '';
+    if (fieldName === 'Last Contact Date') return contact['Last Contact Date'] || '';
+    return newData[fieldName] !== undefined ? newData[fieldName] : contact[fieldName] || '';
   });
 
   await updateRow(accessToken, sheetId, SHEETS.CONTACTS, rowIndex, values);
@@ -824,18 +834,24 @@ export async function updateTouchpoint(
 
   const rowIndex = touchpoint._rowIndex;
 
-  // Build updated row - preserve auto fields
+  // Build updated row - preserve auto fields.
+  //
+  // Concurrent-write strategy: last-write-wins per field.
+  // Use the freshly-fetched `touchpoint` row as the base for fields not present
+  // in newData, so changes saved by another tab after this form was opened are
+  // not silently overwritten. See updateContact for the full rationale.
   const values = headers.map((h) => {
     const fieldName = h.name;
     if (fieldName === 'Touchpoint ID') return touchpointId;
-    if (AUTO_FIELDS[fieldName]) return oldData[fieldName] || '';
+    // Preserve auto-generated fields from the current sheet state, not the stale form snapshot.
+    if (AUTO_FIELDS[fieldName]) return touchpoint[fieldName] || '';
     // Auto-update Status based on Contact ID presence
     if (fieldName === 'Status') {
       const contactId =
-        newData['Contact ID'] !== undefined ? newData['Contact ID'] : oldData['Contact ID'];
+        newData['Contact ID'] !== undefined ? newData['Contact ID'] : touchpoint['Contact ID'];
       return contactId ? TOUCHPOINT_STATUS.COMPLETE : TOUCHPOINT_STATUS.INCOMPLETE;
     }
-    return newData[fieldName] !== undefined ? newData[fieldName] : oldData[fieldName] || '';
+    return newData[fieldName] !== undefined ? newData[fieldName] : touchpoint[fieldName] || '';
   });
 
   await updateRow(accessToken, sheetId, SHEETS.TOUCHPOINTS, rowIndex, values);

@@ -443,6 +443,13 @@ export function AuthProvider({ children }) {
   // to the signed-in account by checking Google's tokeninfo endpoint. If the sub
   // (user ID) has changed — or the token is revoked — force sign-out so stale
   // state from a previous account is never silently used.
+  //
+  // Multi-tab sign-out behavior (intentional):
+  // sessionStorage is tab-isolated, so logout() in Tab B only clears Tab B's
+  // session. However, logout() revokes the shared OAuth token at Google, so Tab A's
+  // next Sheets API call will receive a 401 → notifyAuthError() → needsReauth=true.
+  // This handler also catches it when Tab A regains focus (visibility change).
+  // Tab A cannot silently write data after Tab B signs out — all writes fail with 401.
   const lastTokenCheckRef = useRef(0);
   useEffect(() => {
     if (isDevMode() || !user || !accessToken) return;

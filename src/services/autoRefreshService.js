@@ -1,6 +1,14 @@
 /**
  * Auto-refresh service for polling Google Sheets data
  * Implements 60-second polling with checksum-based change detection
+ *
+ * Multi-tab note: each browser tab that renders a component using this service
+ * creates its own independent polling interval. Two tabs open to ContactList will
+ * each poll every 60 seconds, doubling API usage. The isFetching guard prevents
+ * overlapping requests within a single instance but not across tabs.
+ * This does not cause data corruption (polls are read-only). If rate-limit
+ * pressure becomes a concern, a BroadcastChannel or navigator.locks leader-election
+ * pattern can designate a single polling tab.
  */
 
 const POLL_INTERVAL_MS = 60000; // 60 seconds
